@@ -10,54 +10,54 @@ namespace swift {
 class Timestamp : boost::less_than_comparable<Timestamp>
 {
 public:
-	Timestamp ();
-	~Timestamp ();
-	explicit Timestamp (const int64_t microSecondsSinceEpoch);
+    Timestamp ();
+    ~Timestamp ();
+    explicit Timestamp (const int64_t microSecondsSinceEpoch);
 
-	Timestamp (const Timestamp& rhs);
-	Timestamp& operator= (const Timestamp& rhs);
+    Timestamp (const Timestamp& rhs);
+    Timestamp& operator= (const Timestamp& rhs);
 
-	void Swap (Timestamp& that)
-	{
-		std::swap (microSecondsSinceEpoch_, that.microSecondsSinceEpoch_);
-	}
+    void Swap (Timestamp& that)
+    {
+	    std::swap (microSecondsSinceEpoch_, that.microSecondsSinceEpoch_);
+    }
 
-	std::string ToSecDotMicroString () const;
-	std::string ToString () const;
+    std::string ToSecDotMicroString () const;
+    std::string ToString () const;
 
-	std::string ToFormattedString () const;
+    std::string ToFormattedString () const;
 
-	bool Valid () const { return microSecondsSinceEpoch_ > 0; }
+    bool Valid () const { return microSecondsSinceEpoch_ > 0; }
 
-	// for internal usage.
-	int64_t MicroSecondsSinceEpoch () const 
-	{ 
-		return microSecondsSinceEpoch_; 
-	}
+    // for internal usage.
+    int64_t MicroSecondsSinceEpoch () const 
+    { 
+	    return microSecondsSinceEpoch_; 
+    }
 
-	time_t SecondsSinceEpoch () const 
-	{ 
-		return static_cast<time_t> (microSecondsSinceEpoch_ / kMicroSecondsPerSecond); 
-	}
+    time_t SecondsSinceEpoch () const 
+    { 
+	    return static_cast<time_t> (microSecondsSinceEpoch_ / kMicroSecondsPerSecond); 
+    }
 
-	static Timestamp Now ();
+    static Timestamp Now ();
 
-	static Timestamp Invalid ();
+    static Timestamp Invalid ();
 
-	static const int kMicroSecondsPerSecond = 1000 * 1000;
+    static const int kMicroSecondsPerSecond = 1000 * 1000;
 
 private:
-	int64_t microSecondsSinceEpoch_;
+    int64_t microSecondsSinceEpoch_;
 };
 
 inline bool operator< (const Timestamp& lhs, const Timestamp& rhs)
 {
-	return lhs.MicroSecondsSinceEpoch () < rhs.MicroSecondsSinceEpoch ();
+    return lhs.MicroSecondsSinceEpoch () < rhs.MicroSecondsSinceEpoch ();
 }
 
 inline bool operator== (const Timestamp& lhs, const Timestamp& rhs)
 {
-	return lhs.MicroSecondsSinceEpoch () == rhs.MicroSecondsSinceEpoch ();
+    return lhs.MicroSecondsSinceEpoch () == rhs.MicroSecondsSinceEpoch ();
 }
 
 /**
@@ -70,8 +70,8 @@ inline bool operator== (const Timestamp& lhs, const Timestamp& rhs)
  */
 inline double TimeDifference (const Timestamp& high, const Timestamp& low)
 {
-	int64_t diff = high.MicroSecondsSinceEpoch () - low.MicroSecondsSinceEpoch ();
-	return static_cast<double>(diff) / Timestamp::kMicroSecondsPerSecond;
+    int64_t diff = high.MicroSecondsSinceEpoch () - low.MicroSecondsSinceEpoch ();
+    return static_cast<double>(diff) / Timestamp::kMicroSecondsPerSecond;
 }
 
 /**
@@ -81,8 +81,8 @@ inline double TimeDifference (const Timestamp& high, const Timestamp& low)
  */
 inline Timestamp AddTime (const Timestamp& timestamp, double seconds)
 {
-	int64_t delta = static_cast<int64_t>(seconds * Timestamp::kMicroSecondsPerSecond);
-	return Timestamp (timestamp.MicroSecondsSinceEpoch () + delta);
+    int64_t delta = static_cast<int64_t>(seconds * Timestamp::kMicroSecondsPerSecond);
+    return Timestamp (timestamp.MicroSecondsSinceEpoch () + delta);
 }
 
 } // end of namespace swift

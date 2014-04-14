@@ -26,20 +26,20 @@ class LinkedHashMap : swift::noncopyable
 private:
     struct Record
     {
-	    KEY key;		// key
-	    VALUE value;	// value
-	    Record* child;  // child record
-	    Record* prev;	// previous record
-	    Record* next;	// next record
+        KEY key;		// key
+        VALUE value;	// value
+        Record* child;  // child record
+        Record* prev;	// previous record
+        Record* next;	// next record
 
-	    explicit Record (const KEY& k, const VALUE& v)
-		    : key (k)
-		    , value (v)
-		    , child (nullptr)
-		    , prev (nullptr)
-		    , next (nullptr)
-	    {
-	    }
+        explicit Record (const KEY& k, const VALUE& v)
+            : key (k)
+            , value (v)
+            , child (nullptr)
+            , prev (nullptr)
+            , next (nullptr)
+        {
+        }
     };
 
     //
@@ -58,9 +58,9 @@ public:
     */
     enum MoveMode
     {
-	    MM_CURRENT,
-	    MM_FIRST,
-	    MM_LAST
+        MM_CURRENT,
+        MM_FIRST,
+        MM_LAST
     };
 
     //
@@ -69,155 +69,155 @@ public:
     class Iterator
     {
     public:
-	    /**
-	    * Copy constructor
-	    *
-	    * @param [in] iter the source object
-	    */
-	    Iterator (const Iterator& iter)
-		    : map_ (iter.map_)
-		    , rec_ (iter.rec_)
-	    {
-	    }
+        /**
+        * Copy constructor
+        *
+        * @param [in] iter the source object
+        */
+        Iterator (const Iterator& iter)
+            : map_ (iter.map_)
+            , rec_ (iter.rec_)
+        {
+        }
 
-	    /**
-	    * Get the key
-	    *
-	    * @return a reference of the key
-	    */
-	    const KEY& Key ()
-	    {
-		    return rec_->key;
-	    }
+        /**
+        * Get the key
+        *
+        * @return a reference of the key
+        */
+        const KEY& Key ()
+        {
+            return rec_->key;
+        }
 
-	    /**
-	    * Get the value
-	    *
-	    * @return a reference of the value
-	    */
-	    VALUE& Value ()
-	    {
-		    return rec_->value;
-	    }
+        /**
+        * Get the value
+        *
+        * @return a reference of the value
+        */
+        VALUE& Value ()
+        {
+            return rec_->value;
+        }
 
-	    /**
-	    * Assignment operator from the self type
-	    *
-	    * @param [in] rhs the right operand
-	    *
-	    * @return the reference to itself
-	    */
-	    Iterator& operator= (const Iterator& rhs)
-	    {
-		    if (&rhs != this) {
-			    map_ = rhs.map_;
-			    rec_ = rhs.rec_;
-		    }
+        /**
+        * Assignment operator from the self type
+        *
+        * @param [in] rhs the right operand
+        *
+        * @return the reference to itself
+        */
+        Iterator& operator= (const Iterator& rhs)
+        {
+            if (&rhs != this) {
+                map_ = rhs.map_;
+                rec_ = rhs.rec_;
+            }
 
-		    return *this;
-	    }
+            return *this;
+        }
 
-		    /**
-		    * Equality operator with the self type
-		    *
-		    * @param [in] rhs the right operand
-		    *
-		    * @return true if the both are equal, or false if not
-		    */
-	    bool operator== (const Iterator& rhs) const 
-	    {
-		    return ((map_ == rhs.map_) && (rec_ == rhs.rec_));
-	    }
+            /**
+            * Equality operator with the self type
+            *
+            * @param [in] rhs the right operand
+            *
+            * @return true if the both are equal, or false if not
+            */
+        bool operator== (const Iterator& rhs) const 
+        {
+            return ((map_ == rhs.map_) && (rec_ == rhs.rec_));
+        }
 
-	    /**
-	    * Noe-equality operator with the self type
-	    *
-	    * @param [in] rhs the right operand
-	    *
-	    * @return false if the both are equal, or true if not
-	    */
-	    bool operator!= (const Iterator& rhs) const
-	    {
-		    return ((map_ != rhs.map_) || (rec_ != rhs.rec_));
-	    }
+        /**
+        * Noe-equality operator with the self type
+        *
+        * @param [in] rhs the right operand
+        *
+        * @return false if the both are equal, or true if not
+        */
+        bool operator!= (const Iterator& rhs) const
+        {
+            return ((map_ != rhs.map_) || (rec_ != rhs.rec_));
+        }
 
-	    /**
-	    * Preposting increment operator
-	    *
-	    * @return the iterator itself
-	    */
-	    Iterator& operator++ ()
-	    {
-		    rec_ = rec_->next;
+        /**
+        * Preposting increment operator
+        *
+        * @return the iterator itself
+        */
+        Iterator& operator++ ()
+        {
+            rec_ = rec_->next;
 
-		    return *this;
-	    }
+            return *this;
+        }
 
-	    /**
-	    * Postposting decrement operator
-	    *
-	    * @return an iterator of the old position
-	    */
-	    Iterator operator++ (int)
-	    {
-		    Iterator old (*this);
-		    rec_ = rec_->next;
+        /**
+        * Postposting decrement operator
+        *
+        * @return an iterator of the old position
+        */
+        Iterator operator++ (int)
+        {
+            Iterator old (*this);
+            rec_ = rec_->next;
 
-		    return old;
-	    }
+            return old;
+        }
 
-		    /**
-		    * Preposting decrement operator
-		    * 
-		    * @return the iterator itself
-		    */
-	    Iterator& operator-- ()
-	    {
-		    if (rec_) {
-			    rec_ = rec_->prev;
-		    }
-		    else {
-			    rec_ = map_->last_;
-		    }
+            /**
+            * Preposting decrement operator
+            * 
+            * @return the iterator itself
+            */
+        Iterator& operator-- ()
+        {
+            if (rec_) {
+                rec_ = rec_->prev;
+            }
+            else {
+                rec_ = map_->last_;
+            }
 
-		    return *this;
-	    }
+            return *this;
+        }
 
-	    /**
-	    * Postposing decrement operator
-	    *
-	    * @return an iterator of the old position
-	    */
-	    Iterator operator-- (int)
-	    {
-		    Iterator old (*this);
-		    if (rec_) {
-			    rec_ = rec_->prev;
-		    }
-		    else {
-			    rec_ = map_->last_;
-		    }
+        /**
+        * Postposing decrement operator
+        *
+        * @return an iterator of the old position
+        */
+        Iterator operator-- (int)
+        {
+            Iterator old (*this);
+            if (rec_) {
+                rec_ = rec_->prev;
+            }
+            else {
+                rec_ = map_->last_;
+            }
 
-		    return old;
-	    }
+            return old;
+        }
 
     private:
-	    /**
-	    * Constructor
-	    * 
-	    * @param [in] map the container
-	    * @param [in] rec the pointer to the current record
-	    */
-	    explicit Iterator (LinkedHashMap* map, Record* rec)
-		    : map_ (map)
-		    , rec_ (rec)
-	    {
+        /**
+        * Constructor
+        * 
+        * @param [in] map the container
+        * @param [in] rec the pointer to the current record
+        */
+        explicit Iterator (LinkedHashMap* map, Record* rec)
+            : map_ (map)
+            , rec_ (rec)
+        {
 
-	    }
+        }
 
-	    friend class LinkedHashMap;
-	    LinkedHashMap* map_;	// the container
-	    Record* rec_;			// the current record
+        friend class LinkedHashMap;
+        LinkedHashMap* map_;	// the container
+        Record* rec_;			// the current record
     };
 
 public:
@@ -225,17 +225,17 @@ public:
     * Default constructor
     */
     explicit LinkedHashMap ()
-	    : buckets_ (nullptr)
-	    , bnum_ (MAP_DEFAULT_BUCKET_NUM)
-	    , first_ (nullptr)
-	    , last_ (nullptr)
-	    , count_ (0)
+        : buckets_ (nullptr)
+        , bnum_ (MAP_DEFAULT_BUCKET_NUM)
+        , first_ (nullptr)
+        , last_ (nullptr)
+        , count_ (0)
     {
-	    if (bnum_ < 1) {
-		    bnum_ = MAP_DEFAULT_BUCKET_NUM;
-	    }
+        if (bnum_ < 1) {
+            bnum_ = MAP_DEFAULT_BUCKET_NUM;
+        }
 
-	    Initialize ();
+        Initialize ();
     }
 
     /**
@@ -244,17 +244,17 @@ public:
     * @param [in] bnum the number of buckets of the hash table
     */
     explicit LinkedHashMap (size_t bnum)
-	    : buckets_ (nullptr)
-	    , bnum_ (bnum)
-	    , first_ (nullptr)
-	    , last_ (nullptr)
-	    , count_ (0)
+        : buckets_ (nullptr)
+        , bnum_ (bnum)
+        , first_ (nullptr)
+        , last_ (nullptr)
+        , count_ (0)
     {
-	    if (bnum_ < 1) {
-		    bnum_ = MAP_DEFAULT_BUCKET_NUM;
-	    }
+        if (bnum_ < 1) {
+            bnum_ = MAP_DEFAULT_BUCKET_NUM;
+        }
 
-	    Initialize ();
+        Initialize ();
     }
 
     /**
@@ -262,7 +262,7 @@ public:
     */
     ~LinkedHashMap ()
     {
-	    Destroy ();
+        Destroy ();
     }
 
     /**
@@ -276,91 +276,91 @@ public:
     */
     VALUE* Set (const KEY& key, const VALUE& value, MoveMode mode)
     {
-	    size_t bidx = hash_ (key) % bnum_;
-	    Record* rec = buckets_[bidx];
-	    Record** entp = buckets_ + bidx;
+        size_t bidx = hash_ (key) % bnum_;
+        Record* rec = buckets_[bidx];
+        Record** entp = buckets_ + bidx;
 
-	    while (rec) {
-		    if (_equalto (rec->key, key)) {
-			    rec->value = value;
-			    switch (mode) {
-			    default:
-			    {
-				    break;
-			    }
-			    case MM_FIRST:
-			    {
-				    if (first_ != rec) {
-					    if (last_ == rec) last_ = rec->prev;
-					    if (rec->prev)    rec->prev->next = rec->next;
-					    if (rec->next)    rec->next->prev = rec->prev;
-					    rec->prev = 0;
-					    rec->next = first_;
-					    first_->prev = rec;
-					    first_ = rec;
-				    }
+        while (rec) {
+            if (_equalto (rec->key, key)) {
+                rec->value = value;
+                switch (mode) {
+                default:
+                {
+                    break;
+                }
+                case MM_FIRST:
+                {
+                    if (first_ != rec) {
+                        if (last_ == rec) last_ = rec->prev;
+                        if (rec->prev)    rec->prev->next = rec->next;
+                        if (rec->next)    rec->next->prev = rec->prev;
+                        rec->prev = 0;
+                        rec->next = first_;
+                        first_->prev = rec;
+                        first_ = rec;
+                    }
 
-				    break;
-			    }
-			    case MM_LAST:
-			    {
-				    if (last_ != rec) {
-					    if (first_ == rec) {
-						    first_ = rec->next;
-					    }
+                    break;
+                }
+                case MM_LAST:
+                {
+                    if (last_ != rec) {
+                        if (first_ == rec) {
+                            first_ = rec->next;
+                        }
 
-					    if (rec->prev) {
-						    rec->prev->next = rec->next;
-					    }
+                        if (rec->prev) {
+                            rec->prev->next = rec->next;
+                        }
 
-					    if (rec->next) {
-						    rec->next->prev = rec->prev;
-					    }
+                        if (rec->next) {
+                            rec->next->prev = rec->prev;
+                        }
 
-					    rec->prev = nullptr;
-					    rec->next = first_;
-					    first_->prev = rec;
-					    first_ = rec;
-				    }
+                        rec->prev = nullptr;
+                        rec->next = first_;
+                        first_->prev = rec;
+                        first_ = rec;
+                    }
 
-				    break;
-			    } // end MM_LAST
-			    } // end switch  (mode)
+                    break;
+                } // end MM_LAST
+                } // end switch  (mode)
 
-			    return &rec->value;
-		    } // end if _equalto (rec->key, key)
-		    else {
-			    entp = &rec->child;
-			    rec = rec->child;
-		    }
-	    } // end while (rec)
+                return &rec->value;
+            } // end if _equalto (rec->key, key)
+            else {
+                entp = &rec->child;
+                rec = rec->child;
+            }
+        } // end while (rec)
 
-	    rec = new Record (key, value);
-	    switch (mode) {
-	    default:
-	    {
-		    rec->prev = last_;
-		    if (!first_) first_ = rec;
-		    if (last_)   last_->next = rec;
-		    last_ = rec;
+        rec = new Record (key, value);
+        switch (mode) {
+        default:
+        {
+            rec->prev = last_;
+            if (!first_) first_ = rec;
+            if (last_)   last_->next = rec;
+            last_ = rec;
 
-		    break;
-	    }
-	    case MM_FIRST:
-	    {
-		    rec->next = first_;
-		    if (!last_) last_ = rec;
-		    if (first_) first_->prev = rec;
-		    first_ = rec;
+            break;
+        }
+        case MM_FIRST:
+        {
+            rec->next = first_;
+            if (!last_) last_ = rec;
+            if (first_) first_->prev = rec;
+            first_ = rec;
 
-		    break;
-	    }
-	    } // end switch mode
+            break;
+        }
+        } // end switch mode
 
-	    *entp = rec;
-	    ++count_;
+        *entp = rec;
+        ++count_;
 
-	    return &rec->value;
+        return &rec->value;
     } // end Set function
 
     /**
@@ -372,29 +372,29 @@ public:
     */
     bool Remove (const KEY& key)
     {
-	    size_t bidx = hash_ (key) % bnum_;
-	    Record* rec = buckets_[bidx];
-	    Record** entp = buckets_ + bidx;
-	    while (rec) {
-		    if (_equalto (rec->key, key)) {
-			    if (rec->prev)     rec->prev->next = rec->next;
-			    if (rec->next)     rec->next->prev = rec->prev;
-			    if (rec == first_) first_ = rec->next;
-			    if (rec == last_)  last_ = rec->prev;
-			    *entp = rec->child;
-			    --count_;
-			    delete rec;
-			    rec = nullptr;
+        size_t bidx = hash_ (key) % bnum_;
+        Record* rec = buckets_[bidx];
+        Record** entp = buckets_ + bidx;
+        while (rec) {
+            if (_equalto (rec->key, key)) {
+                if (rec->prev)     rec->prev->next = rec->next;
+                if (rec->next)     rec->next->prev = rec->prev;
+                if (rec == first_) first_ = rec->next;
+                if (rec == last_)  last_ = rec->prev;
+                *entp = rec->child;
+                --count_;
+                delete rec;
+                rec = nullptr;
 
-			    return true;
-		    }
-		    else {
-			    entp = &rec->child;
-			    rec = rec->child;
-		    }
-	    } // end while rec
+                return true;
+            }
+            else {
+                entp = &rec->child;
+                rec = rec->child;
+            }
+        } // end while rec
 
-	    return false;
+        return false;
     }
 
     /**
@@ -407,124 +407,124 @@ public:
     * @return the pointer to the value of the migrated record, or zero on failure
     */
     VALUE* Migrate (const KEY& key, 
-				    LinkedHashMap* dist, 
-				    MoveMode mode)
+                    LinkedHashMap* dist, 
+                    MoveMode mode)
     {
-	    size_t hash = hash_ (key);
-	    size_t bidx = hash % bnum_;
-	    Record* rec = buckets_[bidx];
-	    Record** entp = buckets_ + bidx;
-	    while (rec) {
-		    if (_equalto (rec->key, key)) {
-			    if (rec->prev)		rec->prev->next = rec->next;
-			    if (rec->next)		rec->next->prev = rec->prev;
-			    if (rec == first_)	first_ = rec->next;
-			    if (rec == last_)	last_ = rec->prev;
-			    *entp = rec->child;
-			    --count_;
-			    rec->child = nullptr;
-			    rec->prev = nullptr;
-			    rec->next = nullptr;
+        size_t hash = hash_ (key);
+        size_t bidx = hash % bnum_;
+        Record* rec = buckets_[bidx];
+        Record** entp = buckets_ + bidx;
+        while (rec) {
+            if (_equalto (rec->key, key)) {
+                if (rec->prev)		rec->prev->next = rec->next;
+                if (rec->next)		rec->next->prev = rec->prev;
+                if (rec == first_)	first_ = rec->next;
+                if (rec == last_)	last_ = rec->prev;
+                *entp = rec->child;
+                --count_;
+                rec->child = nullptr;
+                rec->prev = nullptr;
+                rec->next = nullptr;
 
-			    bidx = hash % dist->bnum_;
-			    Record* drec = dist->buckets_[bidx];
-			    entp = dist->buckets_ + bidx;
+                bidx = hash % dist->bnum_;
+                Record* drec = dist->buckets_[bidx];
+                entp = dist->buckets_ + bidx;
 
-			    while (drec) {
-				    if (dist->_equalto (drec->key, key)) {
-					    if (drec->child) rec->child = drec->child;
+                while (drec) {
+                    if (dist->_equalto (drec->key, key)) {
+                        if (drec->child) rec->child = drec->child;
 
-					    if (drec->prev) {
-						    rec->prev = drec->prev;
-						    rec->prev->next = rec;
-					    }
+                        if (drec->prev) {
+                            rec->prev = drec->prev;
+                            rec->prev->next = rec;
+                        }
 
-					    if (drec->next) {
-						    rec->next = drec->next;
-						    rec->next->prev = rec;
-					    }
+                        if (drec->next) {
+                            rec->next = drec->next;
+                            rec->next->prev = rec;
+                        }
 
-					    if (dist->first_ == drec) dist->first_ = rec;
-					    if (dist->last_ == drec)  dist->last_ = rec;
-					    *entp = rec;
-					    delete drec;
-					    drec = nullptr;
+                        if (dist->first_ == drec) dist->first_ = rec;
+                        if (dist->last_ == drec)  dist->last_ = rec;
+                        *entp = rec;
+                        delete drec;
+                        drec = nullptr;
 
-					    switch (mode) {
-					    default:
-					    {
-						    break;
-					    }
-					    case MM_FIRST:
-					    {
-						    if (dist->first_ != rec) {
-							    if (dist->last_ == rec) dist->last_ = rec->prev;
-							    if (rec->prev)			rec->prev->next = rec->next;
-							    if (rec->next)			rec->next->prev = rec->prev;
-							    rec->prev = nullptr;
-							    rec->next = dist->first_;
-							    dist->first_->prev = rec;
-							    dist->first_ = rec;
-						    }
+                        switch (mode) {
+                        default:
+                        {
+                            break;
+                        }
+                        case MM_FIRST:
+                        {
+                            if (dist->first_ != rec) {
+                                if (dist->last_ == rec) dist->last_ = rec->prev;
+                                if (rec->prev)			rec->prev->next = rec->next;
+                                if (rec->next)			rec->next->prev = rec->prev;
+                                rec->prev = nullptr;
+                                rec->next = dist->first_;
+                                dist->first_->prev = rec;
+                                dist->first_ = rec;
+                            }
 
-						    break;
-					    }
-					    case MM_LAST:
-					    {
-						    if (dist->last_ != rec) {
-							    if (dist->first_ == rec) dist->first_ = rec->next;
-							    if (rec->prev)			 rec->prev->next = rec->next;
-							    if (rec->next)			 rec->next->prev = rec->prev;
-							    rec->prev = dist->last_;
-							    rec->next = nullptr;
-							    dist->last_->next = rec;
-							    dist->last_ = rec;
-						    }
+                            break;
+                        }
+                        case MM_LAST:
+                        {
+                            if (dist->last_ != rec) {
+                                if (dist->first_ == rec) dist->first_ = rec->next;
+                                if (rec->prev)			 rec->prev->next = rec->next;
+                                if (rec->next)			 rec->next->prev = rec->prev;
+                                rec->prev = dist->last_;
+                                rec->next = nullptr;
+                                dist->last_->next = rec;
+                                dist->last_ = rec;
+                            }
 
-						    break;
-					    }
-					    } // end switch (mode)
+                            break;
+                        }
+                        } // end switch (mode)
 
-					    return &rec->value;
-				    } // end if (dist->_equalto (drec->key, key))
+                        return &rec->value;
+                    } // end if (dist->_equalto (drec->key, key))
 
-				    entp = &drec->child;
-				    drec = drec->child;
-			    } // end while (drec)
+                    entp = &drec->child;
+                    drec = drec->child;
+                } // end while (drec)
 
-			    switch (mode) {
-			    default:
-			    {
-				    rec->prev = dist->last_;
-				    if (!dist->first_) dist->first_ = rec;
-				    if (dist->last_)   dist->last_->next = rec;
-				    dist->last_ = rec;
+                switch (mode) {
+                default:
+                {
+                    rec->prev = dist->last_;
+                    if (!dist->first_) dist->first_ = rec;
+                    if (dist->last_)   dist->last_->next = rec;
+                    dist->last_ = rec;
 
-				    break;
-			    }
-			    case MM_FIRST:
-			    {
-				    rec->next = dist->first_;
-				    if (!dist->last_) dist->last_ = rec;
-				    if (dist->first_) dist->first_->prev = rec;
-				    dist->first_ = rec;
+                    break;
+                }
+                case MM_FIRST:
+                {
+                    rec->next = dist->first_;
+                    if (!dist->last_) dist->last_ = rec;
+                    if (dist->first_) dist->first_->prev = rec;
+                    dist->first_ = rec;
 
-				    break;
-			    }
-			    } // end switch (mode)
+                    break;
+                }
+                } // end switch (mode)
 
-			    *entp = rec;
-			    ++dist->count_;
+                *entp = rec;
+                ++dist->count_;
 
-			    return &rec->value;
-		    } // end if _equalte (rec->key, key)
-		    else {
-			    entp = &rec->child;
-			    rec = rec->child;
-		    }
-	    } // end while (rec)
+                return &rec->value;
+            } // end if _equalte (rec->key, key)
+            else {
+                entp = &rec->child;
+                rec = rec->child;
+            }
+        } // end while (rec)
 
-	    return nullptr;
+        return nullptr;
     }
 
     /**
@@ -537,54 +537,54 @@ public:
     */
     VALUE* Get (const KEY& key, MoveMode mode)
     {
-	    size_t bidx = hash_ (key) % bnum_;
-	    Record* rec = buckets_[bidx];
+        size_t bidx = hash_ (key) % bnum_;
+        Record* rec = buckets_[bidx];
 
-	    while (rec) {
-		    if (_equalto (rec->key, key)) {
-			    switch (mode) {
-			    default:
-			    {
-				    break;
-			    }
-			    case MM_FIRST:
-			    {
-				    if (first_ != rec) {
-					    if (last_ == rec) last_ = rec->prev;
-					    if (rec->prev)	  rec->prev->next = rec->next;
-					    if (rec->next)	  rec->next->prev = rec->prev;
-					    rec->prev = nullptr;
-					    rec->next = first_;
-					    first_->prev = rec;
-					    first_ = rec;
-				    }
+        while (rec) {
+            if (_equalto (rec->key, key)) {
+                switch (mode) {
+                default:
+                {
+                    break;
+                }
+                case MM_FIRST:
+                {
+                    if (first_ != rec) {
+                        if (last_ == rec) last_ = rec->prev;
+                        if (rec->prev)	  rec->prev->next = rec->next;
+                        if (rec->next)	  rec->next->prev = rec->prev;
+                        rec->prev = nullptr;
+                        rec->next = first_;
+                        first_->prev = rec;
+                        first_ = rec;
+                    }
 
-				    break;
-			    }
-			    case MM_LAST:
-			    {
-				    if (last_ != rec) {
-					    if (first_ == rec) first_ = rec->next;
-					    if (rec->prev)	   rec->prev->next = rec->next;
-					    if (rec->next)	   rec->next->prev = rec->prev;
-					    rec->prev = last_;
-					    rec->next = nullptr;
-					    last_->next = rec;
-					    last_ = rec;
-				    }
+                    break;
+                }
+                case MM_LAST:
+                {
+                    if (last_ != rec) {
+                        if (first_ == rec) first_ = rec->next;
+                        if (rec->prev)	   rec->prev->next = rec->next;
+                        if (rec->next)	   rec->next->prev = rec->prev;
+                        rec->prev = last_;
+                        rec->next = nullptr;
+                        last_->next = rec;
+                        last_ = rec;
+                    }
 
-				    break;
-			    }
-			    } // end switch (mode)
+                    break;
+                }
+                } // end switch (mode)
 
-			    return &rec->value;
-		    } // end if (_equalto (rec->key, key))
-		    else {
-			    rec = rec->child;
-		    }
-	    } // end while (rec)
+                return &rec->value;
+            } // end if (_equalto (rec->key, key))
+            else {
+                rec = rec->child;
+            }
+        } // end while (rec)
 
-	    return nullptr;
+        return nullptr;
     } // end Get
 
     /**
@@ -592,22 +592,22 @@ public:
     */
     void Clear ()
     {
-	    if (count_ < 1) return;
+        if (count_ < 1) return;
 
-	    Record* rec = last_;
-	    while (rec) {
-		    Record* prev = rec->prev;
-		    delete rec;
-		    rec = prev;
-	    }
+        Record* rec = last_;
+        while (rec) {
+            Record* prev = rec->prev;
+            delete rec;
+            rec = prev;
+        }
 
-	    for (size_t i = 0; i < bnum_; ++i) {
-		    buckets_[i] = nullptr;
-	    }
+        for (size_t i = 0; i < bnum_; ++i) {
+            buckets_[i] = nullptr;
+        }
 
-	    first_ = nullptr;
-	    last_ = nullptr;
-	    count_ = nullptr;
+        first_ = nullptr;
+        last_ = nullptr;
+        count_ = nullptr;
     } // end Clear Function
 
     /**
@@ -615,7 +615,7 @@ public:
     */
     size_t Count () const
     {
-	    return count_;
+        return count_;
     }
 
     /**
@@ -623,7 +623,7 @@ public:
     */
     Iterator Begin ()
     {
-	    return Iterator (this, first_);
+        return Iterator (this, first_);
     }
 
     /**
@@ -631,7 +631,7 @@ public:
     */
     Iterator End ()
     {
-	    return Iterator(this, nullptr);
+        return Iterator(this, nullptr);
     }
 
     /**
@@ -643,17 +643,17 @@ public:
     */
     Iterator Find (const KEY& key)
     {
-	    Record* rec = buckets_[hash_ (key) % bnum_];
-	    while (rec) {
-		    if (_equalto (rec->key, key)) {
-			    return Iterator (this, rec);
-		    }
-		    else {
-			    rec = rec->child;
-		    }
-	    }
+        Record* rec = buckets_[hash_ (key) % bnum_];
+        while (rec) {
+            if (_equalto (rec->key, key)) {
+                return Iterator (this, rec);
+            }
+            else {
+                rec = rec->child;
+            }
+        }
 
-	    return Iterator (this, nullptr);
+        return Iterator (this, nullptr);
 
     }
 
@@ -664,7 +664,7 @@ public:
     */
     const KEY& FirstKey () const
     {
-	    return first_->key;
+        return first_->key;
     }
 
     /**
@@ -674,7 +674,7 @@ public:
     */
     VALUE& FirstValue () const
     {
-	    return first_->value;
+        return first_->value;
     }
 
     /**
@@ -684,17 +684,17 @@ public:
     */
     const KEY& LastKey () const
     {
-	    return last_->key;
+        return last_->key;
     }
 
-	    /**
-	    * Get the reference of the value of the last record
-	    *
-	    * @return the reference of the value of the last record
-	    */
+        /**
+        * Get the reference of the value of the last record
+        *
+        * @return the reference of the value of the last record
+        */
     VALUE& LastValue () const
     {
-	    return last_->value;
+        return last_->value;
     }
 
 private:
@@ -724,15 +724,15 @@ private:
     */
     void Initialize ()
     {
-	    if (bnum_ >= MIN_MAPZMAP_BUCKET_NUM) {
+        if (bnum_ >= MIN_MAPZMAP_BUCKET_NUM) {
                 buckets_ = (Record**)MapAlloc (sizeof(*buckets_) * bnum_);
-	    }
-	    else {
-		    buckets_ = new Record*[bnum_];
-		    for (size_t i = 0; i < bnum_; ++i) {
-			    buckets_[i] = nullptr;
-		    }
-	    }
+        }
+        else {
+            buckets_ = new Record*[bnum_];
+            for (size_t i = 0; i < bnum_; ++i) {
+                buckets_[i] = nullptr;
+            }
+        }
     }
 
     /**
@@ -740,22 +740,22 @@ private:
     */
     void Destroy ()
     {
-	    Record* rec = last_;
-	    while (rec) {
-		    Record* prev = rec->prev;
-		    delete rec;
-		    rec = prev;
-	    }
+        Record* rec = last_;
+        while (rec) {
+            Record* prev = rec->prev;
+            delete rec;
+            rec = prev;
+        }
 
-	    if (bnum_ >= MIN_MAPZMAP_BUCKET_NUM) {
-		    MapFree (buckets_);
-	    }
-	    else {
-		    if (buckets_) {
-			    delete [] buckets_;
-			    buckets_ = nullptr;
-		    }
-	    }
+        if (bnum_ >= MIN_MAPZMAP_BUCKET_NUM) {
+            MapFree (buckets_);
+        }
+        else {
+            if (buckets_) {
+                delete [] buckets_;
+                buckets_ = nullptr;
+            }
+        }
     }
 
 private:

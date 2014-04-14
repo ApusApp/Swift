@@ -4,7 +4,7 @@
 
 #include <swift/base/Timestamp.h>
 
-using namespace swift;
+namespace swift {
 
 static_assert (sizeof(Timestamp) == sizeof(int64_t), "sizeof(Timestamp) must equal to sizeof(int64_t)");
 
@@ -86,3 +86,5 @@ std::string Timestamp::ToFormattedString () const
 		microseconds);
 	return std::string (buf, size);
 }
+
+} // namespace swift

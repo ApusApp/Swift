@@ -9,65 +9,62 @@
 namespace swift {
 namespace detail {
 
-	static const char digits[] = "9876543210123456789";
-	static_assert (sizeof(digits) == 20, "sizeof(digits) must equal to 20");
+static const char digits[] = "9876543210123456789";
+static_assert (sizeof(digits) == 20, "sizeof(digits) must equal to 20");
 
-	static const char* zero = digits + 9;
+static const char* zero = digits + 9;
 
-	const char digitsHex[] = "0123456789ABCDEF";
-	static_assert (sizeof(digitsHex) == 17, "sizeof(digitsHex) must equal to 17");
+const char digitsHex[] = "0123456789ABCDEF";
+static_assert (sizeof(digitsHex) == 17, "sizeof(digitsHex) must equal to 17");
 
-	// Efficient Integer to String Conversions, by Matthew Wilson.
-	template<typename T>
-	static size_t Convert (char buf[], const T value)
+// Efficient Integer to String Conversions, by Matthew Wilson.
+template<typename T>
+static size_t Convert (char buf[], const T value)
+{
+	T i = value;
+	char* p = buf;
+
+	do
 	{
-		T i = value;
-		char* p = buf;
+		int lsd = static_cast<int>(i % 10);
+		i /= 10;
+		*p++ = zero[lsd];
+	} while (i != 0);
 
-		do
-		{
-			int lsd = static_cast<int>(i % 10);
-			i /= 10;
-			*p++ = zero[lsd];
-		} while (i != 0);
-
-		if (value < 0)
-		{
-			*p++ = '-';
-		}
-		*p = '\0';
-		std::reverse (buf, p);
-
-		return p - buf;
-	}
-
-	// uintptr_t: 
-	// Integer type capable of holding a value converted from a void pointer and then be 
-	// converted back to that type with a value that compares equal to the original pointer.
-	size_t ConvertHex (char buf[], uintptr_t value)
+	if (value < 0)
 	{
-		uintptr_t i = value;
-		char* p = buf;
-
-		do
-		{
-			int lsd = i % 16;
-			i /= 16;
-			*p++ = digitsHex[lsd];
-		} while (i != 0);
-
-		*p = '\0';
-		std::reverse (buf, p);
-
-		return p - buf;
+		*p++ = '-';
 	}
+	*p = '\0';
+	std::reverse (buf, p);
 
-	template class FixedBuffer<kSmallBuffer>;
-	template class FixedBuffer<kLargeBuffer>;
-} // end of namespace detail
-} // end of namespace swift
+	return p - buf;
+}
 
-using namespace swift;
+// uintptr_t: 
+// Integer type capable of holding a value converted from a void pointer and then be 
+// converted back to that type with a value that compares equal to the original pointer.
+size_t ConvertHex (char buf[], uintptr_t value)
+{
+	uintptr_t i = value;
+	char* p = buf;
+
+	do
+	{
+		int lsd = i % 16;
+		i /= 16;
+		*p++ = digitsHex[lsd];
+	} while (i != 0);
+
+	*p = '\0';
+	std::reverse (buf, p);
+
+	return p - buf;
+}
+
+template class FixedBuffer<kSmallBuffer>;
+template class FixedBuffer<kLargeBuffer>;
+} // namespace detail
 
 // private
 template <typename T>
@@ -202,3 +199,5 @@ template Format::Format (const char* fmt, long long);
 template Format::Format (const char* fmt, unsigned long long);
 template Format::Format (const char* fmt, float);
 template Format::Format (const char* fmt, double);
+
+} // namespace swift

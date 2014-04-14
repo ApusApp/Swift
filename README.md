@@ -1,3 +1,3 @@
 Swift
 =====
-Swift is a basal C++ library for Linux
+Swift is a basic C++ library for Linux

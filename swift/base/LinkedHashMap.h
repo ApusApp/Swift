@@ -694,16 +694,6 @@ public:
 	}
 
 private:
-	//
-	// Dummy constuctor to forbid the use
-	//
-	// LinkedHashMap (const LinkedHashMap&);
-
-	//
-	// Dummy Operator to forbid the use
-	//
-	// LinkedHashMap& operator= (const LinkedHashMap&);
-
 	/**
 	* Initialize fields
 	*/

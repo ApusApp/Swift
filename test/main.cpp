@@ -5,27 +5,58 @@
 #include <swift/base/Date.h>
 #include <swift/base/LinkedHashMap.h>
 
+#include <gtest/gtest.h>
+
+class test_LinkedHashMap : public testing::Test
+{
+public:
+    test_LinkedHashMap () {}
+    ~test_LinkedHashMap () {}
+
+    virtual void SetUp (void)
+    {
+        
+    }
+
+    virtual void TearDown (void)
+    {
+        
+    }
+};
+
+TEST_F (test_LinkedHashMap, All)
+{
+    swift::LinkedHashMap<int, int> lhm;
+    lhm.Set (100, 100, swift::LinkedHashMap<int, int>::MM_FIRST);
+    lhm.Set (101, 100, swift::LinkedHashMap<int, int>::MM_FIRST);
+    lhm.Set (102, 100, swift::LinkedHashMap<int, int>::MM_FIRST);
+    lhm.Set (103, 100, swift::LinkedHashMap<int, int>::MM_FIRST);
+    ASSERT_TRUE (100 == *lhm.Get (100, swift::LinkedHashMap<int, int>::MM_LAST));
+    ASSERT_TRUE (100 == lhm.LastKey ());
+    ASSERT_TRUE (100 == lhm.LastValue ());
+    
+
+    swift::LinkedHashMap<int, int> bigMap (32768);
+    bigMap.Set (100, 100, swift::LinkedHashMap<int, int>::MM_FIRST);
+    bigMap.Set (101, 100, swift::LinkedHashMap<int, int>::MM_FIRST);
+    bigMap.Set (102, 100, swift::LinkedHashMap<int, int>::MM_FIRST);
+    bigMap.Set (103, 100, swift::LinkedHashMap<int, int>::MM_FIRST);
+
+    lhm.Get (100, swift::LinkedHashMap<int, int>::MM_FIRST);
+    ASSERT_TRUE (100 == lhm.FirstKey ());
+    ASSERT_TRUE (100 == lhm.FirstValue ());
+    ASSERT_TRUE (100 == *lhm.Get (100, swift::LinkedHashMap<int, int>::MM_LAST));
+    ASSERT_TRUE (100 == lhm.LastKey ());
+    ASSERT_TRUE (100 == lhm.LastValue ());
+
+    ASSERT_TRUE (100 == *lhm.Get (100, swift::LinkedHashMap<int, int>::MM_CURRENT));
+    ASSERT_TRUE (100 == lhm.LastKey ());
+    ASSERT_TRUE (100 == lhm.LastValue ());
+}
+
 int main (int argc, char* argv[])
 {
-	swift::Timestamp tm = swift::Timestamp::Now ();
-	
-	std::cout << tm.ToFormattedString () << std::endl;
-	std::cout << tm.SecondsSinceEpoch () << std::endl;
-	swift::Date d (2014, 4, 10);
-	std::cout << d.ToString () << " " << d.GetJulianDayNumber () << " Weekday: " << d.WeekDay () << std::endl;
+    testing::InitGoogleTest(&argc, argv);
 
-	swift::LinkedHashMap<int, int> lhm;
-	int a = 100;
-	int b = 100;
-	lhm.Set (100, 100, swift::LinkedHashMap<int, int>::MM_FIRST);
-	lhm.Set (101, 100, swift::LinkedHashMap<int, int>::MM_FIRST);
-	lhm.Set (102, 100, swift::LinkedHashMap<int, int>::MM_FIRST);
-	lhm.Set (103, 100, swift::LinkedHashMap<int, int>::MM_FIRST);
-	std::cout << *lhm.Get (100, swift::LinkedHashMap<int, int>::MM_FIRST) << std::endl;
-
-	for (auto it = lhm.Begin (); it != lhm.End (); ++it) {
-		std::cout << it.Key () << " : " << it.Value () << std::endl;
-	}
-
-	return 0; 
+    return RUN_ALL_TESTS ();
 }

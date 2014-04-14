@@ -1,3 +1,3 @@
 Swift
 =====
-by 老高 第二次修改
+Swift is a basal C++ library for Linux

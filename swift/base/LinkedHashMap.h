@@ -4,6 +4,9 @@
 #include <swift/base/noncopyable.hpp>
 
 #include <hash_map>
+#include <limits> // numeric_limits
+#include <sys/mman.h>
+#include <assert.h>
 
 namespace swift {
 
@@ -25,7 +28,7 @@ private:
 	{
 		KEY key;		// key
 		VALUE value;	// value
-		Record* child;// child record
+		Record* child;  // child record
 		Record* prev;	// previous record
 		Record* next;	// next record
 
@@ -232,7 +235,7 @@ public:
 			bnum_ = MAP_DEFAULT_BUCKET_NUM;
 		}
 
-		Init ();
+		Initialize ();
 	}
 
 	/**
@@ -251,7 +254,7 @@ public:
 			bnum_ = MAP_DEFAULT_BUCKET_NUM;
 		}
 
-		Init ();
+		Initialize ();
 	}
 
 	/**
@@ -694,13 +697,34 @@ public:
 	}
 
 private:
+
+    inline void *MapAlloc (size_t size)
+    {
+        assert (size > 0 && size <= std::numeric_limits<size_t>::max () / 2);
+        void* ptr = ::mmap (0, sizeof(size) + size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (MAP_FAILED == ptr) {
+            throw std::bad_alloc ();
+        }
+
+        *(size_t*)ptr = size;
+        return (char*)ptr + sizeof(size);
+    }
+
+    inline void MapFree (void* ptr) 
+    {
+        if (ptr) {
+            size_t size = *((size_t*)ptr - 1);
+            ::munmap ((char*)ptr - sizeof(size), sizeof(size) + size);
+        }
+    }
+
 	/**
 	* Initialize fields
 	*/
-	void Init ()
+	void Initialize ()
 	{
 		if (bnum_ >= MIN_MAPZMAP_BUCKET_NUM) {
-			// TO DO
+             buckets_ = (Record**)MapAlloc (sizeof(*buckets_) * bnum_);
 		}
 		else {
 			buckets_ = new Record*[bnum_];
@@ -723,7 +747,7 @@ private:
 		}
 
 		if (bnum_ >= MIN_MAPZMAP_BUCKET_NUM) {
-			// TO DO
+			MapFree (buckets_);
 		}
 		else {
 			if (buckets_) {

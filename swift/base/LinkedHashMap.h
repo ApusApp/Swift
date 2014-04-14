@@ -279,6 +279,7 @@ public:
 	    size_t bidx = hash_ (key) % bnum_;
 	    Record* rec = buckets_[bidx];
 	    Record** entp = buckets_ + bidx;
+
 	    while (rec) {
 		    if (_equalto (rec->key, key)) {
 			    rec->value = value;

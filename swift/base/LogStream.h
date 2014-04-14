@@ -8,74 +8,76 @@
 
 namespace swift {
 namespace detail {
-    const int kSmallBuffer = 4096;
-    const int kLargeBuffer = 4096 * 1024;
 
-    template <int SIZE>
-    class FixedBuffer : swift::noncopyable
+const int kSmallBuffer = 4096;
+const int kLargeBuffer = 4096 * 1024;
+
+template <int SIZE>
+class FixedBuffer : swift::noncopyable
+{
+public:
+    FixedBuffer () : current_ (data_) {}
+
+    ~FixedBuffer () {}
+
+    void Append (const char* /*restrict*/ buf, size_t len)
     {
-    public:
-	    FixedBuffer () : current_ (data_) {}
-
-	    ~FixedBuffer () {}
-
-	    void Append (const char* /*restrict*/ buf, size_t len)
-	    {
-		    if (static_cast<size_t>(AvailSize ()) > len) {
-			    memcpy (current_, buf, len);
-			    current_ += len;
-		    }
-	    }
-
-	    // return available size
-	    int AvailSize () const
-	    {
-		    return static_cast<int>(End () - current_);
-	    }
-
-	    const char* Data () const
-	    {
-		    return data_;
-	    }
-
-	    int Length () const
-	    {
-		    return static_cast<int>(current_ - data_);
-	    }
-
-	    char* Current ()
-	    {
-		    return current_;
-	    }
-
-	    void Add (size_t len)
-	    {
+	    if (static_cast<size_t>(AvailSize ()) > len) {
+		    memcpy (current_, buf, len);
 		    current_ += len;
 	    }
+    }
 
-	    void Reset ()
-	    {
-		    current_ = data_;
-	    }
+    // return available size
+    int AvailSize () const
+    {
+	    return static_cast<int>(End () - current_);
+    }
 
-	    void Bzero ()
-	    {
-		    ::bzero (data_, sizeof(data_));
-	    }
+    const char* Data () const
+    {
+	    return data_;
+    }
 
-	    std::string ToString () const
-	    {
-		    return std::string (data_, Length ());
-	    }
-    private:
-	    const char* End () const
-	    {
-		    return data_ + sizeof(data_);
-	    }
+    int Length () const
+    {
+	    return static_cast<int>(current_ - data_);
+    }
 
-	    char data_[SIZE];
-	    char *current_;
-    };
+    char* Current ()
+    {
+	    return current_;
+    }
+
+    void Add (size_t len)
+    {
+	    current_ += len;
+    }
+
+    void Reset ()
+    {
+	    current_ = data_;
+    }
+
+    void Bzero ()
+    {
+	    ::bzero (data_, sizeof(data_));
+    }
+
+    std::string ToString () const
+    {
+	    return std::string (data_, Length ());
+    }
+
+private:
+    const char* End () const
+    {
+	    return data_ + sizeof(data_);
+    }
+
+    char data_[SIZE];
+    char *current_;
+};
 
 } // end of namespace detail
 

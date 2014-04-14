@@ -15,12 +15,12 @@ public:
 
     virtual void SetUp (void)
     {
-        
+
     }
 
     virtual void TearDown (void)
     {
-        
+
     }
 };
 
@@ -34,7 +34,7 @@ TEST_F (test_LinkedHashMap, All)
     ASSERT_TRUE (100 == *lhm.Get (100, swift::LinkedHashMap<int, int>::MM_LAST));
     ASSERT_TRUE (100 == lhm.LastKey ());
     ASSERT_TRUE (100 == lhm.LastValue ());
-    
+
 
     swift::LinkedHashMap<int, int> bigMap (32768);
     bigMap.Set (100, 100, swift::LinkedHashMap<int, int>::MM_FIRST);

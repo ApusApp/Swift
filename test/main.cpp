@@ -5,8 +5,6 @@
 #include <swift/base/Date.h>
 #include <swift/base/LinkedHashMap.h>
 
-using namespace std;
-
 int main (int argc, char* argv[])
 {
 	swift::Timestamp tm = swift::Timestamp::Now ();

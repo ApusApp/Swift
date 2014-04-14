@@ -15,7 +15,7 @@ Timestamp::Timestamp () : microSecondsSinceEpoch_ (0)
 Timestamp::Timestamp (const Timestamp& rhs)
 {
     if (this != &rhs) {
-	    microSecondsSinceEpoch_ = rhs.microSecondsSinceEpoch_;
+        microSecondsSinceEpoch_ = rhs.microSecondsSinceEpoch_;
     }
 }
 
@@ -32,7 +32,7 @@ Timestamp::~Timestamp ()
 Timestamp& Timestamp::operator= (const Timestamp& rhs)
 {
     if (this != &rhs) {
-	    microSecondsSinceEpoch_ = rhs.microSecondsSinceEpoch_;
+        microSecondsSinceEpoch_ = rhs.microSecondsSinceEpoch_;
     }
 
     return *this;
@@ -81,9 +81,9 @@ std::string Timestamp::ToFormattedString () const
     gmtime_r(&seconds, &tm_time);
 
     int size = snprintf (buf, sizeof(buf), "%4d%02d%02d %02d:%02d:%02d.%06d",
-	    tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
-	    tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec,
-	    microseconds);
+        tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
+        tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec,
+        microseconds);
     return std::string (buf, size);
 }
 

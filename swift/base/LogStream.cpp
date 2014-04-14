@@ -26,14 +26,14 @@ static size_t Convert (char buf[], const T value)
 
     do
     {
-	    int lsd = static_cast<int>(i % 10);
-	    i /= 10;
-	    *p++ = zero[lsd];
+        int lsd = static_cast<int>(i % 10);
+        i /= 10;
+        *p++ = zero[lsd];
     } while (i != 0);
 
     if (value < 0)
     {
-	    *p++ = '-';
+        *p++ = '-';
     }
     *p = '\0';
     std::reverse (buf, p);
@@ -51,9 +51,9 @@ size_t ConvertHex (char buf[], uintptr_t value)
 
     do
     {
-	    int lsd = i % 16;
-	    i /= 16;
-	    *p++ = digitsHex[lsd];
+        int lsd = i % 16;
+        i /= 16;
+        *p++ = digitsHex[lsd];
     } while (i != 0);
 
     *p = '\0';
@@ -71,8 +71,8 @@ template <typename T>
 void LogStream::FormatInteger (T v)
 {
     if (buffer_.AvailSize () >= kMaxNumericSize) {
-	    size_t len = detail::Convert (buffer_.Current (), v);
-	    buffer_.Add (len);
+        size_t len = detail::Convert (buffer_.Current (), v);
+        buffer_.Add (len);
     }
 }
 
@@ -140,11 +140,11 @@ LogStream& LogStream::operator<< (const void* v)
     // converted back to that type with a value that compares equal to the original pointer.
     uintptr_t p = reinterpret_cast<uintptr_t>(v);
     if (buffer_.AvailSize () >= kMaxNumericSize) {
-	    char* buf = buffer_.Current ();
-	    buf[0] = '0';
-	    buf[1] = 'X';
-	    size_t len = detail::ConvertHex (buf + 2, p);
-	    buffer_.Add (len + 2);
+        char* buf = buffer_.Current ();
+        buf[0] = '0';
+        buf[1] = 'X';
+        size_t len = detail::ConvertHex (buf + 2, p);
+        buffer_.Add (len + 2);
     }
 
     return *this;
@@ -162,8 +162,8 @@ LogStream& LogStream::operator<< (float v)
 LogStream& LogStream::operator<< (double v)
 {
     if (buffer_.AvailSize () >= kMaxNumericSize) {
-	    int len = snprintf (buffer_.Current (), kMaxNumericSize, "%0.12g", v);
-	    buffer_.Add (len);
+        int len = snprintf (buffer_.Current (), kMaxNumericSize, "%0.12g", v);
+        buffer_.Add (len);
     }
     return *this;
 }

@@ -34,9 +34,9 @@ private:
 
     static void Destroy ()
     {
-	    // this typedef is to avoid T is not a complete type
+        // this typedef is to avoid T is not a complete type
         typedef char T_must_be_complete_type[sizeof (T) == 0 ? -1 : 1];
-	    T_must_be_complete_type dummy; (void) dummy;
+        T_must_be_complete_type dummy; (void) dummy;
         if (nullptr != _value) {
             delete _value;
             _value = nullptr;

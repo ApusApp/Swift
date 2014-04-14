@@ -6,15 +6,15 @@
 struct tm;
 
 namespace swift {
-	
+    
 class Date
 {
 public:
     struct YearMonthDay
     {
-	    int year;   // [1900..2500]
-	    int month;  // [1..12]
-	    int day;    // [1..31]
+        int year;   // [1900..2500]
+        int month;  // [1..12]
+        int day;    // [1..31]
     };
 
 public:
@@ -39,12 +39,12 @@ public:
 
     inline void Swap (Date& that)
     {
-	    std::swap (julianDayNumber_, that.julianDayNumber_);
+        std::swap (julianDayNumber_, that.julianDayNumber_);
     }
 
     inline bool Valid () const 
     { 
-	    return julianDayNumber_ > 0; 
+        return julianDayNumber_ > 0; 
     }
 
     // Converts to YYYY-MM-DD format.
@@ -52,28 +52,28 @@ public:
 
     inline int Year () const
     {
-	    return GetYearMonthDay ().year;
+        return GetYearMonthDay ().year;
     }
 
     inline int Month () const
     {
-	    return GetYearMonthDay ().month;
+        return GetYearMonthDay ().month;
     }
 
     inline int Day () const
     {
-	    return GetYearMonthDay ().day;
+        return GetYearMonthDay ().day;
     }
 
     // [0, 1, 2, 3, 4, 5, 6] => [Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday]
     inline int WeekDay () const
     {
-	    return (julianDayNumber_ + 1) % kDaysPerWeek;
+        return (julianDayNumber_ + 1) % kDaysPerWeek;
     }
 
     inline int GetJulianDayNumber () const 
     { 
-	    return julianDayNumber_; 
+        return julianDayNumber_; 
     }
 
 private:

@@ -19,7 +19,7 @@ public:
 
     void Swap (Timestamp& that)
     {
-	    std::swap (microSecondsSinceEpoch_, that.microSecondsSinceEpoch_);
+        std::swap (microSecondsSinceEpoch_, that.microSecondsSinceEpoch_);
     }
 
     std::string ToSecDotMicroString () const;
@@ -32,12 +32,12 @@ public:
     // for internal usage.
     int64_t MicroSecondsSinceEpoch () const 
     { 
-	    return microSecondsSinceEpoch_; 
+        return microSecondsSinceEpoch_; 
     }
 
     time_t SecondsSinceEpoch () const 
     { 
-	    return static_cast<time_t> (microSecondsSinceEpoch_ / kMicroSecondsPerSecond); 
+        return static_cast<time_t> (microSecondsSinceEpoch_ / kMicroSecondsPerSecond); 
     }
 
     static Timestamp Now ();

@@ -15,8 +15,8 @@ public:
     TimeZone () {}  // an invalid timezone
     bool Valid () const
     {
-	    // 'explicit operator bool() const' in C++11
-	    return static_cast<bool>(data_);
+        // 'explicit operator bool() const' in C++11
+        return static_cast<bool>(data_);
     }
 
     struct tm ToLocalTime (time_t secondsSinceEpoch) const;
@@ -30,7 +30,7 @@ public:
 
     // year in [1900..2500], month in [1..12], day in [1..31]
     static time_t FromUtcTime (int year, int month, int day,
-							    int hour, int minute, int seconds);
+                                int hour, int minute, int seconds);
 
     struct Data;
 

@@ -22,57 +22,57 @@ public:
 
     void Append (const char* /*restrict*/ buf, size_t len)
     {
-	    if (static_cast<size_t>(AvailSize ()) > len) {
-		    memcpy (current_, buf, len);
-		    current_ += len;
-	    }
+        if (static_cast<size_t>(AvailSize ()) > len) {
+            memcpy (current_, buf, len);
+            current_ += len;
+        }
     }
 
     // return available size
     int AvailSize () const
     {
-	    return static_cast<int>(End () - current_);
+        return static_cast<int>(End () - current_);
     }
 
     const char* Data () const
     {
-	    return data_;
+        return data_;
     }
 
     int Length () const
     {
-	    return static_cast<int>(current_ - data_);
+        return static_cast<int>(current_ - data_);
     }
 
     char* Current ()
     {
-	    return current_;
+        return current_;
     }
 
     void Add (size_t len)
     {
-	    current_ += len;
+        current_ += len;
     }
 
     void Reset ()
     {
-	    current_ = data_;
+        current_ = data_;
     }
 
     void Bzero ()
     {
-	    ::bzero (data_, sizeof(data_));
+        ::bzero (data_, sizeof(data_));
     }
 
     std::string ToString () const
     {
-	    return std::string (data_, Length ());
+        return std::string (data_, Length ());
     }
 
 private:
     const char* End () const
     {
-	    return data_ + sizeof(data_);
+        return data_ + sizeof(data_);
     }
 
     char data_[SIZE];
@@ -92,8 +92,8 @@ public:
 
     self& operator<< (bool v)
     {
-	    buffer_.Append(v ? "1" : "0", 1);
-	    return *this;
+        buffer_.Append(v ? "1" : "0", 1);
+        return *this;
     }
 
     self& operator<< (short v);
@@ -110,50 +110,50 @@ public:
 
     self& operator<< (char v)
     {
-	    buffer_.Append (&v, 1);
-	    return *this;
+        buffer_.Append (&v, 1);
+        return *this;
     }
 
     self& operator<< (unsigned char v)
     {
-	    return operator<< (static_cast<char>(v));
+        return operator<< (static_cast<char>(v));
     }
 
     self& operator<< (const char* str)
     {
-	    if (str) {
-		    buffer_.Append (str, strlen (str));
-	    }
-	    else {
-		    buffer_.Append ("(null)", 6);
-	    }
-	    return *this;
+        if (str) {
+            buffer_.Append (str, strlen (str));
+        }
+        else {
+            buffer_.Append ("(null)", 6);
+        }
+        return *this;
     }
 
     self& operator<< (const unsigned char* str)
     {
-	    return operator<< (reinterpret_cast<const char*>(str));
+        return operator<< (reinterpret_cast<const char*>(str));
     }
 
     self& operator<< (const std::string& str)
     {
-	    buffer_.Append (str.c_str (), str.size ());
-	    return *this;
+        buffer_.Append (str.c_str (), str.size ());
+        return *this;
     }
 
     void Append (const char* data, int len) 
     { 
-	    buffer_.Append (data, len); 
+        buffer_.Append (data, len); 
     }
 
     const BufferType& Buffer () const 
     { 
-	    return buffer_; 
+        return buffer_; 
     }
 
     void ResetBuffer() 
     { 
-	    buffer_.Reset (); 
+        buffer_.Reset (); 
     }
 
 private:
@@ -175,12 +175,12 @@ public:
 
     const char* Data() const 
     { 
-	    return buf_; 
+        return buf_; 
     }
 
     int Length() const 
     {
-	    return length_;
+        return length_;
     }
 
 private:

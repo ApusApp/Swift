@@ -35,7 +35,7 @@ struct Compare
 {
     Compare (bool gmt) : compareGmt (gmt) {}
 
-    bool operator() (const Transition& lhs, const Transition& rhs) const
+    bool operator () (const Transition& lhs, const Transition& rhs) const
     {
         if (compareGmt) {
             return lhs.gmtTime < rhs.gmtTime;
@@ -289,7 +289,75 @@ struct tm TimeZone::ToLocalTime (time_t secondsSinceEpoch) const
 // public
 time_t swift::TimeZone::FromLocalTime (const struct tm& t) const
 {
+    assert (nullptr != data_.get ());
+    struct tm localTm = t;
+    time_t seconds = ::timegm (&localTm);
+    detail::Transition tran (0, seconds, 0);
+    const detail::Localtime* local = detail::FindLocalTime (*data_, tran, detail::Compare (false));
+    if (localTm.tm_isdst) {
+        struct tm tryTime = ToLocalTime (seconds - local->gmtOffset);
+        if (!tryTime.tm_isdst
+            && tryTime.tm_hour == localTm.tm_hour
+            && tryTime.tm_min == localTm.tm_min) {
+            seconds -= 3600;
+        }
+    }
 
+    return seconds - local->gmtOffset;
+}
+
+// public
+time_t TimeZone::FromUtcTime (int year, 
+                              int month, 
+                              int day, 
+                              int hour, 
+                              int minute, 
+                              int seconds)
+{
+    Date date (year, month, day);
+    int secondsInDay = hour * 3600 + minute * 60 + seconds;
+    time_t days = date.GetJulianDayNumber () - Date::kJulianDayOf1970_01_01;
+
+    return days * kSecondsPerDay + secondsInDay;
+}
+
+// public
+time_t TimeZone::FromUtcTime (const struct tm& t)
+{
+    return FromUtcTime (t.tm_year + 1900,
+                        t.tm_mon + 1,
+                        t.tm_yday,
+                        t.tm_hour,
+                        t.tm_min,
+                        t.tm_sec);
+}
+
+// static public
+struct tm TimeZone::ToUtcTime (time_t secondsSinceEpoch, bool yday /*= false*/)
+{
+    struct tm utc;
+    utc.tm_zone = "GMT";
+    int seconds = static_cast<int>(secondsSinceEpoch % kSecondsPerDay);
+    int days = static_cast<int>(secondsSinceEpoch / kSecondsPerDay);
+    if (seconds < 0) {
+        seconds += kSecondsPerDay;
+        --days;
+    }
+
+    detail::FillHMS (seconds, &utc);
+    Date date (days + Date::kJulianDayOf1970_01_01);
+    Date::YearMonthDay ymd = date.GetYearMonthDay ();
+    utc.tm_year = ymd.year - 1900;
+    utc.tm_mon  = ymd.month - 1;
+    utc.tm_mday = ymd.day;
+    utc.tm_wday = date.WeekDay ();
+
+    if (yday) {
+        Date startofYear (ymd.year, 1, 1);
+        utc.tm_yday = date.GetJulianDayNumber () - startofYear.GetJulianDayNumber ();
+    }
+
+    return utc;
 }
 
 } // namespace swift

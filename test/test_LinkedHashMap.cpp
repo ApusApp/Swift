@@ -1,8 +1,4 @@
 #include <iostream>
-
-#include <swift/base/Timestamp.h>
-#include <swift/base/MurmurHash3.h>
-#include <swift/base/Date.h>
 #include <swift/base/LinkedHashMap.h>
 
 #include <gtest/gtest.h>
@@ -54,9 +50,3 @@ TEST_F (test_LinkedHashMap, All)
     ASSERT_TRUE (100 == lhm.LastValue ());
 }
 
-int main (int argc, char* argv[])
-{
-    testing::InitGoogleTest(&argc, argv);
-
-    return RUN_ALL_TESTS ();
-}

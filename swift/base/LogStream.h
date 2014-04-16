@@ -83,7 +83,7 @@ private:
 
 class LogStream : swift::noncopyable
 {
-    
+    typedef LogStream self;
 public:
     typedef detail::FixedBuffer<detail::kSmallBuffer> BufferType;
 

@@ -30,7 +30,7 @@ public:
 
     // year in [1900..2500], month in [1..12], day in [1..31]
     static time_t FromUtcTime (int year, int month, int day,
-                                int hour, int minute, int seconds);
+                               int hour, int minute, int seconds);
 
     struct Data;
 

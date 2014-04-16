@@ -76,7 +76,6 @@ public:
         return julianDayNumber_; 
     }
 
-private:
     struct YearMonthDay GetYearMonthDay () const;
 
 private:

@@ -2,14 +2,15 @@ cmake_minimum_required (VERSION 2.8.1)
 cmake_policy (VERSION 2.8.1)
 
 #project name
-project (LinkedHashMap CXX)
-set (TARGET_NAME LinkedHashMap)
+project (test_swift CXX)
+set (TARGET_NAME test_swift)
 
 if(NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE "Debug")
 endif()
 
-set(SRCS test_LinkedHashMap.cpp)
+aux_source_directory (. SRCS)
+
 include_directories (../)
 link_directories ("../lib/")
 add_executable (${TARGET_NAME} ${SRCS})

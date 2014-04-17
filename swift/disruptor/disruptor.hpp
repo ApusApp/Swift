@@ -1,5 +1,5 @@
-#ifndef __APUS_DISRUPTOR_DISRUPTOR_HPP__
-#define __APUS_DISRUPTOR_DISRUPTOR_HPP__
+#ifndef __SWIFT_DISRUPTOR_DISRUPTOR_HPP__
+#define __SWIFT_DISRUPTOR_DISRUPTOR_HPP__
 
 #include <iostream>
 #include <memory>
@@ -11,7 +11,7 @@
 
 const int64_t MAX_INT64_VALUE = 0x7fffffffffffffff;
 
-namespace apus {
+namespace swift {
 namespace disruptor {
 
     class eof : public std::exception
@@ -573,6 +573,6 @@ namespace disruptor {
     }
 
 } // namespace disruptor
-} // namespace apus
+} // namespace swift
 
-#endif // __APUS_DISRUPTOR_DISRUPTOR_HPP__
+#endif // __SWIFT_DISRUPTOR_DISRUPTOR_HPP__

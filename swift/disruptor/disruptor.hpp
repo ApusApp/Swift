@@ -9,10 +9,8 @@
 #include <unistd.h>
 #include <assert.h>
 
-
 namespace swift {
 namespace disruptor {
-    
     const int64_t MAX_INT64_VALUE = std::numeric_limits<int64_t>::max ();
     
     class eof : public std::exception

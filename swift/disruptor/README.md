@@ -7,12 +7,12 @@ C++ simple implementations of the LMAX disruptor.
 API
 =========
 
-   * *ring_buffer<T,Size>*  is a circular buffer with Power of 2 Size
-   * *write_cursor*         tracks a position in the buffer and can follow
+   * *RingBuffer<T,Size>*  is a circular buffer with Power of 2 Size
+   * *WriteCursor*         tracks a position in the buffer and can follow
                             other read cursors to ensure things don't wrap.
-   * *shared_write_cursor*  is a write_cursor that may be used from multiple threads
+   * *SharedWriteCursor*  is a write_cursor that may be used from multiple threads
                             other read cursors to ensure things don't wrap.
-   * *read_cursor*          tracks the read position and can follow / block
+   * *ReadCursor*          tracks the read position and can follow / block
                             on other cursors (read or write).
 
 

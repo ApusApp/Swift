@@ -12,7 +12,7 @@
 namespace swift {
 namespace disruptor {
     const int64_t MAX_INT64_VALUE = std::numeric_limits<int64_t>::max ();
-    
+
     class eof : public std::exception
     {
     public:
@@ -37,51 +37,51 @@ namespace disruptor {
     {
     public:
         sequence (int64_t value = 0)
-            : _sequence (value)
-            , _alert (0)
+            : sequence_ (value)
+            , alert_ (0)
         {
         }
 
         int64_t aquire () const
         {
-            return _sequence.load (std::memory_order_acquire);
+            return sequence_.load (std::memory_order_acquire);
         }
 
         void store (int64_t value)
         {
-            _sequence.store (value, std::memory_order_release);
+            sequence_.store (value, std::memory_order_release);
         }
 
         void set_eof ()
         {
-            _alert = 1;
+            alert_ = 1;
         }
 
         void set_alert ()
         {
-            _alert = -1;
+            alert_ = -1;
         }
 
         bool eof () const
         {
-            return _alert == 1;
+            return alert_ == 1;
         }
 
         bool alert () const
         {
-            return _alert != 0;
+            return alert_ != 0;
         }
 
         int64_t atomic_increment_and_get (uint64_t increment)
         {
-            return _sequence.fetch_add (increment, std::memory_order::memory_order_release) + increment;
+            return sequence_.fetch_add (increment, std::memory_order::memory_order_release) + increment;
         }
 
     private:
         // 64byte size
-        std::atomic<int64_t> _sequence;
-        volatile int64_t     _alert;
-        int64_t              _padding[6];
+        std::atomic<int64_t> sequence_;
+        volatile int64_t     alert_;
+        int64_t              padding_[6];
     };
 
     class event_cursor;
@@ -117,8 +117,8 @@ namespace disruptor {
         int64_t wait_for (int64_t pos) const;
 
     private:
-        mutable int64_t                                   _last_min;
-        std::vector<std::shared_ptr<const event_cursor> > _limit_seq;
+        mutable int64_t                                   last_min_;
+        std::vector<std::shared_ptr<const event_cursor> > limit_seq_;
     };
 
     /**
@@ -135,13 +135,13 @@ namespace disruptor {
         /** @return a read-only reference to the event at pos */
         const EventType& at (int64_t pos) const
         {
-            return _buffer[pos & (Size - 1)];
+            return buffer_[pos & (Size - 1)];
         }
 
         /** @return a reference to the event at pos */
         EventType& at (int64_t pos)
         {
-            return _buffer[pos & (Size - 1)];
+            return buffer_[pos & (Size - 1)];
         }
 
         /** useful to check for contiguous ranges when EventType is
@@ -160,7 +160,7 @@ namespace disruptor {
         }
 
     private:
-        EventType _buffer[Size];
+        EventType buffer_[Size];
     };
 
     /**
@@ -231,16 +231,16 @@ namespace disruptor {
     {
     public:
         event_cursor (int64_t pos = -1)
-            : _name ("")
-            , _begin (pos)
-            , _end (pos)
+            : name_ ("")
+            , begin_ (pos)
+            , end_ (pos)
         {
         }
 
         event_cursor (const char* name, int64_t pos = 0)
-            : _name (name)
-            , _begin (pos)
-            , _end (pos)
+            : name_ (name)
+            , begin_ (pos)
+            , end_ (pos)
         {
         }
 
@@ -248,19 +248,19 @@ namespace disruptor {
         template<typename T>
         void follows (T&& s)
         {
-            _barrier.follows (std::forward<T> (s));
+            barrier_.follows (std::forward<T> (s));
         }
 
         /** returns one after cursor */
         int64_t begin () const
         {
-            return _begin;
+            return begin_;
         }
 
         /** returns one after the last ready as of last call to wait_for () */
         int64_t end () const
         {
-            return _end;
+            return end_;
         }
 
         /** makes the event at pos available to those following this cursor */
@@ -268,14 +268,14 @@ namespace disruptor {
         {
             check_alert ();
 
-            _begin = pos + 1;
-            _cursor.store (pos);
+            begin_ = pos + 1;
+            cursor_.store (pos);
         }
 
         /** when the cusor hits the end of a stream, it can set the eof flag */
         void set_eof ()
         {
-            _cursor.set_eof ();
+            cursor_.set_eof ();
         }
 
         /** If an error occurs while processing data the cursor can set an
@@ -284,14 +284,14 @@ namespace disruptor {
          */
         void set_alert (std::exception_ptr e)
         {
-            _alert = std::move (e);
-            _cursor.set_alert ();
+            alert_ = std::move (e);
+            cursor_.set_alert ();
         }
 
         /** @return any alert set on this cursor */
         const std::exception_ptr& alert () const
         {
-            return _alert;
+            return alert_;
         }
 
         /** If an alert has been set, throw! */
@@ -300,23 +300,23 @@ namespace disruptor {
         /** the last sequence number this processor has completed.*/
         const sequence& pos () const
         {
-            return _cursor;
+            return cursor_;
         }
 
         /** used for debug messages */
         const char* name () const
         {
-            return _name;
+            return name_;
         }
 
     protected:
-        /** last know available, min(_limit_seq) */
-        const char*                   _name;
-        int64_t                       _begin;
-        int64_t                       _end;
-        std::exception_ptr            _alert;
-        barrier                       _barrier;
-        sequence                      _cursor;
+        /** last know available, min(limit_seq_) */
+        const char*                   name_;
+        int64_t                       begin_;
+        int64_t                       end_;
+        std::exception_ptr            alert_;
+        barrier                       barrier_;
+        sequence                      cursor_;
     };
 
     /**
@@ -332,10 +332,10 @@ namespace disruptor {
         int64_t wait_for (int64_t pos)
         {
             try {
-                return _end = _barrier.wait_for (pos) + 1;
+                return end_ = barrier_.wait_for (pos) + 1;
             }
             catch (const eof&) {
-                _cursor.set_eof ();
+                cursor_.set_eof ();
                 throw;
             }
             catch (...) {
@@ -347,7 +347,7 @@ namespace disruptor {
         /** find the current end without blocking */
         int64_t check_end ()
         {
-            return _end = _barrier.get_min () + 1;
+            return end_ = barrier_.get_min () + 1;
         }
     };
     typedef std::shared_ptr<read_cursor> read_cursor_ptr;
@@ -363,12 +363,12 @@ namespace disruptor {
     public:
         /** @param size - the size of the ringbuffer, required to do proper wrap detection */
         write_cursor (int64_t size)
-            : _size (size)
-            , _size_m1 (size - 1)
+            : size_ (size)
+            , size_m1_ (size - 1)
         {
-            _begin = 0;
-            _end = _size;
-            _cursor.store (-1);
+            begin_ = 0;
+            end_ = size_;
+            cursor_.store (-1);
         }
 
         /**
@@ -377,12 +377,12 @@ namespace disruptor {
          */
         write_cursor (const char* name, int64_t size)
             : event_cursor (name)
-            , _size (size)
-            , _size_m1 (size - 1)
+            , size_ (size)
+            , size_m1_ (size - 1)
         {
-            _begin = 0;
-            _end = _size;
-            _cursor.store (-1);
+            begin_ = 0;
+            end_ = size_;
+            cursor_.store (-1);
         }
 
         /** waits for begin() to be valid and then
@@ -392,21 +392,21 @@ namespace disruptor {
          */
         int64_t wait_next ()
         {
-            wait_for (_begin);
-            return _begin;
+            wait_for (begin_);
+            return begin_;
         }
 
         /**
          *   We need to wait until the available space in
          *   the ring buffer is pos - cursor which means that
-         *   all readers must be at least to pos - _size and
-         *   that our new end is the min of the readers + _size
+         *   all readers must be at least to pos - size_ and
+         *   that our new end is the min of the readers + size_
          */
         int64_t wait_for (int64_t pos)
         {
             try {
                 // throws exception on error, returns 'short' on eof
-                return _end = _barrier.wait_for (pos - _size) + _size;
+                return end_ = barrier_.wait_for (pos - size_) + size_;
             }
             catch (...) {
                 set_alert (std::current_exception ());
@@ -415,12 +415,12 @@ namespace disruptor {
         }
         int64_t check_end ()
         {
-            return _end = _barrier.get_min () + _size;
+            return end_ = barrier_.get_min () + size_;
         }
 
     private:
-        const int64_t _size;
-        const int64_t _size_m1;
+        const int64_t size_;
+        const int64_t size_m1_;
     };
     typedef std::shared_ptr<write_cursor> write_cursor_ptr;
 
@@ -459,7 +459,7 @@ namespace disruptor {
          */
         int64_t claim (size_t num_slots)
         {
-            auto pos = _claim_cursor.atomic_increment_and_get (num_slots);
+            auto pos = claim_cursor_.atomic_increment_and_get (num_slots);
             // make sure there is enough space to write
             wait_for (pos);
             return pos - num_slots;
@@ -470,11 +470,11 @@ namespace disruptor {
             try {
                 assert (pos > after_pos);
 
-                _barrier.wait_for (after_pos);
+                barrier_.wait_for (after_pos);
                 publish (pos);
             }
             catch (const eof&) {
-                _cursor.set_eof ();
+                cursor_.set_eof ();
                 throw;
             }
             catch (...) {
@@ -484,7 +484,7 @@ namespace disruptor {
         }
 
     private:
-        sequence _claim_cursor;
+        sequence claim_cursor_;
     };
     typedef std::shared_ptr<shared_write_cursor> shared_write_cursor_ptr;
 
@@ -494,28 +494,28 @@ namespace disruptor {
     //
     inline void barrier::follows (std::shared_ptr<const event_cursor> e)
     {
-        _limit_seq.push_back (std::move (e));
+        limit_seq_.push_back (std::move (e));
     }
 
     inline int64_t barrier::get_min ()
     {
         int64_t min_pos = MAX_INT64_VALUE;
-        for (auto itr = _limit_seq.begin (); itr != _limit_seq.end (); ++itr) {
+        for (auto itr = limit_seq_.begin (); itr != limit_seq_.end (); ++itr) {
             auto itr_pos = (*itr)->pos ().aquire ();
             if (itr_pos < min_pos)
                 min_pos = itr_pos;
         }
 
-        return _last_min = min_pos;
+        return last_min_ = min_pos;
     }
 
     inline int64_t barrier::wait_for (int64_t pos) const
     {
-        if (_last_min > pos)
-            return _last_min;
+        if (last_min_ > pos)
+            return last_min_;
 
         int64_t min_pos = MAX_INT64_VALUE;
-        for (auto itr = _limit_seq.begin (); itr != _limit_seq.end (); ++itr) {
+        for (auto itr = limit_seq_.begin (); itr != limit_seq_.end (); ++itr) {
             int64_t itr_pos = 0;
             itr_pos = (*itr)->pos ().aquire ();
 
@@ -558,7 +558,7 @@ namespace disruptor {
         }
 
         assert (min_pos != MAX_INT64_VALUE);
-        return _last_min = min_pos;
+        return last_min_ = min_pos;
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -567,8 +567,8 @@ namespace disruptor {
     //
     inline void event_cursor::check_alert () const
     {
-        if (_alert != std::exception_ptr ())
-            std::rethrow_exception (_alert);
+        if (alert_ != std::exception_ptr ())
+            std::rethrow_exception (alert_);
     }
 
 } // namespace disruptor

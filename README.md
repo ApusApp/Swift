@@ -1,6 +1,6 @@
 Swift
 =====
-Swift is a basic C++ library for Linux
+Swift is a basic C++ library on linux platform which using c++11. 
 
 
 Computer Latency Numbers

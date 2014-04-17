@@ -208,8 +208,8 @@ namespace disruptor {
      auto end = p->end ();
      while (!done) {
         if (pos >= end) {
-        end = p->wait_for (end);
-     }
+            end = p->wait_for (end);
+        }
 
         source->at (pos) = i;
         p->publish (pos);
@@ -463,7 +463,6 @@ namespace disruptor {
         {
             try {
                 assert (pos > after_pos);
-
                 barrier_.wait_for (after_pos);
                 publish (pos);
             }
@@ -496,8 +495,9 @@ namespace disruptor {
         int64_t min_pos = kMaxInt64Value;
         for (auto itr = limit_seq_.begin (); itr != limit_seq_.end (); ++itr) {
             auto itr_pos = (*itr)->pos ().aquire ();
-            if (itr_pos < min_pos)
+            if (itr_pos < min_pos) {
                 min_pos = itr_pos;
+            }
         }
 
         return last_min_ = min_pos;

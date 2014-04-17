@@ -14,8 +14,8 @@ static_assert (sizeof(digits) == 20, "sizeof(digits) must equal to 20");
 
 static const char* zero = digits + 9;
 
-const char digitsHex[] = "0123456789ABCDEF";
-static_assert (sizeof(digitsHex) == 17, "sizeof(digitsHex) must equal to 17");
+const char digits_hex[] = "0123456789ABCDEF";
+static_assert (sizeof(digits_hex) == 17, "sizeof(digitsHex) must equal to 17");
 
 // Efficient Integer to String Conversions, by Matthew Wilson.
 template<typename T>
@@ -53,7 +53,7 @@ size_t ConvertHex (char buf[], uintptr_t value)
     {
         int lsd = i % 16;
         i /= 16;
-        *p++ = digitsHex[lsd];
+        *p++ = digits_hex[lsd];
     } while (i != 0);
 
     *p = '\0';

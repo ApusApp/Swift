@@ -19,7 +19,7 @@ public:
 
 public:
     // Constructor an invalid Date.
-    Date () : julianDayNumber_ (0) {}
+    Date () : julian_day_number_ (0) {}
 
     //
     // Constructor a YYYY-MM-DD Date.
@@ -30,7 +30,7 @@ public:
     //
     // Constructor a Date from Julian Day Number.
     //
-    explicit Date (int julianDayNum) : julianDayNumber_ (julianDayNum) {}
+    explicit Date (int julian_day_num) : julian_day_number_ (julian_day_num) {}
 
     //
     // Constructor a Date from struct tm
@@ -39,12 +39,12 @@ public:
 
     inline void Swap (Date& that)
     {
-        std::swap (julianDayNumber_, that.julianDayNumber_);
+        std::swap (julian_day_number_, that.julian_day_number_);
     }
 
     inline bool Valid () const 
     { 
-        return julianDayNumber_ > 0; 
+        return julian_day_number_ > 0; 
     }
 
     // Converts to YYYY-MM-DD format.
@@ -68,18 +68,18 @@ public:
     // [0, 1, 2, 3, 4, 5, 6] => [Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday]
     inline int WeekDay () const
     {
-        return (julianDayNumber_ + 1) % kDaysPerWeek;
+        return (julian_day_number_ + 1) % kDaysPerWeek;
     }
 
     inline int GetJulianDayNumber () const 
     { 
-        return julianDayNumber_; 
+        return julian_day_number_; 
     }
 
     struct YearMonthDay GetYearMonthDay () const;
 
 private:
-    int julianDayNumber_;
+    int julian_day_number_;
 
 private:
     static const int kDaysPerWeek = 7;

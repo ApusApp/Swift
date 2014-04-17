@@ -1,7 +1,3 @@
-#include <swift/base/TimeZone.h>
-#include <swift/base/Date.h>
-#include <swift/base/noncopyable.hpp>
-
 #include <algorithm>
 #include <stdexcept>
 #include <string>
@@ -12,6 +8,10 @@
 #include <strings.h>
 #include <assert.h>
 
+#include "swift/base/TimeZone.h"
+#include "swift/base/Date.h"
+#include "swift/base/noncopyable.hpp"
+
 namespace swift {
 namespace detail {
 
@@ -20,72 +20,65 @@ struct Transition
     Transition (time_t gmt,
                 time_t local,
                 int index) 
-        : gmtTime (gmt)
-        , localtime (local)
-        , localtimeIndex (index) 
+        : gmt_time_ (gmt)
+        , localtime_ (local)
+        , localtime_index_ (index) 
     {
     } 
 
-    time_t gmtTime;
-    time_t localtime;
-    int localtimeIndex;
+    time_t gmt_time_;
+    time_t localtime_;
+    int localtime_index_;
 };
 
 struct Compare
 {
-    Compare (bool gmt) : compareGmt (gmt) {}
+    Compare (bool gmt) : compare_gmt_ (gmt) {}
+    ~Compare () {}
 
     bool operator () (const Transition& lhs, const Transition& rhs) const
     {
-        if (compareGmt) {
-            return lhs.gmtTime < rhs.gmtTime;
-        }
-        else {
-            return lhs.localtime < rhs.localtime;
-        }
+        return compare_gmt_ ? (lhs.gmt_time_ < rhs.gmt_time_)
+                            : (lhs.localtime_ < rhs.localtime_);
     }
 
     bool Equal (const Transition& lhs, const Transition& rhs) const
     {
-        if (compareGmt) {
-            return lhs.gmtTime == rhs.gmtTime;
-        }
-        else {
-            return lhs.localtime == rhs.localtime;
-        }
+        return compare_gmt_ ? (lhs.gmt_time_ == rhs.gmt_time_) 
+                            : (lhs.localtime_ == rhs.localtime_);
     }
 
-    bool compareGmt;
+    bool compare_gmt_;
 };
 
 struct Localtime
 {
-    Localtime (time_t offset, 
+    Localtime (time_t off_set, 
                bool dst, 
                int arrb)
-        : gmtOffset (offset)
-        , isDst (dst)
-        , arrbIndex (arrb)
+        : gmt_off_set_ (off_set)
+        , is_dst_ (dst)
+        , arrb_index_ (arrb)
     {
     }
 
-    time_t gmtOffset;
-    bool isDst;
-    int arrbIndex;
+    time_t gmt_off_set_;
+    bool is_dst_;
+    int arrb_index_;
 };
 
 inline void FillHMS (unsigned int seconds, struct tm* utc)
 {
     utc->tm_sec = seconds % 60;
-    unsigned int minutes = seconds / 60;
+    unsigned int minutes = static_cast<unsigned int>(seconds / 60);
     utc->tm_min = minutes % 60;
-    utc->tm_hour = minutes / 60;
+    utc->tm_hour = static_cast<int>(minutes / 60);
 }
 
 class File : swift::noncopyable
 {
 public:
-    File (const char* fileName) : fp_ (::fopen (fileName, "rb")) {}
+    File (const char* filn_name) : fp_ (::fopen (filn_name, "rb")) {}
     ~File ()
     {
         if (fp_) {
@@ -102,7 +95,8 @@ public:
     std::string ReadBytes (int n)
     {
         char buf[n];
-        if (n != ::fread (buf, 1, n, fp_)) {
+        ssize_t bytes = ::fread (buf, 1, n, fp_);
+        if (n != static_cast<int>(bytes)) {
             throw std::logic_error ("no enough data to read");
         }
 
@@ -112,22 +106,25 @@ public:
     int32_t ReadInt32 ()
     {
         int32_t ret = 0;
-        if (sizeof(int32_t) != ::fread (&ret, 1, sizeof(int32_t), fp_)) {
+        ssize_t bytes = ::fread (&ret, 1, sizeof(int32_t), fp_);
+        if (sizeof(int32_t) != static_cast<int>(bytes)) {
             throw std::logic_error ("bad read int32_t data");
         }
 
-        return ret;
+        return static_cast<int32_t>(::be32toh (ret));
     }
 
     uint8_t ReadUInt8 ()
     {
         uint8_t ret = 0;
-        if (sizeof(uint8_t) != ::fread (&ret, 1, sizeof(uint8_t), fp_)) {
+        ssize_t bytes = ::fread (&ret, 1, sizeof(uint8_t), fp_);
+        if (sizeof(uint8_t) != static_cast<int>(bytes)) {
             throw std::logic_error ("bad read uint8_t data");
         }
 
         return ret;
     }
+
 private:
     FILE* fp_;
 }; // class File
@@ -138,23 +135,24 @@ const int kSecondsPerDay = 24 * 60 * 60;
 
 struct TimeZone::Data 
 {
-    std::vector<detail::Transition> transitions;
-    std::vector<detail::Localtime> localtimes;
-    std::vector<std::string> names;
-    std::string abbreviation;
+    std::vector<detail::Transition> transitions_;
+    std::vector<detail::Localtime> localtimes_;
+    std::vector<std::string> names_;
+    std::string abbreviation_;
 };
 
 namespace detail {
 
 // zone file in the directory of /usr/share/zoneinfo/ etc. localtime
 // localtime -> /etc/localtime
-bool ReadTimeZoneFile (const char* zoneFile, struct TimeZone::Data* data)
+bool ReadTimeZoneFile (const char* zone_file, struct TimeZone::Data* data)
 {
-    File f (zoneFile);
+    File f (zone_file);
     if (f.Valid ()) {
         try {
             // read head
-            if ("TZif" != f.ReadBytes (4)) {
+            std::string head = f.ReadBytes (4);
+            if ("TZif" != head) {
                 throw std::logic_error ("bad time zone file");
             }
             // read version
@@ -170,7 +168,6 @@ bool ReadTimeZoneFile (const char* zoneFile, struct TimeZone::Data* data)
 
             std::vector<int32_t> trans;
             std::vector<int> localtimes;
-            trans.reserve (timecnt);
             for (int i = 0; i < timecnt; ++i) {
                 trans.push_back (f.ReadInt32 ());
             }
@@ -185,23 +182,22 @@ bool ReadTimeZoneFile (const char* zoneFile, struct TimeZone::Data* data)
                 uint8_t isdst = f.ReadUInt8 ();
                 uint8_t abbrind = f.ReadUInt8 ();
 
-                data->localtimes.push_back (Localtime (gmtoff, isdst, abbrind));
+                data->localtimes_.push_back (Localtime (gmtoff, isdst, abbrind));
             }
 
-            for (int i = 0; i < timecnt; ++i)
-            {
-                int localIdx = localtimes[i];
-                time_t localtime = trans[i] + data->localtimes[localIdx].gmtOffset;
-                data->transitions.push_back (Transition (trans[i], localtime, localIdx));
+            for (int i = 0; i < timecnt; ++i) {
+                int local_idx = localtimes[i];
+                time_t localtime = trans[i] + data->localtimes_[local_idx].gmt_off_set_;
+                data->transitions_.push_back (Transition (trans[i], localtime, local_idx));
             }
 
-            data->abbreviation = f.ReadBytes (charcnt);
+            data->abbreviation_ = f.ReadBytes (charcnt);
 
             // leapcnt
-            for (int i = 0; i < leapcnt; ++i) {
+            //for (int i = 0; i < leapcnt; ++i) {
                 // int32_t leaptime = f.ReadInt32 ();
                 // int32_t cumleap = f.ReadInt32 ();
-            }
+            //}
             // FIXME
             (void) isstdcnt;
             (void) isgmtcnt;
@@ -210,6 +206,8 @@ bool ReadTimeZoneFile (const char* zoneFile, struct TimeZone::Data* data)
             fprintf (stderr, "%s\n", e.what ());
         }
     }
+
+    return true;
 } // ReadTimeZoneFile
 
 const Localtime* FindLocalTime (const TimeZone::Data& data,
@@ -217,29 +215,29 @@ const Localtime* FindLocalTime (const TimeZone::Data& data,
                                 const Compare& comp)
 {
     const Localtime* localtime = nullptr;
-    if (data.transitions.empty () || comp (trans, data.transitions.front ())) {
+    if (data.transitions_.empty () || comp (trans, data.transitions_.front ())) {
         // FIXME: should be first non dst time zone
-        localtime = &data.localtimes.front ();
+        localtime = &data.localtimes_.front ();
     }
     else {
         // lower_bound: 
         // Returns an iterator pointing to the first element in the range 
         // [data.transitions.begin (), data.transitions.end ()) which does not compare less than trans.
-        std::vector<Transition>::const_iterator transI = std::lower_bound (data.transitions.begin (),
-                                                                            data.transitions.end (),
-                                                                            trans,
-                                                                            comp);
-        if (transI != data.transitions.end ()) {
+        std::vector<Transition>::const_iterator transI = std::lower_bound (data.transitions_.begin (),
+                                                                           data.transitions_.end (),
+                                                                           trans,
+                                                                           comp);
+        if (transI != data.transitions_.end ()) {
             if (!comp.Equal (trans, *transI)) {
-                assert (transI != data.transitions.begin ());
+                assert (transI != data.transitions_.begin ());
                 --transI;
             }
 
-            localtime = &data.localtimes[transI->localtimeIndex];
+            localtime = &data.localtimes_[transI->localtime_index_];
         }
         else {
             // FIXME: use TZ-env
-            localtime = &data.localtimes[data.transitions.back ().localtimeIndex];
+            localtime = &data.localtimes_[data.transitions_.back ().localtime_index_];
         }
     }
 
@@ -248,62 +246,62 @@ const Localtime* FindLocalTime (const TimeZone::Data& data,
 
 } // namespace detail
 
-using namespace swift;
-
 // public
-TimeZone::TimeZone (const char* zoneFile) 
+TimeZone::TimeZone (const char* zone_file) 
     : data_ (std::make_shared<TimeZone::Data> ())
 {
-    if (!detail::ReadTimeZoneFile (zoneFile, data_.get ())) {
+    if (!detail::ReadTimeZoneFile (zone_file, data_.get ())) {
         data_.reset ();
     }
 }
 
 // public
-TimeZone::TimeZone (int eastOfUtc, const char* tzname)
+TimeZone::TimeZone (int east_of_utc, const char* tzname)
     : data_ (std::make_shared<TimeZone::Data> ())
 {
-    data_->localtimes.push_back (detail::Localtime (eastOfUtc, false, 0));
-    data_->abbreviation = std::move (std::string (tzname));
+    data_->localtimes_.push_back (detail::Localtime (east_of_utc, false, 0));
+    data_->abbreviation_ = std::string (tzname);
 }
 
 // public
-struct tm TimeZone::ToLocalTime (time_t secondsSinceEpoch) const
+struct tm TimeZone::ToLocalTime (time_t seconds_since_epoch) const
 {
     struct tm localtime;
     ::bzero (&localtime, sizeof (localtime));
     assert (nullptr != data_.get ());
-    detail::Transition trans (secondsSinceEpoch, 0, 0);
-    const detail::Localtime* local = detail::FindLocalTime (*data_, trans, detail::Compare (true));
+    const Data& data (*data_);
+    detail::Transition trans (seconds_since_epoch, 0, 0);
+    const detail::Localtime* local = detail::FindLocalTime (data, trans, detail::Compare (true));
     if (local) {
-        time_t localSeconds = secondsSinceEpoch + local->gmtOffset;
-        ::gmtime_r (&localSeconds, &localtime);
-        localtime.tm_isdst = local->isDst;
-        localtime.tm_gmtoff = local->gmtOffset;
-        localtime.tm_zone = &data_->abbreviation[local->arrbIndex];
+        time_t local_seconds = seconds_since_epoch + local->gmt_off_set_;
+        ::gmtime_r (&local_seconds, &localtime);
+        localtime.tm_isdst = local->is_dst_;
+        localtime.tm_gmtoff = local->gmt_off_set_;
+        localtime.tm_zone = &data_->abbreviation_[local->arrb_index_];
     }
 
     return localtime;
 }
 
 // public
-time_t swift::TimeZone::FromLocalTime (const struct tm& t) const
+time_t TimeZone::FromLocalTime (const struct tm& t) const
 {
     assert (nullptr != data_.get ());
-    struct tm localTm = t;
-    time_t seconds = ::timegm (&localTm);
+    struct tm localtime = t;
+    const Data& data(*data_);
+    time_t seconds = ::timegm (&localtime);
     detail::Transition tran (0, seconds, 0);
-    const detail::Localtime* local = detail::FindLocalTime (*data_, tran, detail::Compare (false));
-    if (localTm.tm_isdst) {
-        struct tm tryTime = ToLocalTime (seconds - local->gmtOffset);
-        if (!tryTime.tm_isdst
-            && tryTime.tm_hour == localTm.tm_hour
-            && tryTime.tm_min == localTm.tm_min) {
+    const detail::Localtime* local = detail::FindLocalTime (data, tran, detail::Compare (false));
+    if (localtime.tm_isdst) {
+        struct tm try_time = ToLocalTime (seconds - local->gmt_off_set_);
+        if (!try_time.tm_isdst
+            && try_time.tm_hour == localtime.tm_hour
+            && try_time.tm_min == localtime.tm_min) {
             seconds -= 3600;
         }
     }
 
-    return seconds - local->gmtOffset;
+    return seconds - local->gmt_off_set_;
 }
 
 // public
@@ -315,10 +313,10 @@ time_t TimeZone::FromUtcTime (int year,
                               int seconds)
 {
     Date date (year, month, day);
-    int secondsInDay = hour * 3600 + minute * 60 + seconds;
+    int seconds_in_day = hour * 3600 + minute * 60 + seconds;
     time_t days = date.GetJulianDayNumber () - Date::kJulianDayOf1970_01_01;
 
-    return days * kSecondsPerDay + secondsInDay;
+    return days * kSecondsPerDay + seconds_in_day;
 }
 
 // public
@@ -333,12 +331,12 @@ time_t TimeZone::FromUtcTime (const struct tm& t)
 }
 
 // static public
-struct tm TimeZone::ToUtcTime (time_t secondsSinceEpoch, bool yday /*= false*/)
+struct tm TimeZone::ToUtcTime (time_t seconds_since_epoch, bool yday /*= false*/)
 {
     struct tm utc;
     utc.tm_zone = "GMT";
-    int seconds = static_cast<int>(secondsSinceEpoch % kSecondsPerDay);
-    int days = static_cast<int>(secondsSinceEpoch / kSecondsPerDay);
+    int seconds = static_cast<int>(seconds_since_epoch % kSecondsPerDay);
+    int days = static_cast<int>(seconds_since_epoch / kSecondsPerDay);
     if (seconds < 0) {
         seconds += kSecondsPerDay;
         --days;
@@ -353,8 +351,8 @@ struct tm TimeZone::ToUtcTime (time_t secondsSinceEpoch, bool yday /*= false*/)
     utc.tm_wday = date.WeekDay ();
 
     if (yday) {
-        Date startofYear (ymd.year, 1, 1);
-        utc.tm_yday = date.GetJulianDayNumber () - startofYear.GetJulianDayNumber ();
+        Date start_of_year (ymd.year, 1, 1);
+        utc.tm_yday = date.GetJulianDayNumber () - start_of_year.GetJulianDayNumber ();
     }
 
     return utc;

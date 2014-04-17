@@ -4,7 +4,8 @@
 #include <string.h>
 #include <string>
 #include <assert.h>
-#include <swift/base/noncopyable.hpp>
+
+#include "swift/base/noncopyable.hpp"
 
 namespace swift {
 namespace detail {

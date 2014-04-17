@@ -12,14 +12,14 @@ class Timestamp : boost::less_than_comparable<Timestamp>
 public:
     Timestamp ();
     ~Timestamp ();
-    explicit Timestamp (const int64_t microSecondsSinceEpoch);
+    explicit Timestamp (const int64_t micro_seconds_since_epoch);
 
     Timestamp (const Timestamp& rhs);
     Timestamp& operator= (const Timestamp& rhs);
 
     void Swap (Timestamp& that)
     {
-        std::swap (microSecondsSinceEpoch_, that.microSecondsSinceEpoch_);
+        std::swap (micro_seconds_since_epoch_, that.micro_seconds_since_epoch_);
     }
 
     std::string ToSecDotMicroString () const;
@@ -27,17 +27,17 @@ public:
 
     std::string ToFormattedString () const;
 
-    bool Valid () const { return microSecondsSinceEpoch_ > 0; }
+    bool Valid () const { return micro_seconds_since_epoch_ > 0; }
 
     // for internal usage.
     int64_t MicroSecondsSinceEpoch () const 
     { 
-        return microSecondsSinceEpoch_; 
+        return micro_seconds_since_epoch_; 
     }
 
     time_t SecondsSinceEpoch () const 
     { 
-        return static_cast<time_t> (microSecondsSinceEpoch_ / kMicroSecondsPerSecond); 
+        return static_cast<time_t> (micro_seconds_since_epoch_ / kMicroSecondsPerSecond); 
     }
 
     static Timestamp Now ();
@@ -47,7 +47,7 @@ public:
     static const int kMicroSecondsPerSecond = 1000 * 1000;
 
 private:
-    int64_t microSecondsSinceEpoch_;
+    int64_t micro_seconds_since_epoch_;
 };
 
 inline bool operator< (const Timestamp& lhs, const Timestamp& rhs)

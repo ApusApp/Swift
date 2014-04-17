@@ -1,6 +1,7 @@
-#include <swift/base/Date.h>
 #include <stdio.h> // snprintf
 #include <time.h>
+
+#include "swift/base/Date.h"
 
 namespace swift {
 namespace detail {
@@ -18,12 +19,12 @@ int CalculateJulianDayNumber (int year, int month, int day)
     int y = year + 4800 - a;
     int m = month + 12 * a - 3;
         
-    return day + (153 * m + 2) / 5 + y * 365 + y / 4 - y / 100 + y / 400 - 32045;
+    return day + (153 * m + 2) / 5 + y * 365 + (y / 4 - y / 100 + y / 400) - 32045;
 }
 
-struct Date::YearMonthDay CalculateYearMonthDay (int julianDayNumber)
+struct Date::YearMonthDay CalculateYearMonthDay (int julian_day_number)
 {
-    int a = julianDayNumber + 32044;
+    int a = julian_day_number + 32044;
     int b = (4 * a + 3) / 146097;
     int c = a - ((b * 146097) / 4);
     int d = (4 * c + 3) / 1461;
@@ -42,13 +43,13 @@ struct Date::YearMonthDay CalculateYearMonthDay (int julianDayNumber)
 const int Date::kJulianDayOf1970_01_01 = detail::CalculateJulianDayNumber (1970, 1, 1);
 
 // public
-Date::Date (int y, int m, int d) : julianDayNumber_ (detail::CalculateJulianDayNumber (y, m, d))
+Date::Date (int y, int m, int d) : julian_day_number_ (detail::CalculateJulianDayNumber (y, m, d))
 {
 }
 
 // public
 Date::Date (const struct tm& t)
-    : julianDayNumber_ (detail::CalculateJulianDayNumber (
+    : julian_day_number_ (detail::CalculateJulianDayNumber (
     t.tm_year + 1900,
     t.tm_mon + 1,
     t.tm_mday))
@@ -58,7 +59,7 @@ Date::Date (const struct tm& t)
 // private
 struct Date::YearMonthDay Date::GetYearMonthDay () const
 {
-    return detail::CalculateYearMonthDay (julianDayNumber_);
+    return detail::CalculateYearMonthDay (julian_day_number_);
 }
 
 // public

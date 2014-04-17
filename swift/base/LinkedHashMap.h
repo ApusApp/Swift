@@ -1,12 +1,12 @@
 #ifndef __SWIFT_BASE_LINKED_HASH_MAP_H__
 #define __SWIFT_BASE_LINKED_HASH_MAP_H__
 
-#include <swift/base/noncopyable.hpp>
-
 #include <hash_map>
 #include <limits> // numeric_limits
 #include <sys/mman.h>
 #include <assert.h>
+
+#include "swift/base/noncopyable.hpp"
 
 namespace swift {
 
@@ -26,18 +26,18 @@ class LinkedHashMap : swift::noncopyable
 private:
     struct Record
     {
-        KEY key;		// key
-        VALUE value;	// value
-        Record* child;  // child record
-        Record* prev;	// previous record
-        Record* next;	// next record
+        KEY key_;		// key
+        VALUE value_;	// value
+        Record* child_;  // child record
+        Record* prev_;	// previous record
+        Record* next_;	// next record
 
         explicit Record (const KEY& k, const VALUE& v)
-            : key (k)
-            , value (v)
-            , child (nullptr)
-            , prev (nullptr)
-            , next (nullptr)
+            : key_ (k)
+            , value_ (v)
+            , child_ (nullptr)
+            , prev_ (nullptr)
+            , next_ (nullptr)
         {
         }
     };
@@ -87,7 +87,7 @@ public:
         */
         const KEY& Key ()
         {
-            return rec_->key;
+            return rec_->key_;
         }
 
         /**
@@ -97,7 +97,7 @@ public:
         */
         VALUE& Value ()
         {
-            return rec_->value;
+            return rec_->value_;
         }
 
         /**
@@ -148,7 +148,7 @@ public:
         */
         Iterator& operator++ ()
         {
-            rec_ = rec_->next;
+            rec_ = rec_->next_;
 
             return *this;
         }
@@ -161,7 +161,7 @@ public:
         Iterator operator++ (int)
         {
             Iterator old (*this);
-            rec_ = rec_->next;
+            rec_ = rec_->next_;
 
             return old;
         }
@@ -174,7 +174,7 @@ public:
         Iterator& operator-- ()
         {
             if (rec_) {
-                rec_ = rec_->prev;
+                rec_ = rec_->prev_;
             }
             else {
                 rec_ = map_->last_;
@@ -192,7 +192,7 @@ public:
         {
             Iterator old (*this);
             if (rec_) {
-                rec_ = rec_->prev;
+                rec_ = rec_->prev_;
             }
             else {
                 rec_ = map_->last_;
@@ -281,8 +281,8 @@ public:
         Record** entp = buckets_ + bidx;
 
         while (rec) {
-            if (_equalto (rec->key, key)) {
-                rec->value = value;
+            if (_equalto (rec->key_, key)) {
+                rec->value_ = value;
                 switch (mode) {
                 default:
                 {
@@ -291,12 +291,12 @@ public:
                 case MM_FIRST:
                 {
                     if (first_ != rec) {
-                        if (last_ == rec) last_ = rec->prev;
-                        if (rec->prev)    rec->prev->next = rec->next;
-                        if (rec->next)    rec->next->prev = rec->prev;
-                        rec->prev = 0;
-                        rec->next = first_;
-                        first_->prev = rec;
+                        if (last_ == rec) last_ = rec->prev_;
+                        if (rec->prev_)    rec->prev_->next_ = rec->next_;
+                        if (rec->next_)    rec->next_->prev_ = rec->prev_;
+                        rec->prev_ = 0;
+                        rec->next_ = first_;
+                        first_->prev_ = rec;
                         first_ = rec;
                     }
 
@@ -306,20 +306,20 @@ public:
                 {
                     if (last_ != rec) {
                         if (first_ == rec) {
-                            first_ = rec->next;
+                            first_ = rec->next_;
                         }
 
-                        if (rec->prev) {
-                            rec->prev->next = rec->next;
+                        if (rec->prev_) {
+                            rec->prev_->next_ = rec->next_;
                         }
 
-                        if (rec->next) {
-                            rec->next->prev = rec->prev;
+                        if (rec->next_) {
+                            rec->next_->prev_ = rec->prev_;
                         }
 
-                        rec->prev = nullptr;
-                        rec->next = first_;
-                        first_->prev = rec;
+                        rec->prev_ = nullptr;
+                        rec->next_ = first_;
+                        first_->prev_ = rec;
                         first_ = rec;
                     }
 
@@ -327,11 +327,11 @@ public:
                 } // end MM_LAST
                 } // end switch  (mode)
 
-                return &rec->value;
+                return &rec->value_;
             } // end if _equalto (rec->key, key)
             else {
-                entp = &rec->child;
-                rec = rec->child;
+                entp = &rec->child_;
+                rec = rec->child_;
             }
         } // end while (rec)
 
@@ -339,18 +339,18 @@ public:
         switch (mode) {
         default:
         {
-            rec->prev = last_;
+            rec->prev_ = last_;
             if (!first_) first_ = rec;
-            if (last_)   last_->next = rec;
+            if (last_)   last_->next_ = rec;
             last_ = rec;
 
             break;
         }
         case MM_FIRST:
         {
-            rec->next = first_;
+            rec->next_ = first_;
             if (!last_) last_ = rec;
-            if (first_) first_->prev = rec;
+            if (first_) first_->prev_ = rec;
             first_ = rec;
 
             break;
@@ -360,7 +360,7 @@ public:
         *entp = rec;
         ++count_;
 
-        return &rec->value;
+        return &rec->value_;
     } // end Set function
 
     /**
@@ -376,12 +376,12 @@ public:
         Record* rec = buckets_[bidx];
         Record** entp = buckets_ + bidx;
         while (rec) {
-            if (_equalto (rec->key, key)) {
-                if (rec->prev)     rec->prev->next = rec->next;
-                if (rec->next)     rec->next->prev = rec->prev;
-                if (rec == first_) first_ = rec->next;
-                if (rec == last_)  last_ = rec->prev;
-                *entp = rec->child;
+            if (_equalto (rec->key_, key)) {
+                if (rec->prev_)     rec->prev_->next_ = rec->next_;
+                if (rec->next_)     rec->next_->prev_ = rec->prev_;
+                if (rec == first_) first_ = rec->next_;
+                if (rec == last_)  last_ = rec->prev_;
+                *entp = rec->child_;
                 --count_;
                 delete rec;
                 rec = nullptr;
@@ -389,8 +389,8 @@ public:
                 return true;
             }
             else {
-                entp = &rec->child;
-                rec = rec->child;
+                entp = &rec->child_;
+                rec = rec->child_;
             }
         } // end while rec
 
@@ -415,33 +415,33 @@ public:
         Record* rec = buckets_[bidx];
         Record** entp = buckets_ + bidx;
         while (rec) {
-            if (_equalto (rec->key, key)) {
-                if (rec->prev)		rec->prev->next = rec->next;
-                if (rec->next)		rec->next->prev = rec->prev;
-                if (rec == first_)	first_ = rec->next;
-                if (rec == last_)	last_ = rec->prev;
-                *entp = rec->child;
+            if (_equalto (rec->key_, key)) {
+                if (rec->prev_)		rec->prev_->next_ = rec->next_;
+                if (rec->next_)		rec->next_->prev_ = rec->prev_;
+                if (rec == first_)	first_ = rec->next_;
+                if (rec == last_)	last_ = rec->prev_;
+                *entp = rec->child_;
                 --count_;
-                rec->child = nullptr;
-                rec->prev = nullptr;
-                rec->next = nullptr;
+                rec->child_ = nullptr;
+                rec->prev_ = nullptr;
+                rec->next_ = nullptr;
 
                 bidx = hash % dist->bnum_;
                 Record* drec = dist->buckets_[bidx];
                 entp = dist->buckets_ + bidx;
 
                 while (drec) {
-                    if (dist->_equalto (drec->key, key)) {
-                        if (drec->child) rec->child = drec->child;
+                    if (dist->_equalto (drec->key_, key)) {
+                        if (drec->child_) rec->child_ = drec->child_;
 
-                        if (drec->prev) {
-                            rec->prev = drec->prev;
-                            rec->prev->next = rec;
+                        if (drec->prev_) {
+                            rec->prev_ = drec->prev_;
+                            rec->prev_->next_ = rec;
                         }
 
-                        if (drec->next) {
-                            rec->next = drec->next;
-                            rec->next->prev = rec;
+                        if (drec->next_) {
+                            rec->next_ = drec->next_;
+                            rec->next_->prev_ = rec;
                         }
 
                         if (dist->first_ == drec) dist->first_ = rec;
@@ -458,12 +458,12 @@ public:
                         case MM_FIRST:
                         {
                             if (dist->first_ != rec) {
-                                if (dist->last_ == rec) dist->last_ = rec->prev;
-                                if (rec->prev)			rec->prev->next = rec->next;
-                                if (rec->next)			rec->next->prev = rec->prev;
-                                rec->prev = nullptr;
-                                rec->next = dist->first_;
-                                dist->first_->prev = rec;
+                                if (dist->last_ == rec) dist->last_ = rec->prev_;
+                                if (rec->prev_)			rec->prev_->next_ = rec->next_;
+                                if (rec->next_)			rec->next_->prev_ = rec->prev_;
+                                rec->prev_ = nullptr;
+                                rec->next_ = dist->first_;
+                                dist->first_->prev_ = rec;
                                 dist->first_ = rec;
                             }
 
@@ -472,12 +472,12 @@ public:
                         case MM_LAST:
                         {
                             if (dist->last_ != rec) {
-                                if (dist->first_ == rec) dist->first_ = rec->next;
-                                if (rec->prev)			 rec->prev->next = rec->next;
-                                if (rec->next)			 rec->next->prev = rec->prev;
-                                rec->prev = dist->last_;
-                                rec->next = nullptr;
-                                dist->last_->next = rec;
+                                if (dist->first_ == rec) dist->first_ = rec->next_;
+                                if (rec->prev_)			 rec->prev_->next_ = rec->next_;
+                                if (rec->next_)			 rec->next_->prev_ = rec->prev_;
+                                rec->prev_ = dist->last_;
+                                rec->next_ = nullptr;
+                                dist->last_->next_ = rec;
                                 dist->last_ = rec;
                             }
 
@@ -488,25 +488,25 @@ public:
                         return &rec->value;
                     } // end if (dist->_equalto (drec->key, key))
 
-                    entp = &drec->child;
-                    drec = drec->child;
+                    entp = &drec->child_;
+                    drec = drec->child_;
                 } // end while (drec)
 
                 switch (mode) {
                 default:
                 {
-                    rec->prev = dist->last_;
+                    rec->prev_ = dist->last_;
                     if (!dist->first_) dist->first_ = rec;
-                    if (dist->last_)   dist->last_->next = rec;
+                    if (dist->last_)   dist->last_->next_ = rec;
                     dist->last_ = rec;
 
                     break;
                 }
                 case MM_FIRST:
                 {
-                    rec->next = dist->first_;
+                    rec->next_ = dist->first_;
                     if (!dist->last_) dist->last_ = rec;
-                    if (dist->first_) dist->first_->prev = rec;
+                    if (dist->first_) dist->first_->prev_ = rec;
                     dist->first_ = rec;
 
                     break;
@@ -516,11 +516,11 @@ public:
                 *entp = rec;
                 ++dist->count_;
 
-                return &rec->value;
+                return &rec->value_;
             } // end if _equalte (rec->key, key)
             else {
-                entp = &rec->child;
-                rec = rec->child;
+                entp = &rec->child_;
+                rec = rec->child_;
             }
         } // end while (rec)
 
@@ -541,7 +541,7 @@ public:
         Record* rec = buckets_[bidx];
 
         while (rec) {
-            if (_equalto (rec->key, key)) {
+            if (_equalto (rec->key_, key)) {
                 switch (mode) {
                 default:
                 {
@@ -550,12 +550,12 @@ public:
                 case MM_FIRST:
                 {
                     if (first_ != rec) {
-                        if (last_ == rec) last_ = rec->prev;
-                        if (rec->prev)	  rec->prev->next = rec->next;
-                        if (rec->next)	  rec->next->prev = rec->prev;
-                        rec->prev = nullptr;
-                        rec->next = first_;
-                        first_->prev = rec;
+                        if (last_ == rec) last_ = rec->prev_;
+                        if (rec->prev_)	  rec->prev_->next_ = rec->next_;
+                        if (rec->next_)	  rec->next_->prev_ = rec->prev_;
+                        rec->prev_ = nullptr;
+                        rec->next_ = first_;
+                        first_->prev_ = rec;
                         first_ = rec;
                     }
 
@@ -564,12 +564,12 @@ public:
                 case MM_LAST:
                 {
                     if (last_ != rec) {
-                        if (first_ == rec) first_ = rec->next;
-                        if (rec->prev)	   rec->prev->next = rec->next;
-                        if (rec->next)	   rec->next->prev = rec->prev;
-                        rec->prev = last_;
-                        rec->next = nullptr;
-                        last_->next = rec;
+                        if (first_ == rec) first_ = rec->next_;
+                        if (rec->prev_)	   rec->prev_->next_ = rec->next_;
+                        if (rec->next_)	   rec->next_->prev_ = rec->prev_;
+                        rec->prev_ = last_;
+                        rec->next_ = nullptr;
+                        last_->next_ = rec;
                         last_ = rec;
                     }
 
@@ -577,10 +577,10 @@ public:
                 }
                 } // end switch (mode)
 
-                return &rec->value;
+                return &rec->value_;
             } // end if (_equalto (rec->key, key))
             else {
-                rec = rec->child;
+                rec = rec->child_;
             }
         } // end while (rec)
 
@@ -596,7 +596,7 @@ public:
 
         Record* rec = last_;
         while (rec) {
-            Record* prev = rec->prev;
+            Record* prev = rec->prev_;
             delete rec;
             rec = prev;
         }
@@ -645,11 +645,11 @@ public:
     {
         Record* rec = buckets_[hash_ (key) % bnum_];
         while (rec) {
-            if (_equalto (rec->key, key)) {
+            if (_equalto (rec->key_, key)) {
                 return Iterator (this, rec);
             }
             else {
-                rec = rec->child;
+                rec = rec->child_;
             }
         }
 
@@ -664,7 +664,7 @@ public:
     */
     const KEY& FirstKey () const
     {
-        return first_->key;
+        return first_->key_;
     }
 
     /**
@@ -674,7 +674,7 @@ public:
     */
     VALUE& FirstValue () const
     {
-        return first_->value;
+        return first_->value_;
     }
 
     /**
@@ -684,7 +684,7 @@ public:
     */
     const KEY& LastKey () const
     {
-        return last_->key;
+        return last_->key_;
     }
 
         /**
@@ -694,7 +694,7 @@ public:
         */
     VALUE& LastValue () const
     {
-        return last_->value;
+        return last_->value_;
     }
 
 private:
@@ -742,7 +742,7 @@ private:
     {
         Record* rec = last_;
         while (rec) {
-            Record* prev = rec->prev;
+            Record* prev = rec->prev_;
             delete rec;
             rec = prev;
         }

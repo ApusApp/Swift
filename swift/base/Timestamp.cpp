@@ -2,24 +2,25 @@
 #include <sys/time.h>
 #include <stdio.h>
 
-#include <swift/base/Timestamp.h>
+#include "swift/base/Timestamp.h"
 
 namespace swift {
 
 static_assert (sizeof(Timestamp) == sizeof(int64_t), "sizeof(Timestamp) must equal to sizeof(int64_t)");
 
-Timestamp::Timestamp () : microSecondsSinceEpoch_ (0)
+Timestamp::Timestamp () : micro_seconds_since_epoch_ (0)
 {
 }
 
 Timestamp::Timestamp (const Timestamp& rhs)
 {
     if (this != &rhs) {
-        microSecondsSinceEpoch_ = rhs.microSecondsSinceEpoch_;
+        micro_seconds_since_epoch_ = rhs.micro_seconds_since_epoch_;
     }
 }
 
-Timestamp::Timestamp (const int64_t microSecondsSinceEpoch) : microSecondsSinceEpoch_ (microSecondsSinceEpoch)
+Timestamp::Timestamp (const int64_t micro_seconds_since_epoch) 
+    : micro_seconds_since_epoch_ (micro_seconds_since_epoch)
 {
 
 }
@@ -32,7 +33,7 @@ Timestamp::~Timestamp ()
 Timestamp& Timestamp::operator= (const Timestamp& rhs)
 {
     if (this != &rhs) {
-        microSecondsSinceEpoch_ = rhs.microSecondsSinceEpoch_;
+        micro_seconds_since_epoch_ = rhs.micro_seconds_since_epoch_;
     }
 
     return *this;
@@ -56,8 +57,8 @@ Timestamp Timestamp::Invalid ()
 std::string Timestamp::ToSecDotMicroString () const
 {
     char buf[32] = {0};
-    int64_t seconds = microSecondsSinceEpoch_ / kMicroSecondsPerSecond;
-    int64_t microseconds = microSecondsSinceEpoch_ % kMicroSecondsPerSecond;
+    int64_t seconds = static_cast<int64_t>(micro_seconds_since_epoch_ / kMicroSecondsPerSecond);
+    int64_t microseconds = micro_seconds_since_epoch_ % kMicroSecondsPerSecond;
     // PRId64 GCC compile with -D__STDC_FORMAT_MACROS
     int size = snprintf (buf, sizeof(buf) - 1, "%" PRId64 ".%06" PRId64 "", seconds, microseconds);
     return std::string (buf, size);
@@ -67,7 +68,7 @@ std::string Timestamp::ToSecDotMicroString () const
 std::string Timestamp::ToString () const
 {
     char buf[32] = {0};
-    int size = snprintf (buf, sizeof(buf) - 1, "%" PRId64"", microSecondsSinceEpoch_);
+    int size = snprintf (buf, sizeof(buf) - 1, "%" PRId64"", micro_seconds_since_epoch_);
     return std::string (buf, size);
 }
 
@@ -75,8 +76,8 @@ std::string Timestamp::ToString () const
 std::string Timestamp::ToFormattedString () const
 {
     char buf[32] = {0};
-    time_t seconds = static_cast<time_t>(microSecondsSinceEpoch_ / kMicroSecondsPerSecond);
-    int microseconds = static_cast<int>(microSecondsSinceEpoch_ % kMicroSecondsPerSecond);
+    time_t seconds = static_cast<time_t>(micro_seconds_since_epoch_ / kMicroSecondsPerSecond);
+    int microseconds = static_cast<int>(micro_seconds_since_epoch_ % kMicroSecondsPerSecond);
     struct tm tm_time;
     gmtime_r(&seconds, &tm_time);
 

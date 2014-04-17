@@ -1,5 +1,5 @@
-#ifndef __APUS_DISRUPTOR_HPP__
-#define __APUS_DISRUPTOR_HPP__
+#ifndef __APUS_DISRUPTOR_DISRUPTOR_HPP__
+#define __APUS_DISRUPTOR_DISRUPTOR_HPP__
 
 #include <iostream>
 #include <memory>
@@ -575,4 +575,4 @@ namespace disruptor {
 } // namespace disruptor
 } // namespace apus
 
-#endif // __APUS_DISRUPTOR_HPP__
+#endif // __APUS_DISRUPTOR_DISRUPTOR_HPP__

@@ -9,11 +9,12 @@
 #include <unistd.h>
 #include <assert.h>
 
-const int64_t MAX_INT64_VALUE = 0x7fffffffffffffff;
 
 namespace swift {
 namespace disruptor {
-
+    
+    const int64_t MAX_INT64_VALUE = std::numeric_limits<int64_t>::max ();
+    
     class eof : public std::exception
     {
     public:
@@ -118,8 +119,8 @@ namespace disruptor {
         int64_t wait_for (int64_t pos) const;
 
     private:
-        mutable int64_t										_last_min;
-        std::vector<std::shared_ptr<const event_cursor> >	_limit_seq;
+        mutable int64_t                                   _last_min;
+        std::vector<std::shared_ptr<const event_cursor> > _limit_seq;
     };
 
     /**

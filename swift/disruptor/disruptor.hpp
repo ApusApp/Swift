@@ -48,7 +48,8 @@ namespace disruptor {
         Sequence (int64_t value = 0)
             : sequence_ (value)
             , alert_ (0)
-        {}
+        {
+        }
 
         int64_t aquire () const 
         { 
@@ -86,7 +87,7 @@ namespace disruptor {
         }
 
     private:
-        // 64byte size
+        // on x86 cacheline is 64 byte size
         std::atomic<int64_t> sequence_;
         volatile int64_t     alert_;
         int64_t              padding_[6];
@@ -138,7 +139,7 @@ namespace disruptor {
     public:
         typedef EventType event_type;
 
-        static_assert (((Size != 0) && ((Size & (~Size + 1)) == Size)), "Ring buffer's must be a power of 2");
+        static_assert (((Size != 0) && ((Size & (~Size + 1)) == Size)), "Ring buffer's size must be a power of 2");
 
         /** @return a read-only reference to the event at pos */
         const EventType& at (int64_t pos) const
@@ -446,13 +447,17 @@ namespace disruptor {
     {
     public:
         /* @param size - the size of the ringbuffer, required to do proper wrap detection */
-        SharedWriteCursor (int64_t size) :WriteCursor (size) {}
+        SharedWriteCursor (int64_t size) :WriteCursor (size) 
+        {
+        }
 
         /**
          * @param name - name of the cursor for debug purposes
          * @param size - the size of the buffer.
          */
-        SharedWriteCursor (const char* name, int64_t size) : WriteCursor (name, size) {}
+        SharedWriteCursor (const char* name, int64_t size) : WriteCursor (name, size) 
+        {
+        }
 
         /** 
          *  When there are multiple writers they cannot both

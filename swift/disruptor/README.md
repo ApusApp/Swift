@@ -10,14 +10,14 @@ API
    * *RingBuffer<T,Size>*  is a circular buffer with Power of 2 Size
    * *WriteCursor*         tracks a position in the buffer and can follow
                             other read cursors to ensure things don't wrap.
-   * *SharedWriteCursor*  is a write_cursor that may be used from multiple threads
+   * *SharedWriteCursor*  is a write cursor that may be used from multiple threads
                             other read cursors to ensure things don't wrap.
    * *ReadCursor*          tracks the read position and can follow / block
                             on other cursors (read or write).
 
 
 The concept of the cursors are separated from the data storage.  Every cursor
-should read from one or more sources and write to its own outbut buffer.  
+should read from one or more sources and write to its own output buffer.  
 
 Features
 ==========

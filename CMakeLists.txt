@@ -1,19 +1,25 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.1)
-CMAKE_POLICY (VERSION 2.8.1)
+cmake_minimum_required (VERSION 2.8.1)
+cmake_policy (VERSION 2.8.1)
 
-#project name
-PROJECT (SWIFT CXX)
-SET (TARGET_NAME swift)
+project (swift CXX)
 
 if(NOT CMAKE_BUILD_TYPE)
-  SET (CMAKE_BUILD_TYPE "Debug")
+  set (CMAKE_BUILD_TYPE "Debug")
 endif()
 
-SET (CMAKE_CXX_COMPILER "g++")
-SET (CMAKE_CXX_FLAGS_DEBUG "-O0")
-SET (CMAKE_CXX_FLAGS_RELEASE "-O2 -finline-limit=1000 -DNDEBUG")
-SET (EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../bin)
-SET (LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../lib)
+set (CMAKE_CXX_COMPILER "g++")
+set (CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
+set (CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O2 -finline-limit=1000 -DNDEBUG")
 
-INCLUDE_DIRECTORIES (.)
-ADD_SUBDIRECTORY (swift)
+set (EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+set (LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+
+string (TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
+
+include_directories (.)
+
+add_subdirectory (swift/base)
+#add_subdirectory (swift/disruptor)
+
+add_subdirectory (test/base)
+add_subdirectory (test/disruptor)

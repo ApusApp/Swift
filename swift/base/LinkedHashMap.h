@@ -240,9 +240,9 @@ public:
     */
     explicit LinkedHashMap ()
         : buckets_ (nullptr)
-        , bnum_ (MAP_DEFAULT_BUCKET_NUM)
         , first_ (nullptr)
         , last_ (nullptr)
+        , bnum_ (MAP_DEFAULT_BUCKET_NUM)
         , count_ (0)
     {
         if (bnum_ < 1) {
@@ -259,9 +259,9 @@ public:
     */
     explicit LinkedHashMap (size_t bnum)
         : buckets_ (nullptr)
-        , bnum_ (bnum)
         , first_ (nullptr)
         , last_ (nullptr)
+        , bnum_ (bnum)
         , count_ (0)
     {
         if (bnum_ < 1) {

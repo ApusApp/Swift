@@ -32,7 +32,7 @@ int main (int argc, char** argv)
     p->follows (c);
 
     // thread publisher
-    auto pub_thread = [=] ()
+    auto pub_thread = [&] ()
     {
         try {
             auto pos = p->begin ();
@@ -67,7 +67,7 @@ int main (int argc, char** argv)
     };
 
     // thread a
-    auto thread_a = [=] ()
+    auto thread_a = [&] ()
     {
         try {
             auto pos = a->begin ();
@@ -88,7 +88,7 @@ int main (int argc, char** argv)
     };
 
     // thread b
-    auto thread_b = [=] ()
+    auto thread_b = [&] ()
     {
         try {
             auto pos = b->begin ();
@@ -110,7 +110,7 @@ int main (int argc, char** argv)
     };
 
     // thread c
-    auto thread_c = [=] ()
+    auto thread_c = [&] ()
     {
         try {
             auto pos = c->begin ();

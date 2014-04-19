@@ -182,6 +182,7 @@ bool ReadTimeZoneFile (const char* zone_file, struct TimeZone::Data* data)
 
             std::vector<int32_t> trans;
             std::vector<int> localtimes;
+            trans.reserve (timecnt);
             for (int i = 0; i < timecnt; ++i) {
                 trans.push_back (f.ReadInt32 ());
             }
@@ -204,7 +205,7 @@ bool ReadTimeZoneFile (const char* zone_file, struct TimeZone::Data* data)
                 time_t localtime = trans[i] + data->localtimes_[local_idx].gmt_off_set_;
                 data->transitions_.push_back (Transition (trans[i], localtime, local_idx));
             }
-
+            
             data->abbreviation_ = f.ReadBytes (charcnt);
 
             // leapcnt
@@ -212,7 +213,9 @@ bool ReadTimeZoneFile (const char* zone_file, struct TimeZone::Data* data)
                 // int32_t leaptime = f.ReadInt32 ();
                 // int32_t cumleap = f.ReadInt32 ();
             //}
+
             // FIXME
+            (void) leapcnt;
             (void) isstdcnt;
             (void) isgmtcnt;
         }
@@ -285,6 +288,7 @@ struct tm TimeZone::ToLocalTime (time_t seconds_since_epoch) const
     assert (nullptr != data_.get ());
     const Data& data (*data_);
     detail::Transition trans (seconds_since_epoch, 0, 0);
+
     const detail::Localtime* local = detail::FindLocalTime (data, trans, detail::Compare (true));
     if (local) {
         time_t local_seconds = seconds_since_epoch + local->gmt_off_set_;
@@ -302,11 +306,12 @@ time_t TimeZone::FromLocalTime (const struct tm& t) const
 {
     assert (nullptr != data_.get ());
     struct tm localtime = t;
-    const Data& data(*data_);
+    const Data& data (*data_);
     time_t seconds = ::timegm (&localtime);
     detail::Transition tran (0, seconds, 0);
+
     const detail::Localtime* local = detail::FindLocalTime (data, tran, detail::Compare (false));
-    if (localtime.tm_isdst) {
+    if (t.tm_isdst) {
         struct tm try_time = ToLocalTime (seconds - local->gmt_off_set_);
         if (!try_time.tm_isdst
             && try_time.tm_hour == localtime.tm_hour
@@ -348,6 +353,7 @@ time_t TimeZone::FromUtcTime (const struct tm& t)
 struct tm TimeZone::ToUtcTime (time_t seconds_since_epoch, bool yday /*= false*/)
 {
     struct tm utc;
+    ::bzero (&utc, sizeof(utc));
     utc.tm_zone = "GMT";
     int seconds = static_cast<int>(seconds_since_epoch % kSecondsPerDay);
     int days = static_cast<int>(seconds_since_epoch / kSecondsPerDay);

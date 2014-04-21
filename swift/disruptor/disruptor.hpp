@@ -15,7 +15,6 @@
 #ifndef __SWIFT_DISRUPTOR_DISRUPTOR_HPP__
 #define __SWIFT_DISRUPTOR_DISRUPTOR_HPP__
 
-#include <iostream>
 #include <memory>
 #include <vector>
 #include <atomic>
@@ -87,7 +86,7 @@ namespace disruptor {
         }
 
     private:
-        // on x86 cacheline is 64 byte size
+        // x86 machine cpu cacheline is 64 byte
         std::atomic<int64_t> sequence_;
         volatile int64_t     alert_;
         int64_t              padding_[6];
@@ -338,8 +337,15 @@ namespace disruptor {
     class ReadCursor : public EventCursor
     {
     public:
-        ReadCursor (int64_t pos = 0) : EventCursor (pos) {}
-        ReadCursor (const char* name, int64_t pos = 0) : EventCursor (name, pos) {}
+        ReadCursor (int64_t pos = 0) 
+            : EventCursor (pos) 
+        {
+        }
+
+        ReadCursor (const char* name, int64_t pos = 0) 
+            : EventCursor (name, pos) 
+        {
+        }
 
         /** @return end() which is > pos */
         int64_t wait_for (int64_t pos)
@@ -363,7 +369,7 @@ namespace disruptor {
             return end_ = barrier_.get_min () + 1;
         }
     };
-    typedef std::shared_ptr<ReadCursor> read_cursor_ptr;
+    typedef std::shared_ptr<ReadCursor> ReadCursorSPtr;
 
     /**
      *  Tracks the write position in a buffer.
@@ -432,7 +438,7 @@ namespace disruptor {
     private:
         const int64_t size_;
     };
-    typedef std::shared_ptr<WriteCursor> WriteCursorPtr;
+    typedef std::shared_ptr<WriteCursor> WriteCursorSPtr;
 
     /**
      *  When there are multiple writers this cursor can
@@ -500,7 +506,7 @@ namespace disruptor {
     private:
         Sequence claim_cursor_;
     };
-    typedef std::shared_ptr<SharedWriteCursor> SharedWriteCursorPtr;
+    typedef std::shared_ptr<SharedWriteCursor> SharedWriteCursorSPtr;
 
     //////////////////////////////////////////////////////////////////////////
     //
@@ -555,7 +561,7 @@ namespace disruptor {
 
             // queue stalled, don't peg the CPU but don't wait too long either...
             while (itr_pos < pos) {
-                usleep (10 * 1000);
+                usleep (10 * 1000); // 10ms
 
                 itr_pos = (*itr)->pos ().aquire ();
                 if ((*itr)->pos ().alert ()) {

@@ -303,7 +303,12 @@ namespace disruptor {
         }
 
         /** If an alert has been set, throw! */
-        inline void check_alert () const;
+        inline void check_alert () const
+        {
+            if (alert_ != std::exception_ptr ()) {
+                std::rethrow_exception (alert_);
+            }
+        }
 
         /** the last sequence number this processor has completed.*/
         const Sequence& pos () const
@@ -580,17 +585,6 @@ namespace disruptor {
 
         assert (min_pos != kMaxInt64Value);
         return last_min_ = min_pos;
-    }
-
-    //////////////////////////////////////////////////////////////////////////
-    //
-    // EventCursor function define
-    //
-    inline void EventCursor::check_alert () const
-    {
-        if (alert_ != std::exception_ptr ()) {
-            std::rethrow_exception (alert_);
-        }
     }
 
 } // namespace disruptor

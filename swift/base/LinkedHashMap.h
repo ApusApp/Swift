@@ -17,12 +17,16 @@
 
 #include <hash_map>
 #include <limits> // numeric_limits
-#include <sys/mman.h>
 #include <assert.h>
 
 #include "swift/base/noncopyable.hpp"
 
 namespace swift {
+namespace detail {
+    void *MapAlloc (size_t size);
+
+    void MapFree (void* ptr);
+}
 
 /**
  * Doubly-linked hash map
@@ -712,34 +716,13 @@ public:
     }
 
 private:
-
-    inline void *MapAlloc (size_t size)
-    {
-        assert (size > 0 && size <= std::numeric_limits<size_t>::max () / 2);
-        void* ptr = ::mmap (0, sizeof(size) + size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        if (MAP_FAILED == ptr) {
-            throw std::bad_alloc ();
-        }
-
-        *(size_t*)ptr = size;
-        return (char*)ptr + sizeof(size);
-    }
-
-    inline void MapFree (void* ptr) 
-    {
-        if (ptr) {
-            size_t size = *((size_t*)ptr - 1);
-            ::munmap ((char*)ptr - sizeof(size), sizeof(size) + size);
-        }
-    }
-
     /**
     * Initialize fields
     */
     void Initialize ()
     {
         if (bnum_ >= MIN_MAPZMAP_BUCKET_NUM) {
-                buckets_ = (Record**)MapAlloc (sizeof(*buckets_) * bnum_);
+            buckets_ = (Record**)detail::MapAlloc (sizeof(*buckets_) * bnum_);
         }
         else {
             buckets_ = new Record*[bnum_];
@@ -762,7 +745,7 @@ private:
         }
 
         if (bnum_ >= MIN_MAPZMAP_BUCKET_NUM) {
-            MapFree (buckets_);
+            detail::MapFree (buckets_);
         }
         else {
             if (buckets_) {

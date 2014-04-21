@@ -29,24 +29,25 @@ __thread char t_time[32];
 __thread time_t t_last_second;
 
 namespace detail {
+    // thread safe
     inline const char* StrError_R (int saved_errno)
     {
         return ::strerror_r (saved_errno, swift::t_errno_buf, sizeof(swift::t_errno_buf));
     }
 
-    inline Logger::LogLevel InitLogLevel ()
+    inline Logger::LogSeverity InitLogSeverity ()
     {
         if (::getenv ("SWIFT_LOG_TRACE")) {
-            return swift::Logger::LL_TRACE;
+            return swift::Logger::LS_TRACE;
         }
         else if (::getenv ("SWIFT_LOG_DEBUG")) {
-            return swift::Logger::LL_DEBUG;
+            return swift::Logger::LS_DEBUG;
         }
         
-        return swift::Logger::LL_INFO;
+        return swift::Logger::LS_INFO;
     }
 
-    const char* log_level_name[swift::Logger::LL_NUMBER_LOG_LEVELS] = {
+    const char* log_severity_name[swift::Logger::LS_NUMBER_LOG_SERVERITY] = {
         "TRACE ",
         "DEBUG ",
         "INFO  ",
@@ -87,7 +88,7 @@ inline LogStream& operator<< (LogStream& s, const Logger::SourceFile& f)
 }
 
 // public 
-Logger::LogLevel g_log_level = detail::InitLogLevel ();
+Logger::LogSeverity g_log_severity = detail::InitLogSeverity ();
 
 std::function<void (const char*, int)> g_output = std::move ([](const char* msg, int len) {
     ::fwrite (msg, 1, len, stdout);
@@ -100,20 +101,20 @@ std::function<void (void)> g_flush = std::move ([](void) {
 TimeZone g_log_time_zone;
 
 // private
-Logger::LoggerImpl::LoggerImpl (Logger::LogLevel level, 
+Logger::LoggerImpl::LoggerImpl (Logger::LogSeverity log_severity, 
                                 const int old_errno, 
                                 const SourceFile& file, 
                                 const int line)
     : time_ (Timestamp::Now ())
     , stream_ ()
-    , level_ (level)
+    , log_severity_ (log_severity)
     , line_ (line)
     , file_name_ (file)
 {
     FormatTime ();
     ThisThread::GetTid ();
     stream_ << detail::T (ThisThread::TidToString (), 6);
-    stream_ << detail::T (detail::log_level_name[level], 6);
+    stream_ << detail::T (detail::log_severity_name[log_severity], 6);
     if (0 != old_errno) {
         stream_ << detail::StrError_R (old_errno) << " (errno=" << old_errno << ") ";
     }
@@ -161,28 +162,28 @@ void Logger::LoggerImpl::Finish ()
 
 // public
 Logger::Logger (const SourceFile& file, int line)
-    : logger_impl_ (LL_INFO, 0, file, line)
+    : logger_impl_ (LS_INFO, 0, file, line)
 {
 
 }
 
 // public
-Logger::Logger (const SourceFile& file, int line, LogLevel level)
-    : logger_impl_ (level, 0, file, line)
+Logger::Logger (const SourceFile& file, int line, LogSeverity log_severity)
+    : logger_impl_ (log_severity, 0, file, line)
 {
 
 }
 
 // public
-Logger::Logger (const SourceFile& file, int line, LogLevel level, const char* func_name)
-    : logger_impl_ (level, 0, file, line)
+Logger::Logger (const SourceFile& file, int line, LogSeverity log_severity, const char* func_name)
+    : logger_impl_ (log_severity, 0, file, line)
 {
     logger_impl_.stream_ << func_name << ' ';
 }
 
 // public
 Logger::Logger (const SourceFile& file, int line, bool is_abort)
-: logger_impl_ (is_abort ? LL_FATAL : LL_ERROR, errno, file, line)
+: logger_impl_ (is_abort ? LS_FATAL : LS_ERROR, errno, file, line)
 {
 
 }
@@ -193,16 +194,16 @@ Logger::~Logger ()
     logger_impl_.Finish ();
     const LogStream::BufferType& buf (GetStream ().Buffer ());
     g_output (buf.Data (), buf.Length ());
-    if (LL_FATAL == logger_impl_.level_) {
+    if (LS_FATAL == logger_impl_.log_severity_) {
         g_flush ();
         ::abort ();
     }
 }
 
 // static public
-void Logger::SetLogLevel (LogLevel level)
+void Logger::SetLogSeverity (LogSeverity log_severity)
 {
-    g_log_level = level;
+    g_log_severity = log_severity;
 }
 
 // static public

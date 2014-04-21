@@ -28,15 +28,15 @@ class TimeZone;
 class Logger
 {
 public:
-    enum LogLevel
+    enum LogSeverity
     {
-        LL_TRACE,
-        LL_DEBUG,
-        LL_INFO,
-        LL_WARN,
-        LL_ERROR,
-        LL_FATAL,
-        LL_NUMBER_LOG_LEVELS,
+        LS_TRACE,
+        LS_DEBUG,
+        LS_INFO,
+        LS_WARN,
+        LS_ERROR,
+        LS_FATAL,
+        LS_NUMBER_LOG_SERVERITY,
     };
 
     // compile time calculation of name of source file
@@ -76,8 +76,8 @@ public:
     };
 
     Logger (const SourceFile& file, int line);
-    Logger (const SourceFile& file, int line, LogLevel level);
-    Logger (const SourceFile& file, int line, LogLevel level, const char* func_name);
+    Logger (const SourceFile& file, int line, LogSeverity log_serverity);
+    Logger (const SourceFile& file, int line, LogSeverity log_serverity, const char* func_name);
     Logger (const SourceFile& file, int line, bool is_abort);
     ~Logger ();
 
@@ -87,8 +87,8 @@ public:
     }
 
 public:
-    static LogLevel GetLogLevel ();
-    static void SetLogLevel (LogLevel level);
+    static LogSeverity GetLogSeverity ();
+    static void SetLogSeverity (LogSeverity log_serverity);
     static void SetOutput (std::function<void (const char*, int)>&& func);
     static void SetFlush (std::function<void (void)>&& func);
     static void SetTimeZone (const TimeZone& tz);
@@ -97,7 +97,7 @@ private:
     class LoggerImpl : swift::noncopyable
     {
     public:
-        LoggerImpl (Logger::LogLevel level,
+        LoggerImpl (Logger::LogSeverity log_serverity,
                     const int old_errno,
                     const SourceFile& file,
                     const int line);
@@ -108,7 +108,7 @@ private:
     public:
         Timestamp time_;
         LogStream stream_;
-        LogLevel level_;
+        LogSeverity log_severity_;
         int line_;
         SourceFile file_name_;
     };
@@ -116,28 +116,43 @@ private:
     LoggerImpl logger_impl_;
 };
 
-extern Logger::LogLevel g_log_level;
+extern Logger::LogSeverity g_log_severity;
 
 // static public
-inline Logger::LogLevel Logger::GetLogLevel ()
+inline Logger::LogSeverity Logger::GetLogSeverity ()
 {
-    return g_log_level;
+    return g_log_severity;
 }
 
-#define LOG_TRACE if (swift::Logger::GetLogLevel () <= swift::Logger::LL_TRACE) \
-    swift::Logger (__FILE__, __LINE__, swift::Logger::LL_TRACE, __func__).GetStream ()
+#define LOG_TRACE if (swift::Logger::GetLogSeverity () <= swift::Logger::LS_TRACE) \
+    swift::Logger (__FILE__, __LINE__, swift::Logger::LS_TRACE, __func__).GetStream ()
 
-#define LOG_DEBUG if (swift::Logger::GetLogLevel () <= swift::Logger::LL_DEBUG) \
-    swift::Logger (__FILE__, __LINE__, swift::Logger::LL_DEBUG, __func__).GetStream ()
+#define LOG_DEBUG if (swift::Logger::GetLogSeverity () <= swift::Logger::LS_DEBUG) \
+    swift::Logger (__FILE__, __LINE__, swift::Logger::LS_DEBUG, __func__).GetStream ()
 
-#define LOG_INFO if (swift::Logger::GetLogLevel () <= swift::Logger::LL_INFO) \
+#define LOG_INFO if (swift::Logger::GetLogSeverity () <= swift::Logger::LS_INFO) \
     swift::Logger (__FILE__, __LINE__).GetStream ()
 
-#define LOG_WARN swift::Logger (__FILE__, __LINE__, swift::Logger::LL_WARN).GetStream ()
-#define LOG_ERROR swift::Logger (__FILE__, __LINE__, swift::Logger::LL_ERROR).GetStream ()
-#define LOG_FATAL swift::Logger (__FILE__, __LINE__, swift::Logger::LL_FATAL).GetStream ()
+#define LOG_WARN swift::Logger (__FILE__, __LINE__, swift::Logger::LS_WARN).GetStream ()
+#define LOG_ERROR swift::Logger (__FILE__, __LINE__, swift::Logger::LS_ERROR).GetStream ()
+#define LOG_FATAL swift::Logger (__FILE__, __LINE__, swift::Logger::LS_FATAL).GetStream ()
 #define LOG_SYSERR swift::Logger (__FILE__, __LINE__, false).GetStream ()
 #define LOG_SYSFATAL swift::Logger (__FILE__, __LINE__, true).GetStream ()
+
+// CHECK_NOTNULL get from glog/logging.h
+
+// Check that the input is non NULL.  This very useful in constructor
+// initializer lists.
+#define CHECK_NOTNULL(val) swift::CheckNotNull (__FILE__, __LINE__, "'" #val "' Must be non NULL", (val))
+
+// A small helper for CHECK_NOTNULL().
+template <typename T>
+T* CheckNotNull (const Logger::SourceFile& file, int line, const char *names, T* t) {
+    if (t == NULL) {
+        Logger (file, line, Logger::LS_FATAL).GetStream () << names;
+    }
+    return t;
+}
 
 } // namespace swift
 

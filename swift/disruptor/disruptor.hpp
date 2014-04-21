@@ -377,7 +377,6 @@ namespace disruptor {
         /** @param size - the size of the ringbuffer, required to do proper wrap detection */
         WriteCursor (int64_t size)
             : size_ (size)
-            , size_m1_ (size - 1)
         {
             begin_ = 0;
             end_ = size_;
@@ -391,7 +390,6 @@ namespace disruptor {
         WriteCursor (const char* name, int64_t size)
             : EventCursor (name)
             , size_ (size)
-            , size_m1_ (size - 1)
         {
             begin_ = 0;
             end_ = size_;
@@ -433,7 +431,6 @@ namespace disruptor {
 
     private:
         const int64_t size_;
-        const int64_t size_m1_;
     };
     typedef std::shared_ptr<WriteCursor> WriteCursorPtr;
 

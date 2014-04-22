@@ -34,7 +34,7 @@ public:
     // Returns a C-style character string describing the general cause of the current error. 
     virtual const char* what () const throw ();
 
-    inline const std::string& Messge () const throw ();
+    inline const std::string& Messge () const throw ()
     {
         return msg_;
     }

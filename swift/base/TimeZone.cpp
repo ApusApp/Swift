@@ -343,7 +343,7 @@ time_t TimeZone::FromUtcTime (const struct tm& t)
 {
     return FromUtcTime (t.tm_year + 1900,
                         t.tm_mon + 1,
-                        t.tm_yday,
+                        t.tm_mday,
                         t.tm_hour,
                         t.tm_min,
                         t.tm_sec);

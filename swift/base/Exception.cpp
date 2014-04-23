@@ -34,7 +34,7 @@ const char kSymbolCharacters[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRST
 // "out/Debug/base_unittests(_ZN10StackTraceC1Ev+0x20) [0x817778c]"
 // =>
 // "out/Debug/base_unittests(StackTrace::StackTrace()+0x20) [0x817778c]"
-inline void DemangleSymbol (std::string* symbol) 
+void DemangleSymbol (std::string* symbol) 
 {
     std::string::size_type search_from = 0;
     while (search_from < symbol->size ()) {
@@ -114,8 +114,8 @@ const char* Exception::what () const throw ()
 // private
 void Exception::ProcessStackTrace ()
 {
-    void* buf[512];
-    int size = ::backtrace (buf, 512);
+    void* buf[100];
+    int size = ::backtrace (buf, 100);
     std::unique_ptr<char*, void(*)(void*)> stacks {
         ::backtrace_symbols (buf, size),
         std::free

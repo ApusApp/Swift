@@ -172,7 +172,6 @@ LogStream& LogStream::operator<< (float v)
 }
 
 // public
-// FIXME: replace this with Grisu3 by Florian Loitsch.
 LogStream& LogStream::operator<< (double v)
 {
     if (buffer_.AvailSize () >= kMaxNumericSize) {

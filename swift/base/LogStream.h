@@ -139,9 +139,7 @@ public:
         if (str) {
             buffer_.Append (str, strlen (str));
         }
-        else {
-            buffer_.Append ("(null)", 6);
-        }
+
         return *this;
     }
 
@@ -157,8 +155,10 @@ public:
     }
 
     void Append (const char* data, int len) 
-    { 
-        buffer_.Append (data, len); 
+    {
+        if (data) {
+            buffer_.Append (data, len); 
+        }
     }
 
     const BufferType& Buffer () const 

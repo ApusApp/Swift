@@ -39,7 +39,7 @@ public:
     std::string ToSecDotMicroString () const;
     std::string ToString () const;
 
-    std::string ToFormattedString () const;
+    std::string ToFormattedString (bool show_microseconds = true) const;
 
     bool Valid () const { return micro_seconds_since_epoch_ > 0; }
 

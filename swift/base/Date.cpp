@@ -14,6 +14,7 @@
 
 #include <stdio.h> // snprintf
 #include <time.h>
+#include <assert.h>
 
 #include "swift/base/Date.h"
 
@@ -59,6 +60,8 @@ const int Date::kJulianDayOf1970_01_01 = detail::CalculateJulianDayNumber (1970,
 // public
 Date::Date (int y, int m, int d) : julian_day_number_ (detail::CalculateJulianDayNumber (y, m, d))
 {
+    assert (m > 0 && m <= 12);
+    assert (d > 0 && d <= 31);
 }
 
 // public
@@ -70,7 +73,7 @@ Date::Date (const struct tm& t)
 {
 }
 
-// private
+// public
 struct Date::YearMonthDay Date::GetYearMonthDay () const
 {
     return detail::CalculateYearMonthDay (julian_day_number_);

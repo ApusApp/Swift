@@ -152,13 +152,15 @@ LogStream& LogStream::operator<< (const void* v)
     // uintptr_t: 
     // Integer type capable of holding a value converted from a void pointer and then be 
     // converted back to that type with a value that compares equal to the original pointer.
-    uintptr_t p = reinterpret_cast<uintptr_t>(v);
-    if (buffer_.AvailSize () >= kMaxNumericSize) {
-        char* buf = buffer_.Current ();
-        buf[0] = '0';
-        buf[1] = 'X';
-        size_t len = detail::ConvertHex (buf + 2, p);
-        buffer_.Add (len + 2);
+    if (v) {
+        uintptr_t p = reinterpret_cast<uintptr_t>(v);
+        if (buffer_.AvailSize () >= kMaxNumericSize) {
+            char* buf = buffer_.Current ();
+            buf[0] = '0';
+            buf[1] = 'x';
+            size_t len = detail::ConvertHex (buf + 2, p);
+            buffer_.Add (len + 2);
+        }
     }
 
     return *this;

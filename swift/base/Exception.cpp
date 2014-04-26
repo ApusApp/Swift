@@ -20,7 +20,7 @@
 #include "swift/base/Exception.h"
 
 namespace swift {
-namespace {
+namespace detail {
 
 // The prefix used for mangled symbols, per the Itanium C++ ABI:
 // http://www.codesourcery.com/cxx-abi/abi.html#mangling
@@ -73,7 +73,7 @@ void DemangleSymbol (std::string* symbol)
         }
     }
 }
-} // namespace
+} // namespace detail
 
 // public
 Exception::Exception (const char* msg) : msg_ (nullptr == msg ? "" : msg)
@@ -124,7 +124,7 @@ void Exception::ProcessStackTrace ()
     if (nullptr != stacks.get ()) {
         for (int i = 0; i < size; ++i) {
             std::string symbol (stacks.get ()[i]);
-            DemangleSymbol (&symbol);
+            detail::DemangleSymbol (&symbol);
             stack_.append (symbol);
             stack_.push_back ('\n');
         }

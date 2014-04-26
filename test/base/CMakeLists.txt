@@ -5,5 +5,5 @@ set (TARGET_NAME swift_base_test)
 
 aux_source_directory (. SRCS)
 add_executable (${TARGET_NAME} ${SRCS})
-add_definitions ("-std=c++0x -Wno-deprecated")
+add_definitions ("-std=c++0x -Wno-deprecated -D_GLIBCXX_USE_NANOSLEEP")
 target_link_libraries (${TARGET_NAME} swift_base gtest pthread)

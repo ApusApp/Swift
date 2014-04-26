@@ -13,7 +13,6 @@
 */
 
 #include <thread>
-#include <atomic>
 #include <assert.h>
 
 #include "swift/base/ThreadPool.h"

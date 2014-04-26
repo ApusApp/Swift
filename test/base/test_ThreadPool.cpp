@@ -61,7 +61,7 @@ TEST_F (test_ThreadPool, All)
     swift::ThreadPool pool (4);
     pool.Start ();
 
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < 1000; ++i) {
         pool.Schedule (TestT, 3);
         pool.Schedule (TestAdd, 3, 5);
         pool.Schedule (TestSub, 3, 5, 7);
@@ -69,6 +69,7 @@ TEST_F (test_ThreadPool, All)
         pool.Schedule (TestDivision, 3, 5, 7, 9, 11);
     }
 
+    ASSERT_TRUE (pool.TasksRemaining () > 0);
     swift::ThreadPool::Task func;
     {
         func = std::move ([]() { TestAdd (100, 100); });
@@ -80,4 +81,6 @@ TEST_F (test_ThreadPool, All)
     func_1 ();
     pool.Schedule (std::move (func_1));
     ASSERT_TRUE (func_1 == nullptr);
+
+    pool.Join ();
 }

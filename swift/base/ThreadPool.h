@@ -17,6 +17,7 @@
 
 #include <mutex>
 #include <list>
+#include <atomic>
 #include <functional>
 #include <condition_variable>
 
@@ -82,7 +83,7 @@ public:
         Schedule (std::move (std::bind (f, a, b, c, d, e)));
     }
 
-    int TasksRemaining () 
+    int TasksRemaining () const
     { 
         return tasks_remaining_; 
     }
@@ -91,10 +92,10 @@ private:
     std::mutex mutex_;
     std::condition_variable condition_;
 
-    std::list<Worker*> free_workers_; //used as LIFO stack (always front)
-    std::list<Task> tasks_;           //used as FIFO queue (push_back, pop_front)
-    int tasks_remaining_;             // in queue + currently processing
-    int threads_number_;              // only used for sanity checking. could be removed in the future.
+    std::list<Worker*> free_workers_;   //used as LIFO stack (always front)
+    std::list<Task> tasks_;             //used as FIFO queue (push_back, pop_front)
+    std::atomic<int> tasks_remaining_;  // in queue + currently processing
+    int threads_number_;                // only used for sanity checking. could be removed in the future.
 
     // should only be called by a worker from the worker's thread
     void TaskDone (Worker* worker);

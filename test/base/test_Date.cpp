@@ -41,21 +41,23 @@ TEST_F (test_Date, All)
     ASSERT_TRUE (25 == date.Day ());
     // Friday == 5
     ASSERT_TRUE (5 == date.WeekDay ());
+    ASSERT_TRUE (date.ToString () == "2014-04-25");
 
     struct tm stm;
     time_t tt = time (nullptr);
     ::gmtime_r (&tt, &stm);
     dt = swift::Date (stm);
+    dt = swift::Date (2014, 5, 26);
     ASSERT_TRUE (dt.Year () == date.Year ());
-    ASSERT_TRUE (dt.Month () == date.Month ());
-    ASSERT_TRUE (dt.Day () == date.Day ());
-    ASSERT_TRUE (dt == date);
+    ASSERT_TRUE (dt.Month () > date.Month ());
+    ASSERT_TRUE (dt.Day () > date.Day ());
+    ASSERT_TRUE (dt != date);
     ASSERT_TRUE (swift::Date (2014, 4, 24) < date);
     swift::Date::YearMonthDay ymd_tmp = dt.GetYearMonthDay ();
     ASSERT_TRUE (ymd_tmp.year == ymd.year);
-    ASSERT_TRUE (ymd_tmp.month == ymd.month);
-    ASSERT_TRUE (ymd_tmp.day == ymd.day);
-    ASSERT_TRUE (date.ToString () == "2014-04-25");
+    ASSERT_TRUE (ymd_tmp.month != ymd.month);
+    ASSERT_TRUE (ymd_tmp.day != ymd.day);
+    
 
     swift::Date dtt (date.GetJulianDayNumber ());
     ASSERT_TRUE (dtt == date);

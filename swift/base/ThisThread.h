@@ -37,6 +37,10 @@ namespace ThisThread {
 
     inline const char* TidToString ()
     {
+        if (__builtin_expect (0 == t_cached_tid, 0)) {
+            CacheTid ();
+        }
+
         return t_tid_string;
     }
 

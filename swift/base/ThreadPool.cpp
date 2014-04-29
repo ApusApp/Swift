@@ -216,14 +216,14 @@ private:
                 t ();
             }
             catch (Exception& ex) {
-                LOG_INFO << "Unhandled Exception: " << ex.what () << "\n";
-                LOG_INFO << "BackStack: " << ex.GetStackTrace () << "\n";
+                LOG_ERROR << "Unhandled Exception: " << ex.what () << "\n";
+                LOG_ERROR << "BackStack: " << ex.GetStackTrace () << "\n";
             }
             catch (std::exception& ex) {
-                LOG_INFO << "Unhandled std::exception: " << ex.what () << "\n";
+                LOG_ERROR << "Unhandled std::exception: " << ex.what () << "\n";
             }
             catch (...) {
-                LOG_INFO << "Unhandled non-exception in worker thread\n";
+                LOG_ERROR << "Unhandled non-exception in worker thread\n";
             }
 
             is_done_ = true;

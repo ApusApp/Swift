@@ -112,6 +112,11 @@ inline bool operator== (const Date& lhs, const Date& rhs)
     return lhs.GetJulianDayNumber () == rhs.GetJulianDayNumber ();
 }
 
+inline bool operator!= (const Date& lhs, const Date& rhs)
+{
+    return !(lhs.GetJulianDayNumber () == rhs.GetJulianDayNumber ());
+}
+
 } // end of namespace swift
 
 #endif // __SWIFT_BASE_DATE_H__

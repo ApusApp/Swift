@@ -1,5 +1,5 @@
 #include <iostream>
-#include <swift/base/LinkedHashMap.h>
+#include <swift/base/linkedhashmap.h>
 
 #include <gtest/gtest.h>
 

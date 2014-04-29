@@ -20,7 +20,7 @@
 #include <sys/syscall.h>
 #include <linux/unistd.h>
 
-#include "swift/base/ThisThread.h"
+#include "swift/base/thisthread.h"
 
 namespace swift {
 namespace detail {
@@ -30,7 +30,7 @@ namespace detail {
     }
 }
 
-namespace ThisThread {
+namespace thisthread {
     __thread int t_cached_tid = 0;
     __thread char t_tid_string[32];
     __thread const char* t_thread_name = "unknown";
@@ -49,6 +49,6 @@ namespace ThisThread {
         return GetTid () == ::getpid ();
     }
 
-} // namespace ThisThread
+} // namespace thisthread
 
 } // namespace swift

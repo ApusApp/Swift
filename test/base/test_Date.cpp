@@ -2,7 +2,7 @@
 #include <time.h>
 #include <gtest/gtest.h>
 #include <iostream>
-#include <swift/base/Date.h>
+#include <swift/base/date.h>
 
 class test_Date : public testing::Test
 {

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <swift/base/Timestamp.h>
+#include <swift/base/timestamp.h>
 
 class test_Timestamp : public testing::Test
 {

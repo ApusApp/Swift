@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include <gtest/gtest.h>
 
-#include <swift/base/LogStream.h>
+#include <swift/base/logstream.h>
 
 class test_LogStream : public testing::Test
 {

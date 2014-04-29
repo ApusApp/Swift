@@ -18,7 +18,7 @@
 #include <stdint.h>
 
 namespace swift {
-namespace ThisThread {
+namespace thisthread {
     // internal
     extern __thread int t_cached_tid;
     extern __thread char t_tid_string[32];
@@ -49,6 +49,6 @@ namespace ThisThread {
         return t_thread_name;
     }
 
-} // namespace ThisThread
+} // namespace thisthread
 } // namespace swift
 #endif // __SWIFT_BASE_THIS_THREAD_H__

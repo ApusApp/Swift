@@ -17,10 +17,9 @@
 #include <string.h>
 #include <sstream>
 
-#include "swift/base/Logging.h"
-#include "swift/base/TimeZone.h"
-#include "swift/base/Timestamp.h"
-#include "swift/base/ThisThread.h"
+#include "swift/base/logging.h"
+#include "swift/base/timezone.h"
+#include "swift/base/thisthread.h"
 
 namespace swift {
 
@@ -112,8 +111,8 @@ Logger::LoggerImpl::LoggerImpl (Logger::LogSeverity log_severity,
     , file_name_ (file)
 {
     FormatTime ();
-    ThisThread::GetTid ();
-    stream_ << detail::T (ThisThread::TidToString (), 6);
+    thisthread::GetTid ();
+    stream_ << detail::T (thisthread::TidToString (), 6);
     stream_ << detail::T (detail::log_severity_name[log_severity], 6);
     if (0 != old_errno) {
         stream_ << detail::StrError_R (old_errno) << " (errno=" << old_errno << ") ";

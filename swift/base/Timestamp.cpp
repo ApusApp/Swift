@@ -16,7 +16,7 @@
 #include <sys/time.h>
 #include <stdio.h>
 
-#include "swift/base/Timestamp.h"
+#include "swift/base/timestamp.h"
 
 namespace swift {
 

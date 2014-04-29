@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <iostream>
-#include <swift/base/ProcessInformation.h>
+#include <swift/base/processinformation.h>
 
 class test_ProcessInformation : public testing::Test
 {

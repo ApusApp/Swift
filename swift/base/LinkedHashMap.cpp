@@ -14,7 +14,7 @@
 
 #include <sys/mman.h>
 
-#include "swift/base/LinkedHashMap.h"
+#include "swift/base/linkedhashmap.h"
 
 namespace swift {
 namespace detail {

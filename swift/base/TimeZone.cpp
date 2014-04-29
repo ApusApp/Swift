@@ -22,8 +22,8 @@
 #include <strings.h>
 #include <assert.h>
 
-#include "swift/base/TimeZone.h"
-#include "swift/base/Date.h"
+#include "swift/base/timezone.h"
+#include "swift/base/date.h"
 #include "swift/base/noncopyable.hpp"
 
 namespace swift {

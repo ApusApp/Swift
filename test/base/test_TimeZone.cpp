@@ -1,4 +1,4 @@
-#include <swift/base/TimeZone.h>
+#include <swift/base/timezone.h>
 
 #include <gtest/gtest.h>
 

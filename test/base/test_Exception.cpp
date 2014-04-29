@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <gtest/gtest.h>
-#include <swift/base/Exception.h>
+#include <swift/base/exception.h>
 
 class test_Exception : public testing::Test
 {

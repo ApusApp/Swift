@@ -20,7 +20,7 @@
 // compile and run any of them on any platform, but your performance with the
 // non-native version will be less than optimal.
 
-#include <swift/base/MurmurHash3.h>
+#include <swift/base/murmurhash3.h>
 
 namespace swift {
 

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <gtest/gtest.h>
 
-#include <swift/base/ThreadPool.h>
+#include <swift/base/threadpool.h>
 
 class test_ThreadPool : public testing::Test
 {

@@ -16,7 +16,7 @@
 #include <time.h>
 #include <assert.h>
 
-#include "swift/base/Date.h"
+#include "swift/base/date.h"
 
 namespace swift {
 namespace detail {

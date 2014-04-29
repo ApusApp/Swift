@@ -17,8 +17,8 @@
 
 #include <functional>
 
-#include "swift/base/LogStream.h"
-#include "swift/base/Timestamp.h"
+#include "swift/base/logstream.h"
+#include "swift/base/timestamp.h"
 #include "swift/base/noncopyable.hpp"
 
 namespace swift {

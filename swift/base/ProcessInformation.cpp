@@ -24,8 +24,8 @@
 
 #include <vector>
 
-#include "swift/base/Logging.h"
-#include "swift/base/ProcessInformation.h"
+#include "swift/base/logging.h"
+#include "swift/base/processinformation.h"
 
 namespace swift {
 namespace detail {

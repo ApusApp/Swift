@@ -17,7 +17,7 @@
 #include <string.h>
 #include <memory>
 
-#include "swift/base/Exception.h"
+#include "swift/base/exception.h"
 
 namespace swift {
 namespace detail {

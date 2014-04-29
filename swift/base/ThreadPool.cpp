@@ -15,9 +15,9 @@
 #include <thread>
 #include <assert.h>
 
-#include "swift/base/ThreadPool.h"
-#include "swift/base/Exception.h"
-#include "swift/base/Logging.h"
+#include "swift/base/threadpool.h"
+#include "swift/base/exception.h"
+#include "swift/base/logging.h"
 
 namespace swift {
 namespace detail {

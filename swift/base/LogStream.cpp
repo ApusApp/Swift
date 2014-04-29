@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <type_traits>	// for static_assert and is_arithmetic
 
-#include "swift/base/LogStream.h"
+#include "swift/base/logstream.h"
 
 namespace swift {
 namespace detail {

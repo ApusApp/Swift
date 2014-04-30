@@ -111,7 +111,6 @@ Logger::LoggerImpl::LoggerImpl (Logger::LogSeverity log_severity,
     , file_name_ (file)
 {
     FormatTime ();
-    thisthread::GetTid ();
     stream_ << detail::T (thisthread::TidToString (), 6);
     stream_ << detail::T (detail::log_severity_name[log_severity], 6);
     if (0 != old_errno) {
@@ -148,6 +147,11 @@ void Logger::LoggerImpl::FormatTime ()
 
     if (g_log_time_zone.Valid ()) {
         Format ft (".%06d ", microseconds);
+        assert (8 == ft.Length ());
+        stream_ << detail::T (t_time, 17) << detail::T (ft.Data (), 8);
+    }
+    else {
+        Format ft (".%06dZ ", microseconds);
         assert (9 == ft.Length ());
         stream_ << detail::T (t_time, 17) << detail::T (ft.Data (), 9);
     }

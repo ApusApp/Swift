@@ -149,6 +149,8 @@ public:
         return kSystemInfo->page_size_;
     }
 
+    static std::string GetHostName ();
+
     static bool BlockCheckSupported ();
 
     static bool BlockInMemory (const void* start);

@@ -44,7 +44,7 @@ public:
         FILE* pfd = fopen (file_name, "r");
         if (nullptr == pfd) {
             LOG_ERROR << "Could not open [" << file_name << "], pid = " 
-                      << static_cast<uint32_t>(pid) << "\n";
+                      << static_cast<uint32_t>(pid);
 
             // TO DO
             // throw a Exception
@@ -88,7 +88,7 @@ public:
                             );
             if (0 == found) {
                 LOG_ERROR << "System error: reading proc information, pid = " 
-                          << static_cast<uint32_t>(pid) << "\n";
+                          << static_cast<uint32_t>(pid);
             }
 
             fclose (pfd);
@@ -463,7 +463,7 @@ bool ProcessInformation::BlockInMemory (const void* start)
     if (mincore (const_cast<void*>(AlignToStartOfPage (start)), 
                  GetPageSize (), 
                  &x)) {
-        LOG_ERROR << "mincore failed: " << strerror (errno) << "\n";
+        LOG_ERROR << "mincore failed: " << strerror (errno);
         return 1;
     }
 
@@ -488,6 +488,21 @@ void ProcessInformation::InitializeSystemInformation ()
     kSystemInformationLock->unlock ();
 }
 
+std::string ProcessInformation::GetHostName ()
+{
+    // HOST_NAME_MAX 64
+    // _POSIX_HOST_NAME_MAX 255
+    char buf[256] = {'\0'};
+    if (0 == ::gethostname (buf, sizeof(buf))) {
+        buf[sizeof(buf) - 1] = '\0';
+        return buf;
+    }
+    else
+    {
+        return "UnknownHost";
+    }
+}
+
 // private
 void ProcessInformation::SystemInformation::CollectSystemInformation ()
 {
@@ -505,7 +520,7 @@ void ProcessInformation::SystemInformation::CollectSystemInformation ()
 
     if (-1 == uname (&uname_data)) {
         LOG_ERROR << "Unable to collect detailed system information: "
-                  << strerror (errno) << "\n";
+                  << strerror (errno);
     }
 
     os_type_ = "Linux";

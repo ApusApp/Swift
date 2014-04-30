@@ -53,7 +53,7 @@ TEST_F (test_LogFile, All)
     }));
 
     swift::Logger::SetLogSeverity (swift::Logger::LS_TRACE);
-    swift::TimeZone tz ("/usr/share/zoneinfo/PRC");
+    swift::TimeZone tz ("/usr/share/zoneinfo/Asia/Shanghai");
     swift::Logger::SetTimeZone (tz);
 
     std::string line = "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ ";

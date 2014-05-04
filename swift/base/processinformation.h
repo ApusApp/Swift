@@ -34,6 +34,8 @@ public:
     // @return mbytes
     int GetResidentSize ();
 
+    std::string GetExecutableName () const;
+
     inline uint32_t GetPidAsUint32 () const
     {
         return static_cast<uint32_t>(pid_);

@@ -418,6 +418,19 @@ int ProcessInformation::GetResidentSize ()
     return static_cast<int>(lp.GetResidentSize () / (1024.0 * 1024));
 }
 
+std::string ProcessInformation::GetExecutableName () const
+{
+    char name[1024] = {'\0'};
+    char link[1024] = {'\0'};
+    snprintf (link, sizeof(link), "/proc/%d/exe", pid_);
+    ssize_t read = ::readlink (link, name, sizeof(name));
+    if (-1 != read) {
+        name[read] = '\0';
+    } 
+
+    return name;
+}
+
 // static private
 bool ProcessInformation::CheckNumaEnabled ()
 {

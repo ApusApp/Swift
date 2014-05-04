@@ -45,4 +45,5 @@ TEST_F (test_ProcessInformation, All)
     std::cout << "VersionSignature:\t" << pf.GetVersionSignature () << std::endl;
     std::cout << "ParentProcessId:\t" << pf.GetParentProcessId () << std::endl;
     std::cout << "PageSize:\t" << pf.GetPageSize () << std::endl;
+    std::cout << "Program Name: " << pf.GetExecutableName () << std::endl;
 }

@@ -11,7 +11,22 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef __SWIFT_BASE_BLOCKING_QUEUE_HPP__
-#define __SWIFT_BASE_BLOCKING_QUEUE_HPP__
 
-#endif // __SWIFT_BASE_BLOCKING_QUEUE_HPP__
+// These definition are faster than "if" branch
+// return true of false
+
+#ifndef __SWIFT_BASE_LIKELY_H__
+#define __SWIFT_BASE_LIKELY_H__
+
+#undef LIKELY
+#undef UNLIKELY
+
+#if defined(__GNC__) && __GNC__ >= 4
+#define LIKELY(x)   (__builtin_expect((x), 1))
+#define UNLIKELY(x) (__builtin_expect((x), 0))
+#else
+#define LIKELY(x)   (x)
+#define UNLIKELY(x) (x)
+#endif
+
+#endif // __SWIFT_BASE_LIKELY_H__

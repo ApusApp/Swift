@@ -17,6 +17,8 @@
 
 #include <stdint.h>
 
+#include "swift/base/likely.h"
+
 namespace swift {
 namespace thisthread {
     // internal
@@ -28,7 +30,7 @@ namespace thisthread {
     bool IsMainThread ();
     inline int GetTid ()
     {
-        if (__builtin_expect (0 == t_cached_tid, 0)) {
+        if (UNLIKELY (0 == t_cached_tid)) {
             CacheTid ();
         }
 
@@ -37,7 +39,7 @@ namespace thisthread {
 
     inline const char* TidToString ()
     {
-        if (__builtin_expect (0 == t_cached_tid, 0)) {
+        if (UNLIKELY (0 == t_cached_tid)) {
             CacheTid ();
         }
 

@@ -1,7 +1,9 @@
 #include <iostream>
 #include <thread>
 #include <future>
+#include <memory>
 #include <string>
+#include <algorithm>
 #include <gtest/gtest.h>
 #include <swift/base/blockingqueue.h>
 
@@ -51,33 +53,33 @@ TEST_F (test_BlockingQueue, Integer)
 class Data
 {
 public:
-    Data (const char* data) : length_ (0), data_ (nullptr)
+    Data (const char* data) : length_ (0)
     {
         if (nullptr != data) {
             length_ = strlen (data);
-            data_ = new char[length_ + 1];
-            memcpy (data_, data, length_);
-            data_[length_] = '\0';
+            data_.reset (length_ > 0 ? new char[length_ + 1] : nullptr);
+            if (data_) {
+                std::copy (data, data + length_, data_.get ());
+                data_.get ()[length_] = '\0';
+            }
         }
     }
 
     ~Data ()
     {
-        if (nullptr != data_) {
-            delete [] data_;
-            data_ = nullptr;
-            length_ = 0;
-        }
+        data_.reset ();
+        length_ = 0;
     }
 
     Data (const Data& rhs)
     {
         if (this != &rhs) {
             length_ = rhs.length_;
-            if (length_) {
-                data_ = new char[length_ + 1];
-                memcpy (data_, rhs.data_, length_);
-                data_[length_] = '\0';
+            data_.reset (length_ > 0 ? new char[length_ + 1] : nullptr);
+            if (data_) {
+                const char* source = rhs.data_.get ();
+                std::copy (source, source + length_, data_.get ());
+                data_.get ()[length_] = '\0';
             }
         }
     }
@@ -87,41 +89,38 @@ public:
         if (this != &rhs) {
             length_ = rhs.length_;
             if (length_) {
-                data_ = rhs.data_;
+                data_ = std::move (rhs.data_);
                 rhs.data_ = nullptr;
                 rhs.length_ = 0;
             }
         }
     }
 
-    const Data& operator= (const Data& rhs)
+    Data& operator= (const Data& rhs)
     {
         if (this != &rhs) {
-            if (data_) {
-                delete [] data_;
+            if (length_ != rhs.length_) {
+                length_ = rhs.length_;
+                data_.reset (length_ > 0 ? new char[length_ + 1] : nullptr);
             }
-            length_ = rhs.length_;
-            if (length_) {
-                data_ = new char[length_ + 1];
-                memcpy (data_, rhs.data_, length_);
-                data_[length_] = '\0';
+
+            if (data_) {
+                const char* source = rhs.data_.get ();
+                std::copy (source, source + length_, data_.get ());
+                data_.get ()[length_] = '\0';
             }
         }
+
         return *this;
     }
 
-    const Data& operator= (Data&& rhs)
+    Data& operator= (Data&& rhs)
     {
         if (this != &rhs) {
-            if (data_) {
-                delete [] data_;
-            }
             length_ = rhs.length_;
-            if (length_ && data_ != nullptr) {
-                data_ = rhs.data_;
-                rhs.data_ = nullptr;
-                rhs.length_ = 0;
-            }
+            data_ = std::move (rhs.data_);
+            rhs.data_ = nullptr;
+            rhs.length_ = 0;
         }
 
         return *this;
@@ -133,12 +132,12 @@ public:
             return false;
         }
 
-        return 0 == memcmp (data_, rhs.data_, length_);
+        return 0 == memcmp (data_.get (), rhs.data_.get (), length_);
     }
 
     const char* GetData () const
     {
-        return data_;
+        return data_.get ();
     }
 
     size_t GetSize () const
@@ -148,7 +147,7 @@ public:
 
 private:
     int length_;
-    char *data_;
+    std::unique_ptr<char []> data_;
 };
 
 TEST_F (test_BlockingQueue, Structure)

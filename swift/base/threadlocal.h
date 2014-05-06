@@ -16,6 +16,7 @@
 #define __SWIFT_BASE_THREAD_LOCAL_H__
 
 #include <pthread.h>
+#include <assert.h>
 
 #include "swift/base/noncopyable.hpp"
 
@@ -27,35 +28,73 @@ class ThreadLocal : swift::noncopyable
 public:
     ThreadLocal () : key_ (0)
     {
-        pthread_key_create (&key, OnThreadExit);
+        int err = pthread_key_create (&key_, OnThreadExit);
+        assert (err == 0); (void) err;
     }
 
     ~ThreadLocal ()
     {
-        pthread_key_delete (key_);
+        int err = pthread_key_delete (key_);
+        assert (err == 0); (void) err;
     }
 
-    T* get () const
+    T* Get () const
     {
-        return static_cast<T*>(pthread_getspecific (key_));
+        T* ptr = static_cast<T*>(pthread_getspecific (key_));
+        if (nullptr != ptr) {
+            return ptr;
+        }
+
+        return MakeTls ();
     }
 
-    void reset (T* t)
-    {
-        delete get ();
-        pthread_setspecific (key_, t);
+    T* operator-> () const {
+        return Get ();
     }
+
+    T& operator* () const {
+        return *Get ();
+    }
+
+    void Reset (T* t = nullptr)
+    {
+        T* ptr = Get ();
+        if (t != ptr) {
+            if (nullptr != ptr) {
+                delete ptr;
+            }
+            
+            int err = pthread_setspecific (key_, t);
+            assert (err == 0); (void) err;
+        }
+    }
+
+    // movable
+    ThreadLocal (ThreadLocal&&) = default;
+    ThreadLocal& operator= (ThreadLocal&&) = default;
 
 private:
     static void OnThreadExit (void *obj)
     {
+        T* ptr = static_cast<T*>(obj);
         typedef char T_must_be_complete_type[sizeof(T) == 0 ? -1 : 1];
         T_must_be_complete_type dummy; (void) dummy;
-        delete static_cast<T*>(obj);
+        if (nullptr != ptr) {
+            delete ptr;
+        }
+    }
+
+    // Tls: Thread Local Storage
+    T* MakeTls () const
+    {
+        T* ptr = new T ();
+        int err = pthread_setspecific (key_, ptr);
+        assert (err == 0); (void) err;
+        return ptr;
     }
 
 private:
-    pthread_key_t key_;
+    mutable pthread_key_t key_;
 };
 
 } // namespace swift

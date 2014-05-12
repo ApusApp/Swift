@@ -167,6 +167,13 @@ TEST_F (test_StringPiece, All)
         ASSERT_EQ (sp.find_last_not_of ("1"), sp.size () - 2);
         ASSERT_EQ (sp.find_last_not_of (swift::StringPiece ()), sp.size () - 1);
         ASSERT_EQ (sp.find_last_not_of ("321"), s.find_last_not_of ("321"));
+        std::cout << sp << std::endl;
+        ASSERT_TRUE (sp == sp);
+        ASSERT_FALSE (sp != sp);
+        ASSERT_FALSE (sp > sp);
+        ASSERT_TRUE (sp >= sp);
+        ASSERT_FALSE (sp < sp);
+        ASSERT_TRUE (sp <= sp);
     }
     
 }

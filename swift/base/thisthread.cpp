@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
+#include <pthread.h>
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <linux/unistd.h>
@@ -24,16 +25,43 @@
 
 namespace swift {
 namespace detail {
-    inline pid_t GetTid ()
-    {
-        return static_cast<pid_t>(::syscall (SYS_gettid));
-    }
+
+inline pid_t GetTid ()
+{
+    return static_cast<pid_t>(::syscall (SYS_gettid));
 }
+
+void AfterFork ()
+{
+    swift::thisthread::t_cached_tid = 0;
+    swift::thisthread::t_thread_name = "__swift_main_thread__";
+    swift::thisthread::GetTid ();
+}
+
+class ThreadNameInitializer
+{
+public:
+    ThreadNameInitializer ()
+    {
+        swift::thisthread::t_thread_name = "__swift_main_thread__";
+        swift::thisthread::GetTid ();
+        pthread_atfork (nullptr, nullptr, &detail::AfterFork);
+    }
+
+    ~ThreadNameInitializer ()
+    {
+
+    }
+};
+
+} // namespace detail
+
+detail::ThreadNameInitializer init;
 
 namespace thisthread {
     __thread int t_cached_tid = 0;
     __thread char t_tid_string[32];
-    __thread const char* t_thread_name = "unknown";
+    __thread const char* t_thread_name = "__swift_thread__";
 
     void CacheTid ()
     {

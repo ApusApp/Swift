@@ -149,7 +149,9 @@ public:
     {
         int count = 0;
         while (!LIKELY (try_lock ())) {
-            if (++count > 1000) sched_yield ();
+            if (++count > 1000) {
+                sched_yield ();
+            }
         }
     }
 
@@ -165,7 +167,9 @@ public:
     {
         int count = 0;
         while (!LIKELY (try_lock_shared ())) {
-            if (++count > 1000) sched_yield ();
+            if (++count > 1000) {
+                sched_yield ();
+            }
         }
     }
 
@@ -186,7 +190,9 @@ public:
     {
         int count = 0;
         while (!try_lock_upgrade ()) {
-            if (++count > 1000) sched_yield ();
+            if (++count > 1000) {
+                sched_yield ();
+            }
         }
     }
 
@@ -200,7 +206,9 @@ public:
     {
         int64_t count = 0;
         while (!try_unlock_upgrade_and_lock ()) {
-            if (++count > 1000) sched_yield ();
+            if (++count > 1000) {
+                sched_yield ();
+            }
         }
     }
 
@@ -251,7 +259,7 @@ public:
     {
         int32_t expect = UPGRADED;
         return bits_.compare_exchange_strong (expect, WRITER,
-            std::memory_order_acq_rel);
+                                              std::memory_order_acq_rel);
     }
 
     // try to acquire an upgradable lock.
@@ -306,8 +314,7 @@ public:
 
         ReadHolder& operator=(ReadHolder&& other) 
         {
-            using std::swap;
-            swap (lock_, other.lock_);
+            std::swap (lock_, other.lock_);
             return *this;
         }
 
@@ -362,8 +369,7 @@ public:
 
         UpgradedHolder& operator =(UpgradedHolder&& other) 
         {
-            using std::swap;
-            swap (lock_, other.lock_);
+            std::swap (lock_, other.lock_);
             return *this;
         }
 
@@ -382,8 +388,7 @@ public:
 
         void swap (UpgradedHolder* other) 
         {
-            using std::swap;
-            swap (lock_, other->lock_);
+            std::swap (lock_, other->lock_);
         }
 
     private:
@@ -419,8 +424,7 @@ public:
 
         WriteHolder& operator =(WriteHolder&& other) 
         {
-            using std::swap;
-            swap (lock_, other.lock_);
+            std::swap (lock_, other.lock_);
             return *this;
         }
 
@@ -439,8 +443,7 @@ public:
 
         void swap (WriteHolder* other) 
         {
-            using std::swap;
-            swap (lock_, other->lock_);
+            std::swap (lock_, other->lock_);
         }
 
     private:
@@ -450,10 +453,10 @@ public:
     };
 
     // Synchronized<> adaptors
-    friend void acquireRead (RWSpinLock& l) { return l.lock_shared (); }
-    friend void acquireReadWrite (RWSpinLock& l) { return l.lock (); }
-    friend void releaseRead (RWSpinLock& l) { return l.unlock_shared (); }
-    friend void releaseReadWrite (RWSpinLock& l) { return l.unlock (); }
+    friend void AcquireRead (RWSpinLock& l) { return l.lock_shared (); }
+    friend void AcquireReadWrite (RWSpinLock& l) { return l.lock (); }
+    friend void ReleaseRead (RWSpinLock& l) { return l.unlock_shared (); }
+    friend void ReleaseReadWrite (RWSpinLock& l) { return l.unlock (); }
 
 private:
     std::atomic<int32_t> bits_;
@@ -479,24 +482,24 @@ namespace detail {
         typedef uint16_t QuarterInt;
 
 #ifdef __SSE2__
-        static __m128i make128 (const uint16_t v[4]) 
+        static __m128i Make128 (const uint16_t v[4]) 
         {
             return _mm_set_epi16 (0, 0, 0, 0, v[3], v[2], v[1], v[0]);
         }
 
-        static inline __m128i fromInteger (uint64_t from) 
+        static inline __m128i FromInteger (uint64_t from) 
         {
             return _mm_cvtsi64_si128 (from);
         }
 
-        static inline uint64_t toInteger (__m128i in) 
+        static inline uint64_t ToInteger (__m128i in) 
         {
             return _mm_cvtsi128_si64 (in);
         }
 
-        static inline uint64_t addParallel (__m128i in, __m128i kDelta) 
+        static inline uint64_t AddParallel (__m128i in, __m128i kDelta) 
         {
-            return toInteger (_mm_add_epi16 (in, kDelta));
+            return ToInteger (_mm_add_epi16 (in, kDelta));
         }
 #endif
     };
@@ -509,25 +512,25 @@ namespace detail {
         typedef uint8_t QuarterInt;
 
 #ifdef __SSE2__
-        static __m128i make128 (const uint8_t v[4]) 
+        static __m128i Make128 (const uint8_t v[4]) 
         {
             return _mm_set_epi8 (0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, v[3], v[2], v[1], v[0]);
         }
 
-        static inline __m128i fromInteger (uint32_t from) 
+        static inline __m128i FromInteger (uint32_t from) 
         {
             return _mm_cvtsi32_si128 (from);
         }
 
-        static inline uint32_t toInteger (__m128i in) 
+        static inline uint32_t ToInteger (__m128i in) 
         {
             return _mm_cvtsi128_si32 (in);
         }
 
-        static inline uint32_t addParallel (__m128i in, __m128i kDelta) 
+        static inline uint32_t AddParallel (__m128i in, __m128i kDelta) 
         {
-            return toInteger (_mm_add_epi8 (in, kDelta));
+            return ToInteger (_mm_add_epi8 (in, kDelta));
         }
 #endif
     };
@@ -580,10 +583,10 @@ public:
     void lock () 
     {
         if (kFavorWriter) {
-            writeLockAggressive ();
+            WriteLockAggressive ();
         }
         else {
-            writeLockNice ();
+            WriteLockNice ();
         }
     }
 
@@ -619,7 +622,7 @@ public:
     * the existing readers (arriving before the writer) finish their
     * turns.
     */
-    void writeLockAggressive () 
+    void WriteLockAggressive () 
     {
         // sched_yield() is needed here to avoid a pathology if the number
         // of threads attempting concurrent writes is >= the number of real
@@ -635,7 +638,7 @@ public:
     }
 
     // Call this when the writer should be nicer to the readers.
-    void writeLockNice () 
+    void WriteLockNice () 
     {
         // Here it doesn't cpu-relax the writer.
         //
@@ -665,9 +668,9 @@ public:
 #ifdef __SSE2__
         // SSE2 can reduce the lock and unlock overhead by 10%
         static const QuarterInt kDeltaBuf[4] = { 1, 1, 0, 0 };   // write/read/user
-        static const __m128i kDelta = IntTraitType::make128 (kDeltaBuf);
-        __m128i m = IntTraitType::fromInteger (old);
-        t.whole = IntTraitType::addParallel (m, kDelta);
+        static const __m128i kDelta = IntTraitType::Make128 (kDeltaBuf);
+        __m128i m = IntTraitType::FromInteger (old);
+        t.whole = IntTraitType::AddParallel (m, kDelta);
 #else
         ++t.read;
         ++t.write;
@@ -683,7 +686,9 @@ public:
         int count = 0;
         while (!LIKELY (try_lock_shared ())) {
             asm volatile("pause");
-            if (UNLIKELY ((++count & 1023) == 0)) sched_yield ();
+            if (UNLIKELY ((++count & 1023) == 0)) {
+                sched_yield ();
+            }
         }
     }
 
@@ -695,9 +700,9 @@ public:
 #ifdef  __SSE2__
         // SSE2 may reduce the total lock and unlock overhead by 10%
         static const QuarterInt kDeltaBuf[4] = { 0, 1, 1, 0 };   // write/read/user
-        static const __m128i kDelta = IntTraitType::make128 (kDeltaBuf);
-        __m128i m = IntTraitType::fromInteger (old.whole);
-        t.whole = IntTraitType::addParallel (m, kDelta);
+        static const __m128i kDelta = IntTraitType::Make128 (kDeltaBuf);
+        __m128i m = IntTraitType::FromInteger (old.whole);
+        t.whole = IntTraitType::AddParallel (m, kDelta);
 #else
         ++t.read;
         ++t.users;

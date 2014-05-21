@@ -28,7 +28,7 @@ class ThreadLocal : swift::noncopyable
 public:
     ThreadLocal () : key_ (0)
     {
-        int err = pthread_key_create (&key_, OnThreadExit);
+        int err = pthread_key_create (&key_, &ThreadLocal::OnThreadExit);
         assert (err == 0); (void) err;
     }
 

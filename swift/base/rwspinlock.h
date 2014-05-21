@@ -312,7 +312,7 @@ public:
             if (lock_) lock_->unlock_and_lock_shared ();
         }
 
-        ReadHolder& operator=(ReadHolder&& other) 
+        ReadHolder& operator= (ReadHolder&& other) 
         {
             std::swap (lock_, other.lock_);
             return *this;

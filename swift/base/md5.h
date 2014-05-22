@@ -25,6 +25,11 @@ struct MD5Digest
 {
     MD5Digest ()
     {
+        Init ();
+    }
+
+    inline void Init ()
+    {
         memset (digest, 0, sizeof(digest));
     }
 
@@ -59,13 +64,26 @@ public:
     void Update (const void* data, size_t length);
     void Update (const StringPiece& str);
     void Final ();
+    void Reset ();
+    bool Valid () const;
     std::string ToString () const;
-    
+    bool operator== (const MD5& rhs) const;
+
+    inline bool operator!= (const MD5& rhs) const
+    {
+        return (*this == rhs) ? false : true;
+    }
+
+    // movable
+    MD5 (MD5&&) = default;
+    MD5& operator= (MD5&&) = default;
+
 public:
     static void Md5Sum (const StringPiece& str, std::string& out);
     static void Md5Sum (const void* data, size_t length, std::string& out);
 
 private:
+    bool complete_;
     detail::MD5Digest digest_;
     detail::MD5Context context_;
 }; // MD5

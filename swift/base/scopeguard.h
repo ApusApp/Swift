@@ -124,7 +124,7 @@ private:
     FuncT function_;
 };
 
-// Internal use for the macro SCOPE_GUARD_VARIABLE_AUTO_DESTORY_ON_EXIT below
+// Internal use for the macro SCOPE_GUARD_VARIABLES_AUTO_RUNNING_ON_EXIT below
 enum class ScopeGuardOnExit {};
 
 template <typename FuncT>
@@ -148,13 +148,13 @@ typedef detail::ScopeGuardBase&& ScopeGuardType;
 
 } // namespace swift
 
-#ifndef SWIFT_ANONYMOUS_VARIABLE
-#define SWIFT_ANONYMOUS_VARIABLE_IMPL(s1, s2) s1##s2
-#define SWIFT_ANONYMOUS_VARIABLE(str) SWIFT_ANONYMOUS_VARIABLE_IMPL(str, __LINE__)
+#ifndef SWIFT_ANONYMOUS_VARIABLES
+#define SWIFT_ANONYMOUS_VARIABLES_IMPL(s1, s2) s1##s2
+#define SWIFT_ANONYMOUS_VARIABLES(str) SWIFT_ANONYMOUS_VARIABLES_IMPL(str, __LINE__)
 #endif
-#ifndef SCOPE_GUARD_VARIABLE_AUTO_DESTORY_ON_EXIT
-#define SCOPE_GUARD_VARIABLE_AUTO_DESTORY_ON_EXIT \
-    auto SWIFT_ANONYMOUS_VARIABLE(SCOPE_GUARD_EXIT_STATE) \
+#ifndef SCOPE_GUARD_VARIABLES_AUTO_RUNNING_ON_EXIT
+#define SCOPE_GUARD_VARIABLES_AUTO_RUNNING_ON_EXIT \
+    auto SWIFT_ANONYMOUS_VARIABLES(SCOPE_GUARD_EXIT_STATE) \
     = ::swift::detail::ScopeGuardOnExit () + [&]() noexcept
 
 #endif

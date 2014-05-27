@@ -209,7 +209,7 @@ bool ReadFile (const char *file_name,
                size_t num_bytes = std::numeric_limits<size_t>::max ())
 {
     static_assert(sizeof(out[0]) == 1,
-        "readFile: only containers with byte-sized elements accepted");
+        "ReadFile: only containers with byte-sized elements accepted");
     assert (file_name);
 
     const int fd = ::open (file_name, O_RDONLY);
@@ -218,7 +218,7 @@ bool ReadFile (const char *file_name,
     }
 
     size_t size = 0;
-    SCOPE_GUARD_VARIABLE_AUTO_DESTORY_ON_EXIT {
+    SCOPE_GUARD_VARIABLES_AUTO_RUNNING_ON_EXIT {
         assert (out.size () >= size);
         out.resize (size);
         Close (fd);

@@ -111,9 +111,7 @@ public:
     ~ScopeGuard ()
     {
         if (!dismissed_) {
-            if (function_) {
-                function_ ();
-            }
+            function_ ();
         }
     }
 

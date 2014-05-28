@@ -111,7 +111,7 @@ ssize_t WrapFileOpVFuncT (Func f,
         total_bytes += ret;
         Increase (ret, offset...);
         while (0 != ret && 0 != size) {
-            if (ret > iov->iov_len) {
+            if (ret >= iov->iov_len) {
                 ret -= iov->iov_len;
                 ++iov;
                 --size;

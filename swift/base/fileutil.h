@@ -188,7 +188,7 @@ ssize_t PReadvFull (int fd, iovec *iov, int length, off_t offset);
 // For example, Linux (even on a 64-bit platform) won't write more than 2GB in
 // one write() system call.
 //
-// Note that writevFull and pwritevFull require iov to be non-const, unlike
+// Note that WritevFull and PWritevFull require iov to be non-const, unlike
 // writev and pwritev. The contents of iov after these functions return is unspecified.
 ssize_t WriteFull (int fd, const void *buf, size_t length);
 ssize_t PWriteFull (int fd, const void *buf, size_t length, off_t offset);

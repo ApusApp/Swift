@@ -33,27 +33,27 @@ namespace swift {
  *
  * Usage example: Add a friend to memory if it is also added to the db.
  *
- * void User::AddFriend(User& newFriend) {
+ * void User::AddFriend (User& newFriend) {
  *   // add the friend to memory
  *   friends_.push_back (&newFriend);
  *
  *   // If the db insertion that follows fails, we should
  *   // remove it from memory.
  *   // (You could also declare this as "auto guard = MakeScopeGuard (...)")
- *   ScopeGuard guard = MakeScopeGuard([&] { friends_.pop_back(); });
+ *   swift::ScopeGuardType guard = swift::MakeScopeGuard([&] { friends_.pop_back(); });
  *
  *   // this will throw an exception upon error, which
  *   // makes the ScopeGuard execute UserCont::pop_back()
  *   // once the Guard's destructor is called.
- *   db_->AddFriend(GetName(), newFriend.GetName ());
+ *   db_->AddFriend(GetName (), newFriend.GetName ());
  *
  *   // an exception was not thrown, so don't execute
  *   // the Guard.
  *   guard.Dismiss ();
  * }
- * // For more See unit test
+ * // For more, to see unit test
  *
- * Stolen from folly and :
+ * Stolen from:
  *   Andrei's and Petru Marginean's CUJ article:
  *     http://drdobbs.com/184403758
  *   and the loki library:

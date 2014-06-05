@@ -255,6 +255,13 @@ bool ReadFile (const char *file_name,
 
     return true;
 }
+
+// get the file size, return with parameter size
+bool GetFileSize (const char* file_name, size_t* size);
+
+// delete a file 
+bool DeleteFile (const char* file_name);
+
 } // namespace fileutil
 } // namespace swift
 

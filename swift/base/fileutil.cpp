@@ -152,5 +152,29 @@ ssize_t PWritevFull (int fd, iovec *iov, int length, off_t offset)
     return detail::WrapFileOpVFuncT (pwritev, fd, iov, length, offset);
 }
 
+bool DeleteFile (const char* file_name)
+{
+    if (nullptr == file_name) {
+        return false;
+    }
+
+    return 0 == ::unlink (file_name);
+}
+
+bool GetFileSize (const char* file_name, size_t* size)
+{
+    if (nullptr == file_name) {
+        return false;
+    }
+
+    struct stat file_stats;
+    if (::lstat (file_name, &file_stats) != 0) {
+        return false;
+    }
+
+    *size = file_stats.st_size;
+    return true;
+}
+
 } // fileutil
 } // namespace swift

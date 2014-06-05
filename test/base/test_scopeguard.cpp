@@ -47,7 +47,7 @@ private:
 TEST_F (test_ScopeGuard, DifferentWaysToBind)
 {
     {
-        swift::ScopeGuardType guard = swift::MakeScopeGuard (ReturnInt);
+        swift::ScopeGuard guard = swift::MakeScopeGuard (ReturnInt);
         (void)guard;
     }
 
@@ -55,14 +55,14 @@ TEST_F (test_ScopeGuard, DifferentWaysToBind)
     void (vector<int>::*push_back) (const int&) = &vector<int>::push_back;
     v.push_back (1);
     {
-        swift::ScopeGuardType guard = swift::MakeScopeGuard (std::bind (
+        swift::ScopeGuard guard = swift::MakeScopeGuard (std::bind (
             &vector<int>::pop_back, &v));
         (void)guard;
     }
     EXPECT_EQ (0, v.size ());
 
     {
-        swift::ScopeGuardType guard = swift::MakeScopeGuard (std::bind (
+        swift::ScopeGuard guard = swift::MakeScopeGuard (std::bind (
             push_back, &v, 2));
         (void)guard;
     }
@@ -70,7 +70,7 @@ TEST_F (test_ScopeGuard, DifferentWaysToBind)
 
     {
         // v pass by lvalue
-        swift::ScopeGuardType guard = swift::MakeScopeGuard (std::bind (
+        swift::ScopeGuard guard = swift::MakeScopeGuard (std::bind (
             push_back, v, 2));
         (void)guard;
     }
@@ -78,7 +78,7 @@ TEST_F (test_ScopeGuard, DifferentWaysToBind)
 
     {
         // v pass by ref
-        swift::ScopeGuardType guard = swift::MakeScopeGuard (std::bind (
+        swift::ScopeGuard guard = swift::MakeScopeGuard (std::bind (
             push_back, std::ref (v), 3));
         (void)guard;
     }
@@ -86,7 +86,7 @@ TEST_F (test_ScopeGuard, DifferentWaysToBind)
 
     {
         // v pass into by ref
-        swift::ScopeGuardType guard = swift::MakeScopeGuard ([&v]() {
+        swift::ScopeGuard guard = swift::MakeScopeGuard ([&v]() {
             v.push_back (4);
         });
         (void)guard;
@@ -95,7 +95,7 @@ TEST_F (test_ScopeGuard, DifferentWaysToBind)
 
     {
         // lambda with a copy of v
-        swift::ScopeGuardType guard = swift::MakeScopeGuard ([v]() mutable {
+        swift::ScopeGuard guard = swift::MakeScopeGuard ([v]() mutable {
             v.push_back (5);
         });
         (void)guard;
@@ -106,13 +106,13 @@ TEST_F (test_ScopeGuard, DifferentWaysToBind)
     int n = 0;
     {
         TestFunctor f (&n);
-        swift::ScopeGuardType guard = swift::MakeScopeGuard (f);
+        swift::ScopeGuard guard = swift::MakeScopeGuard (f);
         (void)guard;
     }
     EXPECT_EQ (1, n);
 
     {
-        swift::ScopeGuardType guard = swift::MakeScopeGuard (TestFunctor (&n));
+        swift::ScopeGuard guard = swift::MakeScopeGuard (TestFunctor (&n));
         (void)guard;
     }
     EXPECT_EQ (2, n);
@@ -144,7 +144,7 @@ void TestUndoAction (bool failure) {
         v.push_back (1);
 
         // The guard is triggered to undo the insertion unless Dismiss() is called.
-        swift::ScopeGuardType guard = swift::MakeScopeGuard ([&] { v.pop_back (); });
+        swift::ScopeGuard guard = swift::MakeScopeGuard ([&] { v.pop_back (); });
 
         // Do some action; Use the failure argument to pretend
         // if it failed or succeeded.

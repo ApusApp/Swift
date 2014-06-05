@@ -128,7 +128,7 @@ ssize_t WrapFileOpVFuncT (Func f,
 }
 } // namespace detail
 
-
+namespace fileutil {
 // Convenience wrappers around some commonly used system calls. The no *Full
 // wrappers retry on EINTR. The *Full wrappers retry on EINTR and EAGAIN, also loop
 // until all data is written. Note that *Full wrappers weaken the thread
@@ -255,6 +255,7 @@ bool ReadFile (const char *file_name,
 
     return true;
 }
+} // namespace fileutil
 } // namespace swift
 
 #endif // __SWIFT_BASE_FILE_UTIL_H__

@@ -18,6 +18,7 @@
 #include <sys/socket.h>
 
 namespace swift {
+namespace fileutil {
 
 int Open (const char *file_name, 
           int flags /*= O_RDWR | O_LARGEFILE | O_CREAT*/, 
@@ -151,4 +152,5 @@ ssize_t PWritevFull (int fd, iovec *iov, int length, off_t offset)
     return detail::WrapFileOpVFuncT (pwritev, fd, iov, length, offset);
 }
 
+} // fileutil
 } // namespace swift

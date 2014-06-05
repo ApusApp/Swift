@@ -279,25 +279,25 @@ TEST_F (test_FileUtil, ReadFile)
 
     {
         std::string contents;
-        EXPECT_TRUE (swift::ReadFile (empty_file.c_str (), contents));
+        EXPECT_TRUE (swift::fileutil::ReadFile (empty_file.c_str (), contents));
         EXPECT_EQ (contents, "");
-        EXPECT_TRUE (swift::ReadFile (temp_file.c_str (), contents, 0));
+        EXPECT_TRUE (swift::fileutil::ReadFile (temp_file.c_str (), contents, 0));
         EXPECT_EQ (contents, "");
-        EXPECT_TRUE (swift::ReadFile (temp_file.c_str (), contents, 2));
+        EXPECT_TRUE (swift::fileutil::ReadFile (temp_file.c_str (), contents, 2));
         EXPECT_EQ (contents, "ba");
-        EXPECT_TRUE (swift::ReadFile (temp_file.c_str (), contents));
+        EXPECT_TRUE (swift::fileutil::ReadFile (temp_file.c_str (), contents));
         EXPECT_EQ (contents, "bar");
     }
 
     {
         std::vector<unsigned char> contents;
-        EXPECT_TRUE (swift::ReadFile (empty_file.c_str (), contents));
+        EXPECT_TRUE (swift::fileutil::ReadFile (empty_file.c_str (), contents));
         EXPECT_EQ (std::vector<unsigned char> (), contents);
-        EXPECT_TRUE (swift::ReadFile (temp_file.c_str (), contents, 0));
+        EXPECT_TRUE (swift::fileutil::ReadFile (temp_file.c_str (), contents, 0));
         EXPECT_EQ (std::vector<unsigned char> (), contents);
-        EXPECT_TRUE (swift::ReadFile (temp_file.c_str (), contents, 2));
+        EXPECT_TRUE (swift::fileutil::ReadFile (temp_file.c_str (), contents, 2));
         EXPECT_EQ (std::vector<unsigned char> ({ 'b', 'a' }), contents);
-        EXPECT_TRUE (swift::ReadFile (temp_file.c_str (), contents));
+        EXPECT_TRUE (swift::fileutil::ReadFile (temp_file.c_str (), contents));
         EXPECT_EQ (std::vector<unsigned char> ({ 'b', 'a', 'r' }), contents);
     }
 }

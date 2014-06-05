@@ -92,6 +92,15 @@ public:
         return 0 == fileutil::Ftrucate (fd_, static_cast<off_t>(size));
     }
 
+    size_t Read (char* buf, size_t size)
+    {
+        if (fd_ < 0) {
+            return 0;
+        }
+
+        return static_cast<size_t>(fileutil::ReadFull (fd_, buf, size));
+    }
+
     size_t PRead (char* buf, size_t nbytes, size_t offset)
     {
         if (fd_ < 0) {
@@ -102,6 +111,15 @@ public:
                                                         buf, 
                                                         nbytes, 
                                                         static_cast<off_t>(offset)));
+    }
+
+    size_t Write (const char* buf, size_t size)
+    {
+        if (fd_ < 0) {
+            return 0;
+        }
+
+        return static_cast<size_t>(fileutil::WriteFull (fd_, buf, size));
     }
 
     size_t PWrite (const char* buf, size_t nbytes, size_t offset)

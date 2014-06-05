@@ -40,7 +40,7 @@ namespace swift {
  *   // If the db insertion that follows fails, we should
  *   // remove it from memory.
  *   // (You could also declare this as "auto guard = MakeScopeGuard (...)")
- *   swift::ScopeGuardType guard = swift::MakeScopeGuard([&] { friends_.pop_back(); });
+ *   swift::ScopeGuard guard = swift::MakeScopeGuard([&] { friends_.pop_back(); });
  *
  *   // this will throw an exception upon error, which
  *   // makes the ScopeGuard execute UserCont::pop_back()
@@ -88,27 +88,27 @@ protected:
 };
 
 template <typename FuncT>
-class ScopeGuard : public ScopeGuardBase
+class ScopeGuardImpl : public ScopeGuardBase
 {
 public:
-    explicit ScopeGuard (const FuncT& func)
+    explicit ScopeGuardImpl (const FuncT& func)
         : function_ (func)
     {
     }
 
-    explicit ScopeGuard (FuncT&& func)
+    explicit ScopeGuardImpl (FuncT&& func)
         : function_ (std::move (func))
     {
     }
 
-    ScopeGuard (ScopeGuard&& other)
+    ScopeGuardImpl (ScopeGuardImpl&& other)
         : ScopeGuardBase (std::move (other))
         , function_ (std::move (other.function_))
     {
         other.dismissed_ = true;
     }
 
-    ~ScopeGuard ()
+    ~ScopeGuardImpl ()
     {
         if (!dismissed_) {
             function_ ();
@@ -126,23 +126,23 @@ private:
 enum class ScopeGuardOnExit {};
 
 template <typename FuncT>
-ScopeGuard<typename std::decay<FuncT>::type>
+ScopeGuardImpl<typename std::decay<FuncT>::type>
 operator+ (detail::ScopeGuardOnExit, FuncT&& func) {
-    return ScopeGuard<typename std::decay<FuncT>::type> (
+    return ScopeGuardImpl<typename std::decay<FuncT>::type> (
         std::forward<FuncT> (func));
 }
 
 } // namespace detail
 
 template <typename FuncT>
-detail::ScopeGuard<typename std::decay<FuncT>::type>
+detail::ScopeGuardImpl<typename std::decay<FuncT>::type>
 MakeScopeGuard (FuncT&& func) {
-    return detail::ScopeGuard<typename std::decay<FuncT>::type> (
+    return detail::ScopeGuardImpl<typename std::decay<FuncT>::type> (
         std::forward<FuncT> (func));
 }
 
 
-typedef detail::ScopeGuardBase&& ScopeGuardType;
+typedef detail::ScopeGuardBase&& ScopeGuard;
 
 } // namespace swift
 

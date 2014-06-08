@@ -51,8 +51,8 @@ public:
     ~ByteBuffer ();
 
     //movable
-    ByteBuffer (ByteBuffer&& other);
-    ByteBuffer& operator= (ByteBuffer&& rhs);
+    ByteBuffer (ByteBuffer&&) = delete;
+    ByteBuffer& operator= (ByteBuffer&&) = delete;
 
     size_t Length () const
     {
@@ -89,7 +89,7 @@ public:
 
     // Read a next value from the buffer. Return false if 
     // there isn't enough data left for the specified type.
-    bool ReadUInt (uint8_t *val)
+    bool ReadUInt8 (uint8_t *val)
     {
         if (nullptr == val) { return false;}
         return ReadBytes (reinterpret_cast<char*>(val), 1);
@@ -140,9 +140,7 @@ public:
     void Swap (ByteBuffer& other);
 
 private:
-    void Initialize (const char *buffer, 
-                     size_t size, 
-                     ByteOrder byte_order);
+    void Initialize (const char *buffer);
 
 private:
     char* buffer_;

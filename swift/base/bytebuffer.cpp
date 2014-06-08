@@ -14,15 +14,22 @@
 
 #include <string.h>
 #include <algorithm>
+#include <cassert>
 
 #include "swift/base/bytebuffer.h"
 
 namespace swift {
 
 // public
-ByteBuffer::ByteBuffer ()
+ByteBuffer::ByteBuffer () 
+    : buffer_ (nullptr)
+    , size_ (kDefaultSize)
+    , start_ (0)
+    , end_ (0)
+    , version_ (0)
+    , byte_order_ (ByteOrder::BYTE_ORDER_HOST)
 {
-    Initialize (nullptr, kDefaultSize, ByteOrder::BYTE_ORDER_HOST);
+    Initialize (nullptr);
 }
 
 // public
@@ -38,81 +45,60 @@ ByteBuffer::~ByteBuffer ()
 ByteBuffer::ByteBuffer (const char *buffer, 
                         size_t length, 
                         ByteOrder byte_order)
-{   
-    Initialize (buffer, length, byte_order);
+    : buffer_ (nullptr)
+    , size_ (strlen (buffer))
+    , start_ (0)
+    , end_ (0)
+    , version_ (0)
+    , byte_order_ (byte_order)
+{
+    assert (nullptr != buffer);
+    assert (length == strlen (buffer));
+    Initialize (buffer);
 }
 
 // public
 ByteBuffer::ByteBuffer (const char *buffer, size_t length)
+    : buffer_ (nullptr)
+    , size_ (length)
+    , start_ (0)
+    , end_ (0)
+    , version_ (0)
+    , byte_order_ (ByteOrder::BYTE_ORDER_HOST)
 {
-    Initialize (buffer, length, ByteOrder::BYTE_ORDER_HOST);
+    assert (nullptr != buffer);
+    assert (length == strlen (buffer));
+    Initialize (buffer);
 }
 
 // public
 ByteBuffer::ByteBuffer (const char *buffer)
+    : buffer_ (nullptr)
+    , size_ (strlen (buffer))
+    , start_ (0)
+    , end_ (0)
+    , version_ (0)
+    , byte_order_ (ByteOrder::BYTE_ORDER_HOST)
 {
-    Initialize (buffer, strlen (buffer), ByteOrder::BYTE_ORDER_HOST);
+    assert (nullptr != buffer);
+    Initialize (buffer);
 }
 
 // public
 ByteBuffer::ByteBuffer (ByteOrder byte_order)
+    : buffer_ (nullptr)
+    , size_ (kDefaultSize)
+    , start_ (0)
+    , end_ (0)
+    , version_ (0)
+    , byte_order_ (byte_order)
 {
-    Initialize (nullptr, kDefaultSize, byte_order);
-}
-
-ByteBuffer::ByteBuffer (ByteBuffer&& other)
-    : size_ (other.size_)
-    , start_ (other.start_)
-    , end_ (other.end_)
-    , version_ (other.version_)
-    , byte_order_ (other.byte_order_)
-{
-    if (nullptr != buffer_) {
-        delete [] buffer_;
-    }
-
-    buffer_ = other.buffer_;
-    other.buffer_ = nullptr;
-    other.size_ = 0;
-    other.start_ = 0;
-    other.end_ = 0;
-    other.version_ = 0;
-}
-
-ByteBuffer& ByteBuffer::operator= (ByteBuffer&& rhs)
-{
-    if (&rhs != this) {
-        if (nullptr != buffer_) {
-            delete [] buffer_;
-        }
-        buffer_ = rhs.buffer_;
-        rhs.buffer_ = nullptr;
-
-        size_ = rhs.size_;
-        rhs.size_ = 0;
-
-        start_ = rhs.start_;
-        rhs.start_ = 0;
-
-        end_ = rhs.end_;
-        rhs.end_ = 0;
-
-        version_ = rhs.version_;
-        rhs.version_ = 0;
-    }
-
-    return *this;
+    Initialize (nullptr);
 }
 
 // private
-void ByteBuffer::Initialize (const char *buffer, 
-                             size_t size, 
-                             ByteOrder byte_order)
+void ByteBuffer::Initialize (const char *buffer)
 {
-    version_ = 0;
-    size_ = size;
-    start_ = 0;
-    byte_order_ = byte_order;
     buffer_ = new char[size_];
     memset (buffer_, 0, size_);
 

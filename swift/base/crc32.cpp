@@ -12,6 +12,8 @@
  * limitations under the License.
  */
 
+#include <assert.h>
+
 #include "swift/base/crc32.h"
 #include "swift/base/byteorderhelper.h"
 
@@ -290,6 +292,7 @@ namespace {
 // static public
 uint32_t Crc32::UpdateCrc32 (uint32_t initial, const void *data, size_t len)
 {
+    assert (nullptr != data);
 #define STEP4 do {                  \
     uint32_t n = c ^ ByteOrderHelper::GetLittleEndian32 (p); \
     p += 4;                         \
@@ -329,7 +332,7 @@ uint32_t Crc32::UpdateCrc32 (uint32_t initial, const void *data, size_t len)
         c = table0_[(c & 0xFF) ^ *p++] ^ (c >> 8);
     }
 
-#undef STEP4;
+#undef STEP4
 
     return c ^ 0xFFFFFFFFu;
 }

@@ -26,10 +26,10 @@ public:
     // Return the Crc32 of concat(A, data[0,len-1]) where initial is the
     // Crc32 of some string A. UpdateCrc32 () is often used to maintain the
     // Crc32 of a stream of data. for the first call, initial should be 0.
-    uint32_t UpdateCrc32 (uint32_t initial, const void *data, size_t len);
+    static uint32_t UpdateCrc32 (uint32_t initial, const void *data, size_t len);
 
     // Return the crc32c of data[0,len-1]
-    inline uint32_t ComputeCrc32 (const void *data, size_t len) 
+    static inline uint32_t ComputeCrc32 (const void *data, size_t len) 
     {
         return UpdateCrc32 (0, data, len);
     }

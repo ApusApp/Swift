@@ -2,6 +2,7 @@
 #include <iostream>
 #include <gtest/gtest.h>
 #include <swift/base/exception.h>
+#include <swift/base/stacktrace.h>
 
 class test_Exception : public testing::Test
 {
@@ -43,6 +44,9 @@ void TestFunc (int n)
         ASSERT_TRUE (g_test_msg.empty ());
         ASSERT_TRUE (!std::string ((dynamic_cast<swift::Exception*>(e))->GetStackTrace ()).empty ());
         std::cout << (dynamic_cast<swift::Exception*>(e))->GetStackTrace () << std::endl;
+
+        swift::StackTrace::PrintStack (0);
+
         delete e;
     }
 }

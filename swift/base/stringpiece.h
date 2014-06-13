@@ -17,6 +17,7 @@
 
 #include <stddef.h>
 #include <assert.h>
+#include <functional>
 
 #include <iosfwd>
 #include <string>
@@ -48,7 +49,7 @@ class StringPiece
 {
 public:
     // Standard STL container boilerplate.
-    typedef size_t size_type;
+    typedef typename std::string::size_type size_type;
     typedef typename std::string::value_type value_type;
     typedef const value_type& const_reference;
     typedef const value_type& reference;
@@ -302,6 +303,16 @@ public:
         stringpiecedetail::AppendToString (*this, target);
     }
 
+    uint32_t Hash () const {
+        // Taken from fbi/nstring.h:
+        //    Quick and dirty bernstein hash...fine for short ascii strings
+        uint32_t hash = 5381;
+        for (size_t ix = 0; ix < size (); ix++) {
+            hash = ((hash << 5) + hash) + ptr_[ix];
+        }
+        return hash;
+    }
+
 public:
     static inline int WordMemcmp (const value_type* p1,
                                   const value_type* p2,
@@ -348,5 +359,16 @@ inline bool operator>= (const StringPiece& lhs, const StringPiece& rhs)
 std::ostream& operator<< (std::ostream& out, const StringPiece& piece);
 
 } // namespace swift
+
+namespace std {
+
+template <>
+struct hash <swift::StringPiece> {
+    size_t operator() (const swift::StringPiece& str) const {
+        return static_cast<size_t>(str.Hash ());
+    }
+};
+} // namespace std
+
 
 #endif // __SWIFT_BASE_STRING_PIECE_H__

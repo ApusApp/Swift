@@ -1,5 +1,6 @@
 #include <string.h>
 #include <memory>
+#include <unordered_map>
 #include <gtest/gtest.h>
 
 #include <swift/base/stringpiece.h>
@@ -174,6 +175,20 @@ TEST_F (test_StringPiece, All)
         ASSERT_TRUE (sp >= sp);
         ASSERT_FALSE (sp < sp);
         ASSERT_TRUE (sp <= sp);
+    }
+
+    {
+        swift::StringPiece s;
+        EXPECT_EQ (5381, s.Hash ());
+        const char *buf = "abdcdefg";
+        s.Set (buf);
+        EXPECT_NE (0, s.Hash ());
+
+        std::unordered_map<swift::StringPiece, int> m;
+        m[s] = 1;
+        std::unordered_map<swift::StringPiece, int>::iterator it = m.find (s);
+        EXPECT_EQ (it->second, 1);
+        EXPECT_EQ (it->first, s);
     }
     
 }

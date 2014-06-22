@@ -35,9 +35,9 @@ namespace detail {
  * @param HASH the hash functor
  * @param EQUALTO the equality checking functor
  */
-template <class KEY, 
+template <class KEY,
           class VALUE,
-          class HASH = std::hash<KEY>, 
+          class HASH = std::hash<KEY>,
           class EQUALTO = std::equal_to<KEY> >
 class LinkedHashMap : swift::noncopyable
 {
@@ -66,7 +66,7 @@ private:
     static const size_t MAP_DEFAULT_BUCKET_NUM = 31;
 
     //
-    // The mininum number of buckets to use mmap 
+    // The mininum number of buckets to use mmap
     //
     static const size_t MIN_MAPZMAP_BUCKET_NUM = 32768;
 
@@ -103,7 +103,7 @@ public:
         *
         * @return a reference of the key
         */
-        const KEY& Key ()
+        const KEY& Key () const
         {
             return rec_->key_;
         }
@@ -142,7 +142,7 @@ public:
             *
             * @return true if the both are equal, or false if not
             */
-        bool operator== (const Iterator& rhs) const 
+        bool operator== (const Iterator& rhs) const
         {
             return ((map_ == rhs.map_) && (rec_ == rhs.rec_));
         }
@@ -186,7 +186,7 @@ public:
 
             /**
             * Preposting decrement operator
-            * 
+            *
             * @return the iterator itself
             */
         Iterator& operator-- ()
@@ -222,7 +222,7 @@ public:
     private:
         /**
         * Constructor
-        * 
+        *
         * @param [in] map the container
         * @param [in] rec the pointer to the current record
         */
@@ -421,11 +421,11 @@ public:
     * @param [in] key the key
     * @param [in] dist the destination map
     * @param [in] mode the moving mode
-    * 
+    *
     * @return the pointer to the value of the migrated record, or zero on failure
     */
-    VALUE* Migrate (const KEY& key, 
-                    LinkedHashMap* dist, 
+    VALUE* Migrate (const KEY& key,
+                    LinkedHashMap* dist,
                     MoveMode mode)
     {
         size_t hash = hash_ (key);

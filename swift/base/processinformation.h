@@ -73,12 +73,12 @@ public:
     }
 
     // Get the total memory of system in MB
-    inline const unsigned long long GetMemorySizeMB () const 
+    inline const unsigned long long GetMemorySizeMB () const
     {
         return GetSystemInfo ().memory_size_ / (1024 * 1024);
     }
 
-    inline const unsigned long long GetNumberPages () const 
+    inline const unsigned long long GetNumberPages () const
     {
         return GetSystemInfo ().number_pages_;
     }
@@ -216,7 +216,7 @@ private:
     static std::unique_ptr<std::mutex> kSystemInformationLock;
     static std::unique_ptr<ProcessInformation::SystemInformation> kSystemInfo;
 
-    inline const SystemInformation& GetSystemInfo () const
+    static inline const SystemInformation& GetSystemInfo ()
     {
         return *kSystemInfo;
     }

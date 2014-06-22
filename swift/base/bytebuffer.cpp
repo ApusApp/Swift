@@ -21,7 +21,7 @@
 namespace swift {
 
 // public
-ByteBuffer::ByteBuffer () 
+ByteBuffer::ByteBuffer ()
     : buffer_ (nullptr)
     , size_ (kDefaultSize)
     , start_ (0)
@@ -42,8 +42,8 @@ ByteBuffer::~ByteBuffer ()
 }
 
 // public
-ByteBuffer::ByteBuffer (const char *buffer, 
-                        size_t length, 
+ByteBuffer::ByteBuffer (const char *buffer,
+                        size_t length,
                         ByteOrder byte_order)
     : buffer_ (nullptr)
     , size_ (strlen (buffer))
@@ -136,7 +136,7 @@ bool ByteBuffer::ReadUInt16 (uint16_t *val)
                 v;
         return true;
     }
-    
+
     return false;
 }
 
@@ -154,7 +154,7 @@ bool ByteBuffer::ReadUInt32 (uint32_t *val)
                 v;
         return true;
     }
-    
+
     return false;
 }
 
@@ -246,8 +246,8 @@ void ByteBuffer::Resize (size_t size)
     else {
         size_ = std::max (size, 3 * size_ / 2);
         char *new_buffer = new char[size_];
-        memset (new_buffer, 0, size_);
         memcpy (new_buffer, buffer_ + start_, len);
+        new_buffer[len] = '\0';
         delete [] buffer_;
         buffer_ = new_buffer;
     }

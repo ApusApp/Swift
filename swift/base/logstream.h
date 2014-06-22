@@ -31,7 +31,10 @@ template <int SIZE>
 class FixedBuffer : swift::noncopyable
 {
 public:
-    FixedBuffer () : current_ (data_) {}
+    FixedBuffer () : current_ (data_)
+    {
+        memset (data_, '\0', sizeof(data_));
+    }
 
     ~FixedBuffer () {}
 
@@ -102,7 +105,11 @@ class LogStream : swift::noncopyable
 public:
     typedef detail::FixedBuffer<detail::kSmallBuffer> BufferType;
 
-    LogStream () : buffer_ () {}
+    LogStream () : buffer_ ()
+    {
+        StaticCheck ();
+    }
+
     ~LogStream () {}
 
     self& operator<< (bool v)
@@ -154,25 +161,25 @@ public:
         return *this;
     }
 
-    void Append (const char* data, int len) 
+    void Append (const char* data, int len)
     {
         if (data) {
-            buffer_.Append (data, len); 
+            buffer_.Append (data, len);
         }
     }
 
-    const BufferType& Buffer () const 
-    { 
-        return buffer_; 
+    const BufferType& Buffer () const
+    {
+        return buffer_;
     }
 
-    void ResetBuffer() 
-    { 
-        buffer_.Reset (); 
+    void ResetBuffer()
+    {
+        buffer_.Reset ();
     }
 
 private:
-    void StaticCheck ();
+    static void StaticCheck ();
 
     template<typename T>
     void FormatInteger (T);
@@ -188,12 +195,12 @@ public:
     template<typename T>
     Format (const char* fmt, T val);
 
-    const char* Data() const 
-    { 
-        return buf_; 
+    const char* Data() const
+    {
+        return buf_;
     }
 
-    int Length() const 
+    int Length() const
     {
         return length_;
     }

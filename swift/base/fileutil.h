@@ -54,9 +54,9 @@ inline void Increase (ssize_t n, off_t& offset)
 // above which do nothing if the offset is not present and increment it if it is.
 template <class Func, class... Offset>
 ssize_t WrapFileOpFuncT (Func f,
-                         int fd, 
-                         void *buf, 
-                         size_t size, 
+                         int fd,
+                         void *buf,
+                         size_t size,
                          Offset... offset)
 {
     ssize_t ret = -1;
@@ -91,11 +91,10 @@ ssize_t WrapFileOpVFuncT (Func f,
                           int size,
                           Offset... offset)
 {
-    ssize_t ret = -1;
     ssize_t total_bytes = 0;
 
     do {
-        ret = f (fd, iov, size, offset...);
+        ssize_t ret = f (fd, iov, size, offset...);
         if (-1 == ret) {
             if (EINTR == errno || EAGAIN == errno) {
                 continue;
@@ -121,7 +120,7 @@ ssize_t WrapFileOpVFuncT (Func f,
                 iov->iov_len -= ret;
                 ret = 0;
             }
-        } 
+        }
     } while (size);
 
     return total_bytes;
@@ -133,8 +132,8 @@ namespace fileutil {
 // wrappers retry on EINTR. The *Full wrappers retry on EINTR and EAGAIN, also loop
 // until all data is written. Note that *Full wrappers weaken the thread
 // semantics of underlying system calls.
-int Open (const char *file_name, 
-          int flags = O_RDWR | O_LARGEFILE | O_CREAT, 
+int Open (const char *file_name,
+          int flags = O_RDWR | O_LARGEFILE | O_CREAT,
           mode_t mode = 0666);
 int Close (int fd);
 int Dup (int fd);
@@ -236,7 +235,7 @@ bool ReadFile (const char *file_name,
     // should attempt to read stuff. If not zero, we'll attempt to read
     // one extra byte.
     const size_t initial_alloc = 1024 * 4;
-    out.resize (std::min (buf.st_size > 0 ? static_cast<size_t>(buf.st_size + 1) : initial_alloc, 
+    out.resize (std::min (buf.st_size > 0 ? static_cast<size_t>(buf.st_size + 1) : initial_alloc,
                           num_bytes));
     while (size < out.size ()) {
         size_t n = ReadFull (fd, &out[size], out.size () - size);
@@ -259,7 +258,7 @@ bool ReadFile (const char *file_name,
 // get the file size, return with parameter size
 bool GetFileSize (const char* file_name, size_t* size);
 
-// delete a file 
+// delete a file
 bool DeleteFile (const char* file_name);
 
 } // namespace fileutil

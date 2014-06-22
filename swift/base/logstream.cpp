@@ -55,8 +55,8 @@ static size_t Convert (char buf[], const T value)
     return p - buf;
 }
 
-// uintptr_t: 
-// Integer type capable of holding a value converted from a void pointer and then be 
+// uintptr_t:
+// Integer type capable of holding a value converted from a void pointer and then be
 // converted back to that type with a value that compares equal to the original pointer.
 size_t ConvertHex (char buf[], uintptr_t value)
 {
@@ -149,8 +149,8 @@ LogStream& LogStream::operator<< (unsigned long long v)
 // public
 LogStream& LogStream::operator<< (const void* v)
 {
-    // uintptr_t: 
-    // Integer type capable of holding a value converted from a void pointer and then be 
+    // uintptr_t:
+    // Integer type capable of holding a value converted from a void pointer and then be
     // converted back to that type with a value that compares equal to the original pointer.
     if (v) {
         uintptr_t p = reinterpret_cast<uintptr_t>(v);
@@ -183,7 +183,7 @@ LogStream& LogStream::operator<< (double v)
     return *this;
 }
 
-// private
+// sattic private
 void LogStream::StaticCheck ()
 {
     static_assert (kMaxNumericSize - 10 > std::numeric_limits<double>::digits10, "");

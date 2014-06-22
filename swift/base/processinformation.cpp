@@ -43,7 +43,7 @@ public:
 
         FILE* pfd = fopen (file_name, "r");
         if (nullptr == pfd) {
-            LOG_ERROR << "Could not open [" << file_name << "], pid = " 
+            LOG_ERROR << "Could not open [" << file_name << "], pid = "
                       << static_cast<uint32_t>(pid);
 
             // TO DO
@@ -87,7 +87,7 @@ public:
                             */
                             );
             if (0 == found) {
-                LOG_ERROR << "System error: reading proc information, pid = " 
+                LOG_ERROR << "System error: reading proc information, pid = "
                           << static_cast<uint32_t>(pid);
             }
 
@@ -115,7 +115,7 @@ public:
     // This is visible whether or not the executable is swapped out.
     char commond_[128];
 
-    // One character from the string "RSDZTW" where R is running, 
+    // One character from the string "RSDZTW" where R is running,
     // S is sleeping in an interruptible wait, D is waiting in uninterruptible
     // disk sleep, Z is zombie, T is traced or stopped (on a signal), and W is paging.
     char state_;
@@ -132,11 +132,11 @@ public:
     // The tty the process uses
     int tty_;
 
-    // The process group ID of the process which 
+    // The process group ID of the process which
     // currently owns the tty that the process is connected to.
     int tpgid_;
 
-    // The  kernel flags word of the process. For bit meanings, 
+    // The  kernel flags word of the process. For bit meanings,
     // see the PF_* defines in <linux/sched.h>.  Details depend on the kernel version.
     // %lu
     unsigned long flags_;
@@ -149,7 +149,7 @@ public:
     // %lu
     unsigned long cmin_flt_;
 
-    // The number of major faults the process has made which 
+    // The number of major faults the process has made which
     // have required loading a memory page from disk
     // %lu
     unsigned long major_flt_;
@@ -192,9 +192,9 @@ public:
     // %lu
     unsigned long virtual_memory_size_;
 
-    // Resident Set Size: number of pages the process has in real memory, 
+    // Resident Set Size: number of pages the process has in real memory,
     // minus 3 for administrative purposes. This is just the pages which
-    // count  towards text, data, or stack space. This does not include pages 
+    // count  towards text, data, or stack space. This does not include pages
     // which have not been demand-loaded in, or which are swapped out
     // %ld
     long resident_set_size_;
@@ -215,7 +215,7 @@ public:
     // %lu
     unsigned long start_stack_;
 
-    // The current value of esp (stack pointer), as found in the 
+    // The current value of esp (stack pointer), as found in the
     // kernel stack page for the process
     // %lu
     unsigned long kstk_esp_;
@@ -252,7 +252,7 @@ public:
     }
 
     //Get some details about the CPU
-    static void GetCpuInformation (int &proc_count, 
+    static void GetCpuInformation (int &proc_count,
                                    std::string& freq,
                                    std::string& features)
     {
@@ -293,12 +293,12 @@ public:
         FILE* pfd = nullptr;
         bool found = false;
         char buf[512] = {'\0'};
-        
+
         // try lsb file first
         if (0 == access ("/etc/lsb-release", 0)) {
             pfd = fopen ("/etc/lsb-release", "r");
         }
-        
+
         if (nullptr != pfd) {
             while (nullptr != fgets (buf, 511, pfd) && !feof (pfd)) {
                 buf[strlen (buf) < 1 ? 0 : strlen (buf) - 1] = '\0';
@@ -359,7 +359,7 @@ public:
 
                 fclose (pfd);
                 version = "Kernel ";
-                version += LinuxSystemHelper::ReadLineFromFile ("/proc/sys/kernel/osrelease");
+                version += ReadLineFromFile ("/proc/sys/kernel/osrelease");
             }
         }
     }
@@ -367,9 +367,9 @@ public:
     //Get system memory total size
     static unsigned long long GetSystemMemorySize ()
     {
-        std::string memory_info = LinuxSystemHelper::ReadLineFromFile ("/proc/meminfo");
+        std::string memory_info = ReadLineFromFile ("/proc/meminfo");
         size_t line_off = 0;
-        if (!memory_info.empty () 
+        if (!memory_info.empty ()
             && (line_off = memory_info.find ("MemTotal")) != std::string::npos) {
             line_off = memory_info.substr (line_off).find (':') + 1;
             memory_info = memory_info.substr (line_off, memory_info.substr (line_off).find ("kB") - 1);
@@ -426,7 +426,7 @@ std::string ProcessInformation::GetExecutableName () const
     ssize_t read = ::readlink (link, name, sizeof(name));
     if (-1 != read) {
         name[read] = '\0';
-    } 
+    }
 
     return name;
 }
@@ -449,13 +449,13 @@ bool ProcessInformation::CheckNumaEnabled ()
         // proc is populated with numa entries
 
         // read the second column of first line to determine numa state
-        // ('default' = enabled, 'interleave' = disabled).  
+        // ('default' = enabled, 'interleave' = disabled).
         // Logic from version.cpp's warnings.
         std::string line = detail::LinuxSystemHelper::ReadLineFromFile ("/proc/self/numa_maps");
         size_t pos = line.find (' ');
-        if (pos != std::string::npos && 
+        if (pos != std::string::npos &&
             line.substr (pos + 1, 10).find ("interleave") == std::string::npos) {
-            // interleave not found; 
+            // interleave not found;
             return true;
         }
     }
@@ -473,8 +473,8 @@ bool ProcessInformation::BlockCheckSupported ()
 bool ProcessInformation::BlockInMemory (const void* start)
 {
     unsigned char x = 0;
-    if (mincore (const_cast<void*>(AlignToStartOfPage (start)), 
-                 GetPageSize (), 
+    if (mincore (const_cast<void*>(AlignToStartOfPage (start)),
+                 GetPageSize (),
                  &x)) {
         LOG_ERROR << "mincore failed: " << strerror (errno);
         return 1;
@@ -487,7 +487,7 @@ bool ProcessInformation::BlockInMemory (const void* start)
 std::unique_ptr<ProcessInformation::SystemInformation> ProcessInformation::kSystemInfo;
 
 // static private
-std::unique_ptr<std::mutex> ProcessInformation::kSystemInformationLock = 
+std::unique_ptr<std::mutex> ProcessInformation::kSystemInformationLock =
     std::move (std::unique_ptr<std::mutex> (new std::mutex));
 
 // static public
@@ -495,7 +495,7 @@ void ProcessInformation::InitializeSystemInformation ()
 {
     kSystemInformationLock->lock ();
     if (nullptr == kSystemInfo.get ()) {
-        kSystemInfo = 
+        kSystemInfo =
             std::move (std::unique_ptr<ProcessInformation::SystemInformation> (new SystemInformation));
     }
     kSystemInformationLock->unlock ();
@@ -526,7 +526,7 @@ void ProcessInformation::SystemInformation::CollectSystemInformation ()
     std::string cpu_frequncy;
     std::string cpu_features;
 
-    std::string version_signature = 
+    std::string version_signature =
         detail::LinuxSystemHelper::ReadLineFromFile ("/proc/version_signature");
     detail::LinuxSystemHelper::GetCpuInformation (cpu_count, cpu_frequncy, cpu_features);
     detail::LinuxSystemHelper::GetLinuxDistro (distro_name, distro_version);

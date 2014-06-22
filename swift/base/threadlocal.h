@@ -16,31 +16,102 @@
 #define __SWIFT_BASE_THREAD_LOCAL_H__
 
 #include <pthread.h>
-#include <assert.h>
+#include <cassert>
+#include <atomic>
+#include <memory>
+#include <vector>
+#include <mutex>
+#include <unordered_map>
 
 #include "swift/base/noncopyable.hpp"
 
 namespace swift {
 
+typedef void (*UnrefHandler) (void *ptr);
+class ThreadLocalPtr
+{
+public:
+    explicit ThreadLocalPtr (UnrefHandler handler = nullptr);
+    ~ThreadLocalPtr ();
+
+    void* Get () const;
+    void Reset (void *ptr);
+    void* Swap (void *ptr);
+    bool CompareAndSwap (void *ptr, void*& expected);
+    void Scrape (std::vector<void*> *ptrs, const void *replacement);
+
+protected:
+    struct Entry
+    {
+        Entry () : ptr (nullptr) {}
+        Entry (const Entry& other) : ptr (other.ptr.load (std::memory_order_relaxed)) {}
+        std::atomic<void*> ptr;
+    };
+
+    struct ThreadData
+    {
+        ThreadData () {}
+        std::vector<Entry> entries;
+        ThreadData* next;
+        ThreadData* prev;
+    };
+
+    class StaticMeta
+    {
+    public:
+        StaticMeta ();
+
+        uint32_t GetId ();
+        uint32_t PeekId () const;
+        void* Get (uint32_t id);
+        void Reset (uint32_t id, void *ptr);
+        void* Swap (uint32_t id, void *ptr);
+        void ReclaimId (uint32_t id);
+        void Scrape (uint32_t id, std::vector<void*> *ptrs, const void *replacement);
+        bool CompareAndSwap (uint32_t id, void *ptr, void*& expected);
+        void SetHandler (uint32_t id, UnrefHandler handler);
+
+    private:
+        UnrefHandler GetHandler (uint32_t id) const;
+        void AddThreadData (ThreadData* data);
+        void RemoveThreadData (ThreadData* data);
+
+    private:
+        static void OnThreadExit (void *ptr);
+        static ThreadData* GetThreadLocal ();
+
+    private:
+        ThreadData head_;
+        pthread_key_t key_;
+        uint32_t next_instance_id_;
+        std::vector<uint32_t> free_instance_ids_;
+        std::unordered_map<uint32_t, UnrefHandler> handler_map_;
+
+        static std::mutex kLock_;
+        static __thread ThreadData* kTls_;
+     }; // StaticMeta
+
+     static StaticMeta* Instance ();
+
+     const uint32_t id_;
+};
+
 template <typename T>
 class ThreadLocal : swift::noncopyable
 {
 public:
-    ThreadLocal () : key_ (0)
-    {
-        int err = pthread_key_create (&key_, &ThreadLocal::OnThreadExit);
-        assert (err == 0); (void) err;
-    }
-
+    ThreadLocal () : tlp_ (OnThreadExit) { }
     ~ThreadLocal ()
     {
-        int err = pthread_key_delete (key_);
-        assert (err == 0); (void) err;
+        // if (nullptr != tlp_) {
+        //     delete tlp_;
+        //     tlp_ = nullptr;
+        // }
     }
 
     T* Get () const
     {
-        T* ptr = static_cast<T*>(pthread_getspecific (key_));
+        T* ptr = static_cast<T*>(tlp_.Get ());
         if (nullptr != ptr) {
             return ptr;
         }
@@ -58,15 +129,7 @@ public:
 
     void Reset (T* t = nullptr)
     {
-        T* ptr = Get ();
-        if (t != ptr) {
-            if (nullptr != ptr) {
-                delete ptr;
-            }
-            
-            int err = pthread_setspecific (key_, t);
-            assert (err == 0); (void) err;
-        }
+        tlp_.Reset (t);
     }
 
     // movable
@@ -88,14 +151,12 @@ private:
     T* MakeTls () const
     {
         T* ptr = new T ();
-        int err = pthread_setspecific (key_, ptr);
-        assert (err == 0); (void) err;
+        tlp_.Reset (ptr);
         return ptr;
     }
 
 private:
-    mutable pthread_key_t key_;
+    mutable ThreadLocalPtr tlp_;
 };
-
 } // namespace swift
 #endif // __SWIFT_BASE_THREAD_LOCAL_H__

@@ -50,7 +50,7 @@ protected:
 
     struct ThreadData
     {
-        ThreadData () {}
+        ThreadData () : next (nullptr), prev (nullptr) {}
         std::vector<Entry> entries;
         ThreadData* next;
         ThreadData* prev;
@@ -101,13 +101,7 @@ class ThreadLocal : swift::noncopyable
 {
 public:
     ThreadLocal () : tlp_ (OnThreadExit) { }
-    ~ThreadLocal ()
-    {
-        // if (nullptr != tlp_) {
-        //     delete tlp_;
-        //     tlp_ = nullptr;
-        // }
-    }
+    ~ThreadLocal () {}
 
     T* Get () const
     {

@@ -38,15 +38,13 @@ static size_t Convert (char buf[], const T value)
     T i = value;
     char* p = buf;
 
-    do
-    {
+    do {
         int lsd = static_cast<int>(i % 10);
         i /= 10;
         *p++ = zero[lsd];
     } while (i != 0);
 
-    if (value < 0)
-    {
+    if (value < 0) {
         *p++ = '-';
     }
     *p = '\0';
@@ -63,8 +61,7 @@ size_t ConvertHex (char buf[], uintptr_t value)
     uintptr_t i = value;
     char* p = buf;
 
-    do
-    {
+    do {
         int lsd = i % 16;
         i /= 16;
         *p++ = digits_hex[lsd];

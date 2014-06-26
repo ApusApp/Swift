@@ -67,7 +67,7 @@ void* ThreadLocalPtr::StaticMeta::Get (uint32_t id)
 }
 
 // public
-void ThreadLocalPtr::StaticMeta::Reset (uint32_t id, void *ptr)
+void ThreadLocalPtr::StaticMeta::Reset (uint32_t id, void* ptr)
 {
     assert (id >= 0);
     ThreadLocalPtr::ThreadData* data = GetThreadLocal ();
@@ -100,8 +100,8 @@ void ThreadLocalPtr::StaticMeta::ReclaimId (uint32_t id)
 
 // public
 void ThreadLocalPtr::StaticMeta::Scrape (uint32_t id,
-                                         std::vector<void*> *ptrs,
-                                         const void *replacement)
+                                         std::vector<void*>* ptrs,
+                                         const void* replacement)
 {
     std::lock_guard<std::mutex> lock (kLock_);
     for (ThreadLocalPtr::ThreadData *data = head_.next; data != &head_; data = data->next) {
@@ -116,7 +116,7 @@ void ThreadLocalPtr::StaticMeta::Scrape (uint32_t id,
 }
 
 // public
-void* ThreadLocalPtr::StaticMeta::Swap (uint32_t id, void *ptr)
+void* ThreadLocalPtr::StaticMeta::Swap (uint32_t id, void* ptr)
 {
     assert (id >= 0);
     ThreadLocalPtr::ThreadData* data = GetThreadLocal ();
@@ -129,7 +129,7 @@ void* ThreadLocalPtr::StaticMeta::Swap (uint32_t id, void *ptr)
 }
 
 // public
-bool ThreadLocalPtr::StaticMeta::CompareAndSwap (uint32_t id, void *ptr, void*& expected)
+bool ThreadLocalPtr::StaticMeta::CompareAndSwap (uint32_t id, void* ptr, void*& expected)
 {
     assert (id >= 0);
     ThreadLocalPtr::ThreadData* data = GetThreadLocal ();
@@ -179,7 +179,7 @@ void ThreadLocalPtr::StaticMeta::RemoveThreadData (ThreadData* data)
 }
 
 // static private
-void ThreadLocalPtr::StaticMeta::OnThreadExit (void *ptr)
+void ThreadLocalPtr::StaticMeta::OnThreadExit (void* ptr)
 {
     ThreadLocalPtr::ThreadData* data = static_cast<ThreadData*>(ptr);
     assert (nullptr != data);
@@ -255,25 +255,25 @@ void* ThreadLocalPtr::Get () const
 }
 
 // public
-void ThreadLocalPtr::Reset (void *ptr)
+void ThreadLocalPtr::Reset (void* ptr)
 {
     Instance ()->Reset (id_, ptr);
 }
 
 // public
-void* ThreadLocalPtr::Swap (void *ptr)
+void* ThreadLocalPtr::Swap (void* ptr)
 {
     return Instance ()->Swap (id_, ptr);
 }
 
 // public
-bool ThreadLocalPtr::CompareAndSwap (void *ptr, void*& expected)
+bool ThreadLocalPtr::CompareAndSwap (void* ptr, void*& expected)
 {
     return Instance ()->CompareAndSwap (id_, ptr, expected);
 }
 
 // public
-void ThreadLocalPtr::Scrape (std::vector<void*> *ptrs, const void *replacement)
+void ThreadLocalPtr::Scrape (std::vector<void*>* ptrs, const void* replacement)
 {
     Instance ()->Scrape (id_, ptrs, replacement);
 }

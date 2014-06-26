@@ -27,7 +27,8 @@
 
 namespace swift {
 
-typedef void (*UnrefHandler) (void *ptr);
+// ThreadLocalPtr is stolen from the rocksdb and change some implementation
+typedef void (*UnrefHandler) (void* ptr);
 class ThreadLocalPtr
 {
 public:
@@ -35,10 +36,10 @@ public:
     ~ThreadLocalPtr ();
 
     void* Get () const;
-    void Reset (void *ptr);
-    void* Swap (void *ptr);
-    bool CompareAndSwap (void *ptr, void*& expected);
-    void Scrape (std::vector<void*> *ptrs, const void *replacement);
+    void Reset (void* ptr);
+    void* Swap (void* ptr);
+    bool CompareAndSwap (void* ptr, void*& expected);
+    void Scrape (std::vector<void*>* ptrs, const void* replacement);
 
 protected:
     struct Entry
@@ -64,11 +65,11 @@ protected:
         uint32_t GetId ();
         uint32_t PeekId () const;
         void* Get (uint32_t id);
-        void Reset (uint32_t id, void *ptr);
-        void* Swap (uint32_t id, void *ptr);
+        void Reset (uint32_t id, void* ptr);
+        void* Swap (uint32_t id, void* ptr);
         void ReclaimId (uint32_t id);
-        void Scrape (uint32_t id, std::vector<void*> *ptrs, const void *replacement);
-        bool CompareAndSwap (uint32_t id, void *ptr, void*& expected);
+        void Scrape (uint32_t id, std::vector<void*>* ptrs, const void* replacement);
+        bool CompareAndSwap (uint32_t id, void* ptr, void*& expected);
         void SetHandler (uint32_t id, UnrefHandler handler);
 
     private:
@@ -77,7 +78,7 @@ protected:
         void RemoveThreadData (ThreadData* data);
 
     private:
-        static void OnThreadExit (void *ptr);
+        static void OnThreadExit (void* ptr);
         static ThreadData* GetThreadLocal ();
 
     private:
@@ -88,7 +89,7 @@ protected:
         std::unordered_map<uint32_t, UnrefHandler> handler_map_;
 
         static std::mutex kLock_;
-        static __thread ThreadData* kTls_;
+        static __thread ThreadData *kTls_;
      }; // StaticMeta
 
      static StaticMeta* Instance ();
@@ -131,7 +132,7 @@ public:
     ThreadLocal& operator= (ThreadLocal&&) = default;
 
 private:
-    static void OnThreadExit (void *obj)
+    static void OnThreadExit (void* obj)
     {
         T* ptr = static_cast<T*>(obj);
         typedef char T_must_be_complete_type[sizeof(T) == 0 ? -1 : 1];

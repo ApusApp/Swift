@@ -194,8 +194,10 @@ void ThreadLocalPtr::StaticMeta::OnThreadExit (void *ptr)
     for (auto &it : data->entries) {
         void *p = it.ptr.load (std::memory_order_relaxed);
         if (nullptr != p) {
-            auto unref = instance->GetHandler (id);
-            unref (p);
+            UnrefHandler handler = instance->GetHandler (id);
+            if (nullptr != handler) {
+                handler (p);
+            }
         }
 
         ++id;

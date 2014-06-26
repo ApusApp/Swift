@@ -19,7 +19,6 @@ string (TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
 include_directories (.)
 
 add_subdirectory (swift/base)
-#add_subdirectory (swift/disruptor)
 
 add_subdirectory (test/base)
 add_subdirectory (test/disruptor)

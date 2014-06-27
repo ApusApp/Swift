@@ -30,7 +30,7 @@ TEST(test_Guid, Correctly)
 
     for (int i = 0; i < 100; ++i) {
         std::move(swift::Guid::Generate(guid));
-        EXPECT_TRUE(swift::Guid::IsValidGuid(guid));
+        EXPECT_TRUE(swift::Guid::IsValid(guid));
     }
 }
 
@@ -54,7 +54,7 @@ TEST(test_Guid, Uniqueness)
             std::string guid;
             for (int i = 0; i < 10000; ++i) {
                 EXPECT_TRUE(swift::Guid::Generate(guid));
-                EXPECT_TRUE(swift::Guid::IsValidGuid(guid));
+                EXPECT_TRUE(swift::Guid::IsValid(guid));
                 mu.lock();
                 auto ret = ss.insert(std::move(guid));
                 mu.unlock();

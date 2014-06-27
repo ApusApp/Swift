@@ -51,7 +51,7 @@ bool Guid::Generate(std::string& guid)
 }
 
 // static public
-bool Guid::IsValidGuid(const std::string& guid)
+bool Guid::IsValid(const std::string& guid)
 {
     size_t len = guid.size();
     if (36u != len) {

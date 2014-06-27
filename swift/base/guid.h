@@ -29,7 +29,7 @@ public:
     static bool Generate(std::string& guid);
 
     // Returns true if the input string conforms to the GUID format.
-    static bool IsValidGuid(const std::string& guid);
+    static bool IsValid(const std::string& guid);
 
     static bool RandomDataToGuidString(const uint64_t bytes[2], std::string& guid);
 

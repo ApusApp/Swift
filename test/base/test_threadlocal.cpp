@@ -58,52 +58,55 @@ TEST(test_ThreadLocal, UniqueId)
     std::mutex mu;
     std::condition_variable cv;
 
-    EXPECT_EQ(IDChecker::PeekId(), 0u);
+    uint32_t n = IDChecker::PeekId();
+
+    EXPECT_EQ(IDChecker::PeekId(), 0u + n);
     // New ThreadLocal instance bumps id by 1
     {
         // Id used 0
-        TestData p1(&mu, &cv, nullptr, 1u);
-        EXPECT_EQ(IDChecker::PeekId(), 1u);
+        TestData p1(&mu, &cv, nullptr, 1u + n);
+        EXPECT_EQ(IDChecker::PeekId(), 1u + n);
         // Id used 1
-        TestData p2(&mu, &cv, nullptr, 1u);
-        EXPECT_EQ(IDChecker::PeekId(), 2u);
+        TestData p2(&mu, &cv, nullptr, 1u + n);
+        EXPECT_EQ(IDChecker::PeekId(), 2u + n);
         // Id used 2
-        TestData p3(&mu, &cv, nullptr, 1u);
-        EXPECT_EQ(IDChecker::PeekId(), 3u);
+        TestData p3(&mu, &cv, nullptr, 1u + n);
+        EXPECT_EQ(IDChecker::PeekId(), 3u + n);
         // Id used 3
-        TestData p4(&mu, &cv, nullptr, 1u);
-        EXPECT_EQ(IDChecker::PeekId(), 4u);
+        TestData p4(&mu, &cv, nullptr, 1u + n);
+        EXPECT_EQ(IDChecker::PeekId(), 4u + n);
     }
     // id 3, 2, 1, 0 are in the free queue in order
-    EXPECT_EQ(IDChecker::PeekId(), 0u);
+    EXPECT_EQ(IDChecker::PeekId(), 0u + n);
 
     // pick up 0
-    TestData p1(&mu, &cv, nullptr, 1u);
-    EXPECT_EQ(IDChecker::PeekId(), 1u);
+    TestData p1(&mu, &cv, nullptr, 1u + n);
+    EXPECT_EQ(IDChecker::PeekId(), 1u + n);
     // pick up 1
-    TestData *p2 = new TestData(&mu, &cv, nullptr, 1u);
-    EXPECT_EQ(IDChecker::PeekId(), 2u);
+    TestData *p2 = new TestData(&mu, &cv, nullptr, 1u + n);
+    EXPECT_EQ(IDChecker::PeekId(), 2u + n);
     // pick up 2
-    TestData p3(&mu, &cv, nullptr, 1u);
-    EXPECT_EQ(IDChecker::PeekId(), 3u);
+    TestData p3(&mu, &cv, nullptr, 1u + n);
+    EXPECT_EQ(IDChecker::PeekId(), 3u + n);
     // return up 1
     delete p2;
-    EXPECT_EQ(IDChecker::PeekId(), 1u);
+    EXPECT_EQ(IDChecker::PeekId(), 1u + n);
     // Now we have 3, 1 in queue
     // pick up 1
-    TestData p4(&mu, &cv, nullptr, 1u);
-    EXPECT_EQ(IDChecker::PeekId(), 3u);
+    TestData p4(&mu, &cv, nullptr, 1u + n);
+    EXPECT_EQ(IDChecker::PeekId(), 3u + n);
     // pick up 3
-    TestData p5(&mu, &cv, nullptr, 1u);
+    TestData p5(&mu, &cv, nullptr, 1u + n);
     // next new id
-    EXPECT_EQ(IDChecker::PeekId(), 4u);
+    EXPECT_EQ(IDChecker::PeekId(), 4u + n);
     // After exit, id sequence in queue:
     // 3, 1, 2, 0
 }
 
-TEST(ThreadLocal, ConcurrentReadWrite)
+TEST(test_ThreadLocal, ConcurrentReadWrite)
 {
-    EXPECT_EQ(IDChecker::PeekId(), 0u);
+    uint32_t n = IDChecker::PeekId();
+    EXPECT_EQ(IDChecker::PeekId(), 0u + n);
 
     swift::ThreadLocalPtr tls2;
     std::mutex mu1;
@@ -189,12 +192,13 @@ TEST(ThreadLocal, ConcurrentReadWrite)
         i.join();
     }
 
-    EXPECT_EQ(IDChecker::PeekId(), 3u);
+    EXPECT_EQ(IDChecker::PeekId(), 3u + n);
 }
 
 TEST(test_ThreadLocal, SequentialReadWrite)
 {
-    EXPECT_EQ(IDChecker::PeekId(), 0u);
+    uint32_t n = IDChecker::PeekId();
+    EXPECT_EQ(IDChecker::PeekId(), 0u + n);
     std::mutex mu;
     std::condition_variable cv;
     TestData p(&mu, &cv, nullptr, 1);
@@ -220,7 +224,7 @@ TEST(test_ThreadLocal, SequentialReadWrite)
 
     std::vector<std::thread> ths;
     for (int iter = 0; iter < 1024; ++iter) {
-        EXPECT_EQ(IDChecker::PeekId(), 1u);
+        EXPECT_EQ(IDChecker::PeekId(), 1u + n);
         // Another new thread, read/write should not see value from previous thread
         ths.push_back(std::move(std::thread (func, &p)));
 
@@ -229,7 +233,7 @@ TEST(test_ThreadLocal, SequentialReadWrite)
             cv.wait(lock);
         }
 
-        EXPECT_EQ(IDChecker::PeekId(), 1u);
+        EXPECT_EQ(IDChecker::PeekId(), 1u + n);
     }
 
     for (auto && i : ths) {
@@ -239,7 +243,8 @@ TEST(test_ThreadLocal, SequentialReadWrite)
 
 TEST(test_ThreadLocal, Unref)
 {
-    EXPECT_EQ(IDChecker::PeekId(), 0u);
+    uint32_t n = IDChecker::PeekId();
+    EXPECT_EQ(IDChecker::PeekId(), 0u + n);
     auto unref_func = [](void *ptr) {
         TestData *data = static_cast<TestData*>(ptr);
         data->mu->lock();

@@ -114,8 +114,7 @@ ssize_t WrapFileOpVFuncT (Func f,
                 ret -= iov->iov_len;
                 ++iov;
                 --size;
-            }
-            else {
+            } else {
                 iov->iov_base = static_cast<char*>(iov->iov_base) + ret;
                 iov->iov_len -= ret;
                 ret = 0;

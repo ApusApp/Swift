@@ -54,8 +54,12 @@ void LogBench (const char* buf, bool is_write_long_string = false)
 
     swift::Timestamp end (swift::Timestamp::Now ());
     double seconds = swift::TimeDifference (end, start);
-    printf ("%12s: %f seconds, %lu bytes, %10.2f msg/s, %.2f MiB/s\n",
-        buf, seconds, g_total_write_size.load (), n / seconds, g_total_write_size / seconds / (1024 * 1024));
+    // printf ("%12s: %f seconds, %lu bytes, %10.2f msg/s, %.2f MiB/s\n",
+    //     buf, seconds, g_total_write_size.load (), n / seconds, g_total_write_size / seconds / (1024 * 1024));
+    printf ("%12s: %f seconds, %llu bytes, %10.2f msg/s, %.2f MiB/s\n",
+        buf, seconds, g_total_write_size.load (),
+        static_cast<double>(n / seconds),
+        static_cast<double>(g_total_write_size / seconds / (1024 * 1024)));
     g_total_write_size = 0;
 }
 

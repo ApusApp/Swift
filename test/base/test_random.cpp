@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <thread>
 #include <vector>
+#include <exception>
+#include <iostream>
 
 class test_Random : public testing::Test
 {
@@ -24,40 +26,45 @@ TEST(test_Random, RandomSeed)
 
 TEST(test_Random, MultiThreadSeed)
 {
-    int count = 1024;
+    int count = 20;
     std::vector<uint32_t> seeds(count);
     std::vector<std::thread> ths;
-    for (int i = 0; i < count; ++i) {
-        ths.push_back(std::move(std::thread([i, &seeds]{
-            seeds[i] = swift::Random::RandomNumberSeed();
-        })));
-    }
 
-    for (auto&& i : ths) {
-        i.join();
-    }
+    try {
+        for (int i = 0; i < count; ++i) {
+            ths.push_back(std::move(std::thread([i, &seeds]{
+                seeds[i] = swift::Random::RandomNumberSeed();
+            })));
+        }
 
-    std::sort(seeds.begin(), seeds.end());
-    for (int i = 0; i < count - 1; ++i) {
-        EXPECT_LT(seeds[i], seeds[i + 1]);
+        for (auto&& i : ths) {
+            i.join();
+        }
+
+        std::sort(seeds.begin(), seeds.end());
+        for (int i = 0; i < count - 1; ++i) {
+            EXPECT_LT(seeds[i], seeds[i + 1]);
+        }
+    }
+    catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
     }
 }
 
-void TestFunc()
+TEST(test_Random, RandUInt64)
 {
-#ifdef f
-    uint32_t n = f();
-    n = f(0);
+    uint32_t n = swift::Random::RandUInt64();
+    n = swift::Random::RandUInt64(0);
     EXPECT_TRUE(n == 0);
-    n = f(1);  // [0, 1)
+    n = swift::Random::RandUInt64(1);  // [0, 1)
     EXPECT_TRUE(n == 0);
 
-    int count = 1024;
+    int count = 20;
     std::vector<uint32_t> values(count);
     std::vector<std::thread> ths;
     for (int i = 0; i < count; ++i) {
         ths.push_back(std::move(std::thread([i, &values]{
-            values[i] = f(100, 1000);  // [100, 1000)
+            values[i] = swift::Random::RandUInt64(100, 1000);  // [100, 1000)
         })));
     }
 
@@ -73,23 +80,41 @@ void TestFunc()
     }
 
     swift::detail::ThreadLocalPRNG prng;
-    n = f(1, prng);  // [0, 1)
+    n = swift::Random::RandUInt64(1, prng);  // [0, 1)
     EXPECT_TRUE(n == 0);
-#endif
-}
-
-TEST(test_Random, RandUInt64)
-{
-    #define f swift::Random::RandUInt64
-    TestFunc();
-    #undef f
 }
 
 TEST(test_Random, RandUInt32)
 {
-    #define f swift::Random::RandUInt32
-    TestFunc();
-    #undef f
+    uint32_t n = swift::Random::RandUInt32();
+    n = swift::Random::RandUInt32(0);
+    EXPECT_TRUE(n == 0);
+    n = swift::Random::RandUInt32(1);  // [0, 1)
+    EXPECT_TRUE(n == 0);
+
+    int count = 20;
+    std::vector<uint32_t> values(count);
+    std::vector<std::thread> ths;
+    for (int i = 0; i < count; ++i) {
+        ths.push_back(std::move(std::thread([i, &values]{
+            values[i] = swift::Random::RandUInt32(100, 1000);  // [100, 1000)
+        })));
+    }
+
+    for (auto&& i : ths) {
+        i.join();
+    }
+
+    std::sort(values.begin(), values.end());
+    for (int i = 0; i < count - 1; ++i) {
+        EXPECT_LE(values[i], values[i + 1]);
+        EXPECT_LT(values[i], 1000);
+        EXPECT_GE(values[i], 100);
+    }
+
+    swift::detail::ThreadLocalPRNG prng;
+    n = swift::Random::RandUInt32(1, prng);  // [0, 1)
+    EXPECT_TRUE(n == 0);
 }
 
 TEST(test_Random, RandBool)

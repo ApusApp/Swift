@@ -17,6 +17,7 @@
 #include "swift/base/guid.h"
 
 #include <stdio.h>  // snprintf
+#include <cstdlib>  // strtoull
 
 #include "swift/base/stringpiece.h"
 #include "swift/base/random.h"
@@ -74,4 +75,61 @@ bool Guid::IsValid(const std::string& guid)
 
     return true;
 }
+
+// public
+Guid::Guid()
+{
+    for (uint32_t i = 0; i < sizeof(bytes_) / sizeof(uint64_t); ++i) {
+        bytes_[i] = Random::RandUInt64();
+    }
+}
+
+// public
+Guid::Guid(const std::string& guid)
+{
+    if (36u == guid.size() && IsValid(guid)) {
+        size_t n = 0;
+        size_t j = 0;
+        char buf[17] = { '\0' };
+        for (size_t i = 0; i < guid.size(); ++i) {
+            if (i == 8 || i == 13 || i == 18 || i == 23) {
+                continue;
+            }
+
+            buf[j++] = guid[i];
+            if (17 == i || 35 == i) {
+                buf[16] = '\0';
+                bytes_[n++] = std::strtoull(buf, nullptr, 16);
+                j = 0;
+            }
+        }
+    } else {
+        for (uint32_t i = 0; i < sizeof(bytes_) / sizeof(uint64_t); ++i) {
+            bytes_[i] = 0u;
+        }
+    }
+}
+
+// public
+Guid::Guid(const Guid& guid)
+{
+    if (this != &guid) {
+        for (uint32_t i = 0; i < sizeof(bytes_) / sizeof(uint64_t); ++i) {
+            bytes_[i] = guid.bytes_[i];
+        }
+    }
+}
+
+// public
+Guid& Guid::operator= (const Guid& rhs)
+{
+    if (this != &rhs) {
+        for (uint32_t i = 0; i < sizeof(bytes_) / sizeof(uint64_t); ++i) {
+            bytes_[i] = rhs.bytes_[i];
+        }
+    }
+
+    return *this;
+}
+
 } // namespace swift

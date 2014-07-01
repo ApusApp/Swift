@@ -19,11 +19,38 @@
 
 #include <stdint.h>
 #include <string>
+#include <cassert>
 
 namespace swift {
 
 class Guid
 {
+public:
+    Guid();
+    Guid(const std::string& guid);
+    ~Guid() {};
+
+    Guid(const Guid& guid);
+    Guid& operator=(const Guid& rhs);
+
+    inline bool IsValid() const
+    {
+        return (0 != bytes_[0]) || (0 != bytes_[1]);
+    }
+
+    inline std::string ToString() const
+    {
+        assert(true == IsValid());
+        std::string guid;
+        RandomDataToGuidString(bytes_, guid);
+        return guid;
+    }
+
+    bool operator== (const Guid& rhs) const
+    {
+        return (bytes_[0] == rhs.bytes_[0]) && (bytes_[1] == rhs.bytes_[1]);
+    }
+
 public:
     // Generate a 128 bit random GUID of the form: "%08X-%04X-%04X-%04X-%012llX".
     static bool Generate(std::string& guid);
@@ -32,6 +59,9 @@ public:
     static bool IsValid(const std::string& guid);
 
     static bool RandomDataToGuidString(const uint64_t bytes[2], std::string& guid);
+
+private:
+    uint64_t bytes_[2];
 
 private:
     static const char* kHexChars;

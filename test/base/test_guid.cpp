@@ -67,3 +67,31 @@ TEST(test_Guid, Uniqueness)
         i.join();
     }
 }
+
+TEST(test_Guid, Others)
+{
+    swift::Guid guid;
+    EXPECT_TRUE(guid.IsValid());
+    std::string s = guid.ToString();
+    EXPECT_TRUE(false == s.empty());
+    EXPECT_EQ(s.size(), 36);
+
+    swift::Guid str_guid (s);
+    EXPECT_TRUE(str_guid.IsValid());
+    EXPECT_EQ(s, str_guid.ToString());
+
+    s = "01234567-89AB-CDEF-FEDC-BA";
+    swift::Guid g(s);
+    EXPECT_FALSE(g.IsValid());
+
+    s = "01234567-89AB-CDEF-HEDC-BA9876543210";
+    swift::Guid gg(s);
+    EXPECT_FALSE(gg.IsValid());
+
+    s = "00000000-0000-0000-HEDC-BA9876543210";
+    swift::Guid ggg(s);
+    EXPECT_FALSE(ggg.IsValid());
+
+    swift::Guid gggg = guid;
+    EXPECT_EQ(gggg, guid);
+}

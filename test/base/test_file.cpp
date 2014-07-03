@@ -26,15 +26,27 @@ public:
 
 TEST_F (test_File, Open)
 {
-    char buf = 'a';
-    swift::File f;
-    EXPECT_EQ (-1, f.GetFd ());
-    EXPECT_TRUE (f.Open ("/etc/hosts", O_RDONLY));
-    EXPECT_NE (-1, f.GetFd ());
-    EXPECT_EQ (1, ::read (f.GetFd (), &buf, 1));
-    EXPECT_NE (buf, 'a');
-    f.Close ();
-    EXPECT_EQ (-1, f.GetFd ());
+    {
+        char buf = 'a';
+        swift::File f;
+        EXPECT_EQ (-1, f.GetFd ());
+        EXPECT_TRUE (f.Open ("/etc/hosts", O_RDONLY));
+        EXPECT_NE (-1, f.GetFd ());
+        EXPECT_EQ (1, ::read (f.GetFd (), &buf, 1));
+        EXPECT_NE (buf, 'a');
+        f.Close ();
+        EXPECT_EQ (-1, f.GetFd ());
+    }
+
+    swift::File tmp = swift::File::Temporary ();
+    int tmp_fd = tmp.GetFd();
+    swift::File f (tmp_fd, true);
+    EXPECT_EQ (tmp.Release (), tmp_fd);
+    EXPECT_EQ (-1, tmp.GetFd ());
+    int fd = f.GetFd();
+    EXPECT_EQ (tmp_fd, fd);
+    EXPECT_EQ (true, f.Open("/etc/hosts", O_RDONLY));
+    EXPECT_NE (fd, f.GetFd());
 }
 
 TEST_F (test_File, Release)
@@ -45,14 +57,14 @@ TEST_F (test_File, Release)
 }
 
 namespace {
-    void ExpectWouldBlock (ssize_t r) 
+    void ExpectWouldBlock (ssize_t r)
     {
         int savedErrno = errno;
         EXPECT_EQ (-1, r);
         EXPECT_EQ (EAGAIN, savedErrno);
     }
 
-    void ExpectOK (ssize_t r) 
+    void ExpectOK (ssize_t r)
     {
         //int savedErrno = errno;
         EXPECT_LE (0, r);
@@ -123,7 +135,7 @@ TEST_F (test_File, Truthy)
 
         EXPECT_NE (-1, f.GetFd ());
     }
-    
+
     EXPECT_FALSE (bool (swift::File ()));
     if (swift::File ()) {
         EXPECT_TRUE (false);
@@ -191,7 +203,7 @@ TEST_F (test_File, Others)
             EXPECT_EQ (tmp_fd, fd);
             EXPECT_TRUE (tmp.Close ());
         }
-        
+
         swift::File tmp (tmp_fd, true);
         swift::Swap (tmp, f);
         EXPECT_EQ (tmp_fd, f.GetFd ());

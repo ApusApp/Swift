@@ -44,11 +44,16 @@ File& File::operator= (File&& other)
 }
 
 // public
-bool File::Open (const char *file_name, 
-                 int flags /*= O_RDWR | O_LARGEFILE | O_CREAT*/, 
+bool File::Open (const char *file_name,
+                 int flags /*= O_RDWR | O_LARGEFILE | O_CREAT*/,
                  mode_t mode /*= 0666*/)
 {
+    if (fd_ > 0) {
+        Close();
+    }
+
     fd_ = fileutil::Open (file_name, flags, mode);
+    is_owns_ = true;
     return (fd_ > 0) ? true : false;
 }
 
@@ -85,7 +90,7 @@ File File::Dup () const
         if (LIKELY (-1 != fd)) {
             File f (fd, true);
             ret_file.Swap (f);
-        }        
+        }
     }
 
     return ret_file;
@@ -109,7 +114,7 @@ File File::Temporary ()
             ret_file.Swap (f);
         }
     }
-    
+
     return ret_file;
 }
 

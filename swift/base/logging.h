@@ -143,6 +143,7 @@ inline Logger::LogSeverity Logger::GetLogSeverity ()
 
 // Check that the input is non NULL.  This very useful in constructor
 // initializer lists.
+#ifndef CHECK_NOTNULL
 #define CHECK_NOTNULL(val) swift::CheckNotNull (__FILE__, __LINE__, "'" #val "' Must be non NULL", (val))
 
 // A small helper for CHECK_NOTNULL().
@@ -153,7 +154,7 @@ T* CheckNotNull (const Logger::SourceFile& file, int line, const char *names, T*
     }
     return t;
 }
-
+#endif // CHECK_NOTNULL
 } // namespace swift
 
 #endif // __SWIFT_BASE_LOGGING_H__

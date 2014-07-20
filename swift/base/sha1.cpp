@@ -204,37 +204,9 @@ Sha1::~Sha1()
 }
 
 // public
-void Sha1::Update(const void* data, size_t length)
-{
-    if (data && length) {
-        detail::Sha1Update(&context_,
-                           reinterpret_cast<const unsigned char*>(data),
-                           static_cast<uint32_t>(length));
-        complete_ = true;
-    }
-}
-
-// public
 void Sha1::Update(const StringPiece& str)
 {
     Update(str.data(), str.length());
-}
-
-// public
-void Sha1::Final()
-{
-    if (complete_) {
-        detail::Sha1Final(&context_, &digest_);
-    }
-}
-
-// public
-void Sha1::Reset()
-{
-    digest_.Init();
-    memset(&context_, 0, sizeof(context_));
-    detail::Sha1Init(&context_);
-    complete_ = false;
 }
 
 // public
@@ -247,31 +219,12 @@ std::string Sha1::ToString() const
     return ret;
 }
 
-// public
-bool Sha1::operator== (const Sha1& rhs) const
-{
-    if (!complete_ && !rhs.complete_) {
-        return true;
-    }
-
-    return (0 == memcmp(digest_.digest, rhs.digest_.digest, sizeof(digest_.digest)));
-}
-
 // static public
 void Sha1::Sha1Sum(const StringPiece& str, std::string* out)
 {
     assert(nullptr != out);
     if (!str.empty()) {
         detail::ComputeSha1(str.data(), static_cast<uint32_t>(str.size()), out);
-    }
-}
-
-// static public
-void Sha1::Sha1Sum(const void* data, size_t length, std::string* out)
-{
-    assert(nullptr != out);
-    if (data && length) {
-        detail::ComputeSha1(data, static_cast<uint32_t>(length), out);
     }
 }
 

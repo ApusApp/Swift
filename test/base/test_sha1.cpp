@@ -13,36 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- #include <swift/base/sha1.h>
- #include <gtest/gtest.h>
- #include <openssl/sha.h>
- #include <swift/base/stringpiece.h>
+#include <swift/base/sha1.h>
+#include <gtest/gtest.h>
+#include <openssl/sha.h>
+#include <swift/base/stringpiece.h>
 
- class test_Sha1 : public testing::Test
- {
- public:
-     test_Sha1();
-     ~test_Sha1();
- };
+class test_Sha1 : public testing::Test
+{
+public:
+    test_Sha1();
+    ~test_Sha1();
+};
 
- std::string SSL_Sha1Sum(const void* data, size_t size)
- {
+std::string SSL_Sha1Sum(const void* data, size_t size)
+{
     char tmp[3] = {'\0'};
     char buf[41] = {'\0'};
     swift::detail::Sha1Digest digest;
-    SHA1(reinterpret_cast<const unsigned char*>(data),
-                          size,
-                          digest.digest);
+    SHA1(reinterpret_cast<const unsigned char*>(data), size, digest.digest);
     for (unsigned i = 0; i < sizeof(digest.digest); ++i) {
         snprintf(tmp, sizeof(tmp), "%02x", digest.digest[i]);
         strcat(buf, tmp);
     }
 
     return std::string(buf, sizeof(buf) - 1);
- }
+}
 
- TEST(test_Sha1, All)
- {
+TEST(test_Sha1, All)
+{
     swift::StringPiece str("abcdefghijklmnopqrstuvwxyz0123456789");
     std::string sha1;
     std::string ssl_sha1 = SSL_Sha1Sum(str.data(), str.length());

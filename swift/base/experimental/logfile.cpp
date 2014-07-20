@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "swift/base/logfile.h"
+#include "swift/base/experimental/logfile.h"
 #include "swift/base/processinformation.h"
 
 namespace swift {
@@ -81,10 +81,10 @@ private:
 };
 
 // public
-LogFile::LogFile (const std::string& file_name, 
-                  size_t roll_size, 
-                  bool thread_safe /*= true*/, 
-                  int flush_interval /*= 3*/, 
+LogFile::LogFile (const std::string& file_name,
+                  size_t roll_size,
+                  bool thread_safe /*= true*/,
+                  int flush_interval /*= 3*/,
                   int check_every_count /*= 1024*/)
     : mutex_ (thread_safe ? new std::mutex : nullptr)
     , name_ (file_name)

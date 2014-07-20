@@ -17,7 +17,7 @@
 #include <string.h>
 #include <sstream>
 
-#include "swift/base/logging.h"
+#include "swift/base/experimental/logging.h"
 #include "swift/base/timezone.h"
 #include "swift/base/thisthread.h"
 
@@ -42,7 +42,7 @@ namespace detail {
         else if (::getenv ("SWIFT_LOG_DEBUG")) {
             return swift::Logger::LS_DEBUG;
         }
-        
+
         return swift::Logger::LS_INFO;
     }
 
@@ -86,7 +86,7 @@ inline LogStream& operator<< (LogStream& s, const Logger::SourceFile& f)
     return s;
 }
 
-// public 
+// public
 Logger::LogSeverity g_log_severity = detail::InitLogSeverity ();
 
 std::function<void (const char*, int)> g_output = std::move ([](const char* msg, int len) {
@@ -100,9 +100,9 @@ std::function<void (void)> g_flush = std::move ([](void) {
 TimeZone g_log_time_zone;
 
 // private
-Logger::LoggerImpl::LoggerImpl (Logger::LogSeverity log_severity, 
-                                const int old_errno, 
-                                const SourceFile& file, 
+Logger::LoggerImpl::LoggerImpl (Logger::LogSeverity log_severity,
+                                const int old_errno,
+                                const SourceFile& file,
                                 const int line)
     : time_ (Timestamp::Now ())
     , stream_ ()
@@ -134,7 +134,7 @@ void Logger::LoggerImpl::FormatTime ()
             ::gmtime_r (&seconds, &localtime);
         }
 
-        int length = snprintf (t_time, sizeof(t_time), "%4d%02d%02d %02d:%02d:%02d", 
+        int length = snprintf (t_time, sizeof(t_time), "%4d%02d%02d %02d:%02d:%02d",
                                localtime.tm_year + 1900,
                                localtime.tm_mon + 1,
                                localtime.tm_mday,

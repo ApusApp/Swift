@@ -17,11 +17,10 @@
 
 #include <inttypes.h>
 #include <string>
-#include <boost/operators.hpp>
 
 namespace swift {
 
-class Timestamp : boost::less_than_comparable<Timestamp>
+class Timestamp
 {
 public:
     Timestamp ();
@@ -44,14 +43,14 @@ public:
     bool Valid () const { return micro_seconds_since_epoch_ > 0; }
 
     // for internal usage.
-    int64_t MicroSecondsSinceEpoch () const 
-    { 
-        return micro_seconds_since_epoch_; 
+    int64_t MicroSecondsSinceEpoch () const
+    {
+        return micro_seconds_since_epoch_;
     }
 
-    time_t SecondsSinceEpoch () const 
-    { 
-        return static_cast<time_t> (micro_seconds_since_epoch_ / kMicroSecondsPerSecond); 
+    time_t SecondsSinceEpoch () const
+    {
+        return static_cast<time_t> (micro_seconds_since_epoch_ / kMicroSecondsPerSecond);
     }
 
     static Timestamp Now ();
@@ -72,6 +71,16 @@ inline bool operator< (const Timestamp& lhs, const Timestamp& rhs)
 inline bool operator== (const Timestamp& lhs, const Timestamp& rhs)
 {
     return lhs.MicroSecondsSinceEpoch () == rhs.MicroSecondsSinceEpoch ();
+}
+
+inline bool operator!= (const Timestamp& lhs, const Timestamp& rhs)
+{
+    return !(lhs == rhs);
+}
+
+inline bool operator> (const Timestamp& lhs, const Timestamp& rhs)
+{
+    return !(lhs < rhs) && (lhs != rhs);
 }
 
 /**

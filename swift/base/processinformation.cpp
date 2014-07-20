@@ -43,8 +43,8 @@ public:
 
         FILE* pfd = fopen (file_name, "r");
         if (nullptr == pfd) {
-            LOG_ERROR << "Could not open [" << file_name << "], pid = "
-                      << static_cast<uint32_t>(pid);
+            LOG (ERROR) << "Could not open [" << file_name << "], pid = "
+                        << static_cast<uint32_t>(pid);
 
             // TO DO
             // throw a Exception
@@ -87,8 +87,8 @@ public:
                             */
                             );
             if (0 == found) {
-                LOG_ERROR << "System error: reading proc information, pid = "
-                          << static_cast<uint32_t>(pid);
+                LOG (ERROR) << "System error: reading proc information, pid = "
+                           << static_cast<uint32_t>(pid);
             }
 
             fclose (pfd);
@@ -476,7 +476,7 @@ bool ProcessInformation::BlockInMemory (const void* start)
     if (mincore (const_cast<void*>(AlignToStartOfPage (start)),
                  GetPageSize (),
                  &x)) {
-        LOG_ERROR << "mincore failed: " << strerror (errno);
+        LOG (ERROR) << "mincore failed: " << strerror (errno);
         return 1;
     }
 
@@ -532,8 +532,8 @@ void ProcessInformation::SystemInformation::CollectSystemInformation ()
     detail::LinuxSystemHelper::GetLinuxDistro (distro_name, distro_version);
 
     if (-1 == uname (&uname_data)) {
-        LOG_ERROR << "Unable to collect detailed system information: "
-                  << strerror (errno);
+        LOG (ERROR) << "Unable to collect detailed system information: "
+                    << strerror (errno);
     }
 
     os_type_ = "Linux";

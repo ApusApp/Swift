@@ -77,10 +77,33 @@ public:
     Sha1();
     ~Sha1();
 
-    void Update(const void* data, size_t length);
+    inline void Update(const void* data, size_t length)
+    {
+        if (data && length) {
+            detail::Sha1Update(&context_,
+                               reinterpret_cast<const unsigned char*>(data),
+                               static_cast<uint32_t>(length));
+            complete_ = true;
+        }
+    }
+
     void Update(const StringPiece& str);
-    void Final();
-    void Reset();
+
+    inline void Final()
+    {
+        if (complete_) {
+            detail::Sha1Final(&context_, &digest_);
+        }
+    }
+
+    inline void Reset()
+    {
+        digest_.Init();
+        memset(&context_, 0, sizeof(context_));
+        detail::Sha1Init(&context_);
+        complete_ = false;
+    }
+
     std::string ToString() const;
 
     inline bool Valid() const
@@ -88,7 +111,17 @@ public:
         return complete_;
     }
 
-    bool operator== (const Sha1& rhs) const;
+    inline bool operator== (const Sha1& rhs) const
+    {
+        if (!complete_ && !rhs.complete_) {
+            return true;
+        }
+
+        return (0 == memcmp(digest_.digest,
+                            rhs.digest_.digest,
+                            sizeof(digest_.digest)));
+    }
+
     inline bool operator!= (const Sha1& rhs) const
     {
         return (*this == rhs) ? false : true;
@@ -97,19 +130,30 @@ public:
     // movable
     Sha1 (Sha1&&) = default;
     Sha1& operator=(Sha1&&) = default;
+
 public:
     static void Sha1Sum(const StringPiece& str, std::string* out);
+
     /**
      * @param [in] data
      * @param [in] length
      * @param [out] sha1
      */
-    static void Sha1Sum(const void* data, size_t length, std::string* sha1);
+    static inline void Sha1Sum(const void* data,
+                               size_t length,
+                               std::string* sha1)
+    {
+        if (data && length) {
+            detail::ComputeSha1(data, static_cast<uint32_t>(length), sha1);
+        }
+    }
+
 private:
     bool complete_;
     detail::Sha1Digest digest_;
     detail::Sha1Context context_;
 };
+
 } // namespace swift
 
 #endif // __SWIFT_BASE_SHA1_H__

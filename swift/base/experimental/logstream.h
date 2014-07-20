@@ -12,8 +12,8 @@
  * limitations under the License.
  */
 
-#ifndef __SWIFT_BASE_LOG_STREAM_H__
-#define __SWIFT_BASE_LOG_STREAM_H__
+#ifndef __SWIFT_BASE_EXPERIMENTAL_LOG_STREAM_H__
+#define __SWIFT_BASE_EXPERIMENTAL_LOG_STREAM_H__
 
 #include <string.h>
 #include <string>
@@ -218,4 +218,4 @@ inline LogStream& operator<< (LogStream& s, const Format& fmt)
 
 } // end of namespace swift
 
-#endif // __SWIFT_BASE_LOG_STREAM_H__
+#endif // __SWIFT_BASE_EXPERIMENTAL_LOG_STREAM_H__

@@ -155,9 +155,9 @@ public:
     // Note: this is fast because there is no locking, but state could
     // change before you get a chance to act on it.
     // Mainly useful for sanity checks / asserts.
-    State GetState () 
-    { 
-        return state_; 
+    State GetState ()
+    {
+        return state_;
     }
 
 private:
@@ -216,14 +216,14 @@ private:
                 t ();
             }
             catch (Exception& ex) {
-                LOG_ERROR << "Unhandled Exception: " << ex.what () << "\n";
-                LOG_ERROR << "BackStack: " << ex.GetStackTrace () << "\n";
+                LOG(ERROR) << "Unhandled Exception: " << ex.what () << "\n";
+                LOG(ERROR) << "BackStack: " << ex.GetStackTrace () << "\n";
             }
             catch (std::exception& ex) {
-                LOG_ERROR << "Unhandled std::exception: " << ex.what () << "\n";
+                LOG(ERROR) << "Unhandled std::exception: " << ex.what () << "\n";
             }
             catch (...) {
-                LOG_ERROR << "Unhandled non-exception in worker thread\n";
+                LOG(ERROR) << "Unhandled non-exception in worker thread\n";
             }
 
             is_done_ = true;

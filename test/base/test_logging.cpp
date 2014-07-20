@@ -2,8 +2,8 @@
 #include <thread>
 #include <inttypes.h>
 
-#include <swift/base/logging.h>
-#include <swift/base/logfile.h>
+#include <swift/base/experimental/logging.h>
+#include <swift/base/experimental/logfile.h>
 #include <swift/base/threadpool.h>
 #include <swift/base/timezone.h>
 

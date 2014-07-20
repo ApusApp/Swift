@@ -334,7 +334,7 @@ static inline void MD5IntermediateFinal (MD5Digest* digest, const MD5Context* co
 // public
 MD5::MD5 () : complete_ (false), digest_ ()
 {
-    bzero (context_, sizeof (context_));
+    bzero (&context_, sizeof (context_));
     detail::MD5Init (&context_);
 }
 
@@ -374,7 +374,7 @@ void MD5::Final ()
 void MD5::Reset ()
 {
     digest_.Init ();
-    bzero (context_, sizeof (context_));
+    bzero (&context_, sizeof (context_));
     detail::MD5Init (&context_);
     complete_ = false;
 }

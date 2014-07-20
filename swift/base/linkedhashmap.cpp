@@ -12,9 +12,8 @@
  * limitations under the License.
  */
 
-#include <sys/mman.h>
-
 #include "swift/base/linkedhashmap.h"
+#include <sys/mman.h>
 
 namespace swift {
 namespace detail {

@@ -15,11 +15,10 @@
 #ifndef __SWIFT_BASE_MEMORY_MAP_H__
 #define __SWIFT_BASE_MEMORY_MAP_H__
 
-#include <glog/logging.h>
-
 #include "swift/base/stringpiece.h"
 #include "swift/base/noncopyable.hpp"
 #include "swift/base/file.h"
+#include "swift/base/logging.h"
 
 namespace swift {
 

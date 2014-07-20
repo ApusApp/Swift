@@ -65,8 +65,13 @@ public:
     void Update (const StringPiece& str);
     void Final ();
     void Reset ();
-    bool Valid () const;
     std::string ToString () const;
+
+    inline bool Valid () const
+    {
+        return complete_;
+    }
+
     bool operator== (const MD5& rhs) const;
 
     inline bool operator!= (const MD5& rhs) const

@@ -73,9 +73,9 @@ static void ByteReverse (unsigned char* buf, unsigned longs)
 // The core of the MD5 algorithm, this alters an existing MD5 has to
 // reflect the addition of 16 longwords of new data. MD5Update blocks
 // the data and converts bytes into longwords for this routine.
-static void MD5Transform (uint32_t buf[4], const uint32_t in[16]) 
+static void MD5Transform (uint32_t buf[4], const uint32_t in[16])
 {
-    register uint32_t a; 
+    register uint32_t a;
     register uint32_t b;
     register uint32_t c;
     register uint32_t d;
@@ -254,7 +254,7 @@ static void MD5Final (MD5Digest* digest, MD5Context* context)
     // Compute number of bytes mod 64
     unsigned count = (ctx->bits[0] >> 3) & 0x3f;
 
-    // Set the first char of padding to 0x80. 
+    // Set the first char of padding to 0x80.
     // This is safe since there is always at least one byte free.
     unsigned char *p = ctx->in + count;
     *p++ = 0x80;
@@ -380,17 +380,10 @@ void MD5::Reset ()
 }
 
 // public
-bool MD5::Valid () const
-{
-    StringPiece digest (reinterpret_cast<const char*>(digest_.digest));
-    return digest.empty () ? false : true;
-}
-
-// public
 std::string MD5::ToString () const
 {
     std::string ret;
-    if (Valid ()) {
+    if (complete_) {
         ret = std::move (detail::MD5DigestToString (digest_));
     }
 
@@ -400,9 +393,11 @@ std::string MD5::ToString () const
 // public
 bool MD5::operator== (const MD5& rhs) const
 {
-    StringPiece rhs_digest (reinterpret_cast<const char*>(rhs.digest_.digest));
-    StringPiece this_digest (reinterpret_cast<const char*>(digest_.digest));
-    return (rhs_digest == this_digest) ? true : false;
+    if (!complete_ && !rhs.complete_) {
+        return true;
+    }
+
+    return (0 == memcmp(digest_.digest, rhs.digest_.digest, sizeof(digest_.digest)));
 }
 
 // static public

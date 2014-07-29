@@ -72,6 +72,7 @@ uint32_t ThreadLocalPRNG::GetImpl(LocalInstancePRNG* local)
 
 } // namespace detail
 
+// static public
 uint32_t Random::RandomNumberSeed()
 {
     struct timeval tv;

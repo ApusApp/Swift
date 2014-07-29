@@ -25,6 +25,7 @@ namespace swift {
 class Random;
 namespace detail {
 
+// Thread local random number generator
 class ThreadLocalPRNG
 {
     friend class Random;
@@ -63,85 +64,88 @@ private:
 class Random
 {
 private:
-    template<typename RNG>
+    template<typename RandomNumberGenerator>
     using ValidRNG = typename std::enable_if<
-        std::is_unsigned<typename std::result_of<RNG&()>::type>::value,
-        RNG>::type;
+        std::is_unsigned<typename std::result_RandomNumberGenerator&()>::type>::value,
+        RandomNumberGenerator>::type;
 
 public:
     // Return a good seed for a random number gnerator
     static uint32_t RandomNumberSeed();
 
     // Return a random uint32_t
-    template<typename RNG = detail::ThreadLocalPRNG>
-    static inline uint32_t RandUInt32(ValidRNG<RNG> rrng = RNG())
+    template<typename RandomNumberGenerator = detail::ThreadLocalPRNG>
+    static inline uint32_t RandUInt32(ValidRRandomNumberGenerator> rrng = RandomNumberGenerator())
     {
         return rrng.operator()();
     }
 
     // Return [0, max), if max = 0 return 0
-    template<typename RNG = detail::ThreadLocalPRNG>
-    static inline uint32_t RandUInt32(uint32_t max, ValidRNG<RNG> rrng = RNG())
+    template<typename RandomNumberGenerator = detail::ThreadLocalPRNG>
+    static inline uint32_t RandUInt32(uint32_t max,
+                                      ValidRNG<RandomNumberGenerator> rrng = RandomNumberGenerator())
     {
         if (0 == max) { return 0; }
         return std::uniform_int_distribution<uint32_t>(0, max - 1)(rrng);
     }
 
     // Return [min, max), if min == max return 0
-    template<typename RNG = detail::ThreadLocalPRNG>
+    template<typename RandomNumberGenerator = detail::ThreadLocalPRNG>
     static inline uint32_t RandUInt32(uint32_t min,
                                       uint32_t max,
-                                      ValidRNG<RNG> rrng = RNG())
+                                      ValidRNG<RandomNumberGenerator> rrng = RandomNumberGenerator())
     {
         if (min == max) { return 0; }
         return std::uniform_int_distribution<uint32_t>(min, max - 1)(rrng);
     }
 
     // Return  a random uint64_t
-    template<typename RNG = detail::ThreadLocalPRNG>
-    static inline uint64_t RandUInt64(ValidRNG<RNG> rrng = RNG())
+    template<typename RandomNumberGenerator = detail::ThreadLocalPRNG>
+    static inline uint64_t RandUInt64(ValidRNG<RandomNumberGenerator> rrng = RandomNumberGenerator())
     {
         return ((uint64_t)rrng() << 32) | rrng();
     }
 
     // Return [0, max), if max = 0 return 0
-    template<typename RNG = detail::ThreadLocalPRNG>
-    static inline uint64_t RandUInt64(uint64_t max, ValidRNG<RNG> rrng = RNG())
+    template<typename RandomNumberGenerator = detail::ThreadLocalPRNG>
+    static inline uint64_t RandUInt64(uint64_t max,
+                                      ValidRNG<RandomNumberGenerator> rrng = RandomNumberGenerator())
     {
         if (0 == max) { return 0; }
         return std::uniform_int_distribution<uint64_t>(0, max - 1)(rrng);
     }
 
     // Return [min, max), if min == max return 0
-    template<typename RNG = detail::ThreadLocalPRNG>
+    template<typename RandomNumberGenerator = detail::ThreadLocalPRNG>
     static inline uint64_t RandUInt64(uint64_t min,
                                       uint64_t max,
-                                      ValidRNG<RNG> rrng = RNG())
+                                      ValidRNG<RandomNumberGenerator> rrng = RandomNumberGenerator())
     {
         if (min == max) { return 0; }
         return std::uniform_int_distribution<uint64_t>(min, max - 1)(rrng);
     }
 
     // Return true 1/n of the time. If 0 == n, always return false
-    template<typename RNG = detail::ThreadLocalPRNG>
-    static inline bool RandBool(uint32_t n, ValidRNG<RNG> rrng = RNG())
+    template<typename RandomNumberGenerator = detail::ThreadLocalPRNG>
+    static inline bool RandBool(uint32_t n,
+                                ValidRNG<RandomNumberGenerator> rrng = RandomNumberGenerator())
     {
         return (0 == n) ? false : (RandUInt32(n, rrng) == 0);
     }
 
     // Returns [0, 1)
-    template<typename RNG = detail::ThreadLocalPRNG>
-    static inline double RandDouble01(ValidRNG<RNG> rrng = RNG())
+    template<typename RandomNumberGenerator = detail::ThreadLocalPRNG>
+    static inline double RandDouble01(ValidRNG<RandomNumberGenerator> rrng = RandomNumberGenerator())
     {
         return std::generate_canonical<double,
                                        std::numeric_limits<double>::digits>(rrng);
     }
 
     // Returns a double in [min, max), if max == min, return 0
-    template<typename RNG = detail::ThreadLocalPRNG>
+    template<typename RandomNumberGenerator = detail::ThreadLocalPRNG>
     static inline double RandDouble(double min,
                                     double max,
-                                    ValidRNG<RNG> rrng = RNG())
+                                    ValidRNG<RandomNumberGenerator> rrng = RandomNumberGenerator())
     {
         if (std::fabs(max - min) < std::numeric_limits<double>::epsilon()) {
             return 0;

@@ -66,7 +66,7 @@ class Random
 private:
     template<typename RandomNumberGenerator>
     using ValidRNG = typename std::enable_if<
-        std::is_unsigned<typename std::result_RandomNumberGenerator&()>::type>::value,
+        std::is_unsigned<typename std::result_of<RandomNumberGenerator&()>::type>::value,
         RandomNumberGenerator>::type;
 
 public:
@@ -75,7 +75,7 @@ public:
 
     // Return a random uint32_t
     template<typename RandomNumberGenerator = detail::ThreadLocalPRNG>
-    static inline uint32_t RandUInt32(ValidRRandomNumberGenerator> rrng = RandomNumberGenerator())
+    static inline uint32_t RandUInt32(ValidRNG<RandomNumberGenerator> rrng = RandomNumberGenerator())
     {
         return rrng.operator()();
     }

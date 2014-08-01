@@ -161,3 +161,44 @@ TEST(test_Random, RandDouble)
         t.join();
     }
 }
+
+TEST(test_Random, String)
+{
+    std::string s;
+    swift::Random::RandomString(&s, 10);
+    EXPECT_TRUE(!s.empty());
+    EXPECT_EQ(s.size(), 10);
+    for (size_t i = 0; i < s.size(); ++i)
+    {
+        printf("%02X", s[i]);
+    }
+    printf("\n");
+
+    s.clear();
+    swift::Random::RandomString(&s, 0);
+    EXPECT_TRUE(s.empty());
+    EXPECT_EQ(s.size(), 0);
+
+    std::string* p = nullptr;
+    swift::Random::RandomString(p, 100);
+    EXPECT_EQ(p, nullptr);
+
+    EXPECT_EQ(sizeof(uint32_t), sizeof(swift::Random::SecureRandom<uint32_t>()));
+    EXPECT_EQ(sizeof(int32_t),  sizeof(swift::Random::SecureRandom<int32_t>()));
+    EXPECT_EQ(sizeof(uint64_t), sizeof(swift::Random::SecureRandom<uint64_t>()));
+    EXPECT_EQ(sizeof(int64_t),  sizeof(swift::Random::SecureRandom<int64_t>()));
+    EXPECT_EQ(sizeof(char),     sizeof(swift::Random::SecureRandom<char>()));
+    EXPECT_EQ(sizeof(unsigned), sizeof(swift::Random::SecureRandom<unsigned>()));
+    EXPECT_EQ(sizeof(unsigned char), sizeof(swift::Random::SecureRandom<unsigned char>()));
+}
+
+TEST(test_Random, StateSize)
+{
+    EXPECT_EQ(sizeof(uint_fast32_t) / 4 + 3,
+        swift::detail::StateSize<std::minstd_rand0>::value);
+    EXPECT_EQ(624, swift::detail::StateSize<std::mt19937>::value);
+    #if USE_SIMD_PRNG
+    EXPECT_EQ(624, swift::detail::StateSize<__gnu_cxx::sfmt19937>::value);
+    #endif
+    EXPECT_EQ(24, swift::detail::StateSize<std::ranlux24_base>::value);
+}

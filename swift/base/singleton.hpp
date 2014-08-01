@@ -34,10 +34,11 @@ public:
         return *value_;
     }
 
-private:
+protected:
     Singleton () {};
     ~Singleton () {};
 
+private:
     static void Init ()
     {
         if (0 == value_) {

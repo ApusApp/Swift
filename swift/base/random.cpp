@@ -19,49 +19,126 @@
 #include <sys/time.h>
 #include <cassert>
 #include <array>
-#include <random>
 #include <algorithm>
 
-#if __GNUC_PREREQ(4, 8)
-#include <ext/random>
-#define USE_SIMD_PRNG
-#endif
-
-#include "swift/base/thisthread.h"
+#include "swift/base/logging.h"
+#include "swift/base/file.h"
+#include "swift/base/likely.h"
+#include "swift/base/singleton.hpp"
 
 namespace swift {
+namespace {
+
+// Use Singleton ot keep it open for the durarion of the program
+class RandomDevice : public Singleton<RandomDevice>
+{
+public:
+    RandomDevice() : dev_()
+    {
+        PCHECK(true == dev_.Open("/dev/urandom"));
+    }
+
+    inline void Read(void* data, size_t size)
+    {
+        PCHECK(size == dev_.Read(static_cast<char*>(data), size));
+    }
+
+private:
+    File dev_;
+};
+
+class BufferedRandomDevice
+{
+public:
+    explicit BufferedRandomDevice(size_t buffer_size = kDefaultBufferSize)
+        : buffer_size_(buffer_size)
+        , buffer_(new unsigned char[buffer_size])
+        , ptr_(buffer_.get() + buffer_size)
+    {
+
+    };
+
+    ~BufferedRandomDevice() {};
+
+    void Get(void* data, size_t size)
+    {
+        if (LIKELY(size <= Remaining())) {
+            ::memcpy(data, ptr_, size);
+            ptr_ += size;
+        } else {
+            GetSlow(static_cast<unsigned char*>(data), size);
+        }
+    }
+
+private:
+    void GetSlow(unsigned char* data, size_t size)
+    {
+        DCHECK_GT(size, Remaining());
+        if (size >= buffer_size_) {
+            // Just read directly
+            RandomDevice::Instance().Read(data, size);
+            return;
+        }
+
+        size_t copied = Remaining();
+        ::memcpy(data, ptr_, copied);
+        data += copied;
+        size -= copied;
+
+        // refill
+        RandomDevice::Instance().Read(buffer_.get(), buffer_size_);
+        ptr_ = buffer_.get();
+
+        ::memcpy(data, ptr_, size);
+        ptr_ += size;
+    }
+
+    inline size_t Remaining() const
+    {
+        return buffer_.get() + buffer_size_ - ptr_;
+    }
+
+public:
+    static constexpr size_t kDefaultBufferSize = 128;
+
+private:
+    const size_t buffer_size_;
+    std::unique_ptr<unsigned char[]> buffer_;
+    unsigned char* ptr_;
+}; // BufferedRandomDevice
+
+ThreadLocal<BufferedRandomDevice> buffered_random_device;
+
+} // anonymous namespace
 
 namespace detail {
 
-std::atomic<uint32_t> seed_input(0);
-
 class ThreadLocalPRNG::LocalInstancePRNG
 {
-#ifdef USE_SIMD_PRNG
-    typedef __gnu_cxx::sfmt19937 RNG;
-#else
-    typedef std::mt19937 RNG;
-#endif
-
-static RNG MakeRng()
-{
-    std::array<int, RNG::state_size> seed_data;
-    std::random_device rdev;  // /dev/urandom
-    std::generate_n(seed_data.data(), seed_data.size(), std::ref(rdev));
-    std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
-    return RNG(seq);
-}
+public:
+    LocalInstancePRNG() : rng_(std::move(Random::Create())) {}
+    ~LocalInstancePRNG() {}
 
 public:
-    LocalInstancePRNG() : rng_(std::move(MakeRng())) {}
-
-public:
-    RNG rng_;
+    Random::DefaultGenerator rng_;
 };
 
-swift::ThreadLocal<ThreadLocalPRNG::LocalInstancePRNG> ThreadLocalPRNG::kLocalInstance;
+ThreadLocal<ThreadLocalPRNG::LocalInstancePRNG> ThreadLocalPRNG::kLocalInstance;
 
-ThreadLocalPRNG::ThreadLocalPRNG() : local_(kLocalInstance.Get()) {};
+ThreadLocalPRNG::ThreadLocalPRNG() : local_(kLocalInstance.Get())
+{
+    if (nullptr == local_) {
+        local_ = InitLocal();
+    }
+}
+
+// static private
+ThreadLocalPRNG::LocalInstancePRNG* ThreadLocalPRNG::InitLocal()
+{
+    LocalInstancePRNG* prng = new LocalInstancePRNG;
+    kLocalInstance.Reset(prng);
+    return prng;
+}
 
 // static private
 uint32_t ThreadLocalPRNG::GetImpl(LocalInstancePRNG* local)
@@ -73,14 +150,9 @@ uint32_t ThreadLocalPRNG::GetImpl(LocalInstancePRNG* local)
 } // namespace detail
 
 // static public
-uint32_t Random::RandomNumberSeed()
+void Random::SecureRandom(void* data, size_t size)
 {
-    struct timeval tv;
-    gettimeofday(&tv, nullptr);
-    return 51551u * (detail::seed_input++)
-         + 61631u * static_cast<uint32_t>(swift::thisthread::GetTid())
-         + 64997u * static_cast<uint32_t>(tv.tv_sec)
-         + 111857u * static_cast<uint32_t>(tv.tv_usec);
+    buffered_random_device->Get(data, size);
 }
 
 } // namespace swift

@@ -17,6 +17,13 @@
 
 #include <random>
 #include <stdint.h>
+#include <string>
+#include <type_traits>
+
+#if __GNUC_PREREQ(4, 8)
+#include <ext/random>
+#define USE_SIMD_PRNG 1
+#endif
 
 #include "swift/base/threadlocal.h"
 
@@ -52,12 +59,13 @@ public:
 
 private:
     class LocalInstancePRNG;
+    static LocalInstancePRNG* InitLocal();
     static result_type GetImpl(LocalInstancePRNG* local);
 
 private:
     LocalInstancePRNG* local_;
 
-    static swift::ThreadLocal<ThreadLocalPRNG::LocalInstancePRNG> kLocalInstance;
+    static ThreadLocal<ThreadLocalPRNG::LocalInstancePRNG> kLocalInstance;
 };
 } // namespace detail
 
@@ -68,10 +76,57 @@ private:
     using ValidRNG = typename std::enable_if<
         std::is_unsigned<typename std::result_of<RandomNumberGenerator&()>::type>::value,
         RandomNumberGenerator>::type;
+public:
+    // Default generator type.
+    #if USE_SIMD_PRNG
+        typedef __gnu_cxx::sfmt19937 DefaultGenerator;
+    #else
+        typedef std::mt19937 DefaultGenerator;
+    #endif
 
 public:
     // Return a good seed for a random number gnerator
-    static uint32_t RandomNumberSeed();
+    static inline uint32_t RandomNumberSeed()
+    {
+        return RandUInt32();
+    }
+
+    // Get secure random bytes. (On Linux and OSX, this means /dev/urandom)
+    static void SecureRandom(void* data, size_t size);
+
+    // Shortcut to get a secure random value of integral type.
+    template<typename T>
+    static typename std::enable_if<
+        std::is_integral<T>::value && !std::is_same<T, bool>::value,
+        T>::type
+    SecureRandom()
+    {
+        T val;
+        SecureRandom(&val, sizeof(val));
+        return val;
+    }
+
+    /**
+    * (Re-)Seed an existing RNG with a good seed.
+    *
+    * Note that you should usually use ThreadLocalPRNG unless you need
+    * reproducibility (such as during a test), in which case you'd want
+    * to create a RNG with a good seed in production, and seed it yourself
+    * in test.
+    */
+    template<typename RandomNumberGenerator = DefaultGenerator>
+    static void Seed(ValidRNG<RandomNumberGenerator>& rng);
+
+    /**
+    * Create a new RNG, seeded with a good seed.
+    *
+    * Note that you should usually use ThreadLocalPRNG unless you need
+    * reproducibility (such as during a test), in which case you'd want
+    * to create a RNG with a good seed in production, and seed it yourself
+    * in test.
+    */
+    template<typename RandomNumberGenerator = DefaultGenerator>
+    static ValidRNG<RandomNumberGenerator> Create();
 
     // Return a random uint32_t
     template<typename RandomNumberGenerator = detail::ThreadLocalPRNG>
@@ -153,7 +208,19 @@ public:
 
         return std::uniform_real_distribution<double>(min, max)(rrng);
     }
+
+    // Random generate a string
+    static inline void RandomString(std::string* out, size_t size)
+    {
+        if (nullptr != out && size > 0) {
+            out->resize(size);
+            SecureRandom(&*out->begin(), size);
+        }
+    }
 };
 
 } // namespace swift
+
+#include "swift/base/random-inl.h"
+
 #endif // __SWIFT_BASE_RANDOM_H__

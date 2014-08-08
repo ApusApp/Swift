@@ -192,13 +192,15 @@ void StringUtil::Join(const std::vector<std::string>* components,
                       const char* delimiter,
                       std::string* result)
 {
-    if (nullptr == result || nullptr == components) {
+    if (nullptr == result ||
+        nullptr == components ||
+        components->empty()) {
         return;
     }
 
     result->clear();
     size_t total_length = 0;
-    size_t delimiter_length = (nullptr == delimiter) ? strlen(delimiter) : 0;
+    size_t delimiter_length = (nullptr == delimiter) ? 0 : strlen(delimiter);
     const std::vector<std::string>& vec = *components;
     for (auto const& it : vec) {
         if (!it.empty()) {
@@ -215,14 +217,17 @@ void StringUtil::Join(const std::vector<std::string>* components,
     result->reserve(total_length);
 
     // combine erverything
-    bool first = true;
-    for (auto const& it : vec) {
-        if (!it.empty()) {
-            if (first && delimiter_length) {
-                first = false;
+    std::vector<std::string>::const_iterator end = components->end();
+    std::vector<std::string>::const_iterator it = components->begin();
+    if (it != end && !(*it).empty()) {
+        result->append((*it).data(), (*it).size());
+    }
+    while (++it != end) {
+        if (!(*it).empty()) {
+            if (delimiter_length) {
                 result->append(delimiter, delimiter_length);
             }
-            result->append(it.data(), it.size());
+            result->append((*it).data(), (*it).size());
         }
     }
 }

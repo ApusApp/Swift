@@ -12,65 +12,32 @@
  * limitations under the License.
  */
 
+#include "swift/base/experimental/logstream.h"
+
 #include <algorithm>
 #include <limits>		// numeric_limits
 #include <stdint.h>
 #include <stdio.h>
 #include <type_traits>	// for static_assert and is_arithmetic
 
-#include "swift/base/experimental/logstream.h"
+#include "swift/base/stringutil.h"
 
 namespace swift {
 namespace detail {
 
-static const char digits[] = "9876543210123456789";
-static_assert (sizeof(digits) == 20, "sizeof(digits) must equal to 20");
-
-static const char* zero = digits + 9;
-
-const char digits_hex[] = "0123456789ABCDEF";
-static_assert (sizeof(digits_hex) == 17, "sizeof(digitsHex) must equal to 17");
-
 // Efficient Integer to String Conversions, by Matthew Wilson.
 template<typename T>
-static size_t Convert (char buf[], const T value)
+static inline size_t Convert (char buf[], const T& value)
 {
-    T i = value;
-    char* p = buf;
-
-    do {
-        int lsd = static_cast<int>(i % 10);
-        i /= 10;
-        *p++ = zero[lsd];
-    } while (i != 0);
-
-    if (value < 0) {
-        *p++ = '-';
-    }
-    *p = '\0';
-    std::reverse (buf, p);
-
-    return p - buf;
+    return StringUtil::FastIntegerToBuffer (buf, value);
 }
 
 // uintptr_t:
 // Integer type capable of holding a value converted from a void pointer and then be
 // converted back to that type with a value that compares equal to the original pointer.
-size_t ConvertHex (char buf[], uintptr_t value)
+static inline size_t ConvertHex (char buf[], uintptr_t value)
 {
-    uintptr_t i = value;
-    char* p = buf;
-
-    do {
-        int lsd = i % 16;
-        i /= 16;
-        *p++ = digits_hex[lsd];
-    } while (i != 0);
-
-    *p = '\0';
-    std::reverse (buf, p);
-
-    return p - buf;
+    return StringUtil::FastIntegerToHex (buf, value);
 }
 
 template class FixedBuffer<kSmallBuffer>;

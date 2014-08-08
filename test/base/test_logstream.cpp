@@ -105,7 +105,7 @@ TEST_F (test_LogStream, VoidAndString)
     ASSERT_TRUE (buf.Length () == 0);
 
     os << reinterpret_cast<void*>(9999);
-    ASSERT_TRUE (buf.ToString () == std::string ("0x270F"));
+    ASSERT_TRUE (buf.ToString () == std::string ("0x270f"));
     os.ResetBuffer ();
 
     os << "Hello World!";

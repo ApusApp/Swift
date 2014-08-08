@@ -267,13 +267,21 @@ public:
         return val;
     }
 
+    //
     // Efficient Integer to String Conversions, by Matthew Wilson.
+    // Convert integer to string
+    // Returns the valid length of content
+    //
     template<typename T>
     static size_t FastIntegerToBuffer(char buf[], const T& value);
 
+    //
     // uintptr_t:
     // Integer type capable of holding a value converted from a void pointer and then be
     // converted back to that type with a value that compares equal to the original pointer.
+    //
+    // Returns the valid length of content
+    //
     static size_t FastIntegerToHex(char buf[], uintptr_t value);
 };
 

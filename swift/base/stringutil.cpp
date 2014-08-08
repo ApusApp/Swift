@@ -15,7 +15,6 @@
 #include "stringutil.h"
 
 #include <string.h>
-#include <memory>
 
 namespace swift {
 
@@ -201,8 +200,7 @@ void StringUtil::Join(const std::vector<std::string>* components,
     result->clear();
     size_t total_length = 0;
     size_t delimiter_length = (nullptr == delimiter) ? 0 : strlen(delimiter);
-    const std::vector<std::string>& vec = *components;
-    for (auto const& it : vec) {
+    for (auto const& it : *components) {
         if (!it.empty()) {
             total_length += it.size();
             total_length += delimiter_length;
@@ -217,11 +215,12 @@ void StringUtil::Join(const std::vector<std::string>* components,
     result->reserve(total_length);
 
     // combine erverything
-    std::vector<std::string>::const_iterator end = components->end();
     std::vector<std::string>::const_iterator it = components->begin();
-    if (it != end && !(*it).empty()) {
+    if (!(*it).empty()) {
         result->append((*it).data(), (*it).size());
     }
+
+    std::vector<std::string>::const_iterator end = components->end();
     while (++it != end) {
         if (!(*it).empty()) {
             if (delimiter_length) {

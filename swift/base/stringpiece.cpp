@@ -28,7 +28,7 @@ namespace {
     // the possible values of an unsigned char. Thus it should be be declared
     // as follows:
     // bool table[UCHAR_MAX + 1]
-    inline void BuildLookupTable (const StringPiece& characters_wanted, bool* table) 
+    inline void BuildLookupTable (const StringPiece& characters_wanted, bool* table)
     {
         const size_t length = characters_wanted.length ();
         const char* const data = characters_wanted.data ();
@@ -86,7 +86,7 @@ size_t Find (const StringPiece& self, char c, size_t pos)
     typename StringPiece::const_iterator result =
         std::find (self.begin () + pos, self.end (), c);
     return result != self.end () ?
-           static_cast<size_t>(result - self.begin ()) : 
+           static_cast<size_t>(result - self.begin ()) :
            StringPiece::npos;
 }
 
@@ -311,6 +311,49 @@ std::ostream& operator<< (std::ostream& out, const StringPiece& piece)
 {
     out.write (piece.data (), static_cast<std::streamsize>(piece.size ()));
     return out;
+}
+
+// public
+void StringPiece::Split (std::vector<std::string>* result, const char* delimiter)
+{
+    assert (nullptr != result || nullptr != delimiter);
+    if (empty ()) {
+        return;
+    }
+
+    std::back_insert_iterator<std::vector<std::string>> it(*result);
+    // Optimize the common case where delimiter is a single character.
+    if ('\0' != delimiter[0] && '\0' == delimiter[1]) {
+        char c = delimiter[0];
+        const char* p = data ();
+        const char* end = p + size ();
+        while (p != end) {
+            if (*p == c) {
+                ++p;
+            } else {
+                const char* start = p;
+                while (++p != end && *p != c);
+                *it++ = std::move (std::string (start, p - start));
+            }
+        }
+        return;
+    }
+
+    StringPiece delim (delimiter);
+    size_type end = 0;
+    size_type begin = find_first_not_of (delim);
+    while (npos != begin) {
+        end = find_first_of (delim, begin);
+        if (npos == end) {
+            StringPiece str (substr (begin));
+            *it++ = std::move (str.ToString ());
+            return;
+        }
+
+        StringPiece str (substr (begin, (end - begin)));
+        *it++ = std::move (str.ToString ());
+        begin = find_first_not_of (delim, end);
+    }
 }
 
 } // namespace swift

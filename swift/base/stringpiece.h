@@ -21,6 +21,7 @@
 
 #include <iosfwd>
 #include <string>
+#include <vector>
 
 namespace swift {
 
@@ -43,7 +44,7 @@ size_t FindLastOf (const StringPiece& self, char c, size_t pos);
 size_t FindLastNotOf (const StringPiece& self, const StringPiece& str, size_t pos);
 size_t FindLastNotOf (const StringPiece& self, char c, size_t pos);
 StringPiece SubStr (const StringPiece& self, size_t pos, size_t n);
-} // namespace stringpiecedetail 
+} // namespace stringpiecedetail
 
 class StringPiece
 {
@@ -59,7 +60,7 @@ public:
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     static const size_type npos;
-    
+
 public:
     StringPiece () : ptr_ (nullptr), length_ (0)
     {
@@ -208,8 +209,8 @@ public:
         return length_;
     }
 
-    size_type copy (value_type* buf, 
-                    size_type n, 
+    size_type copy (value_type* buf,
+                    size_type n,
                     size_type pos = 0) const
     {
         return stringpiecedetail::Copy (*this, buf, n, pos);
@@ -277,7 +278,7 @@ public:
 
     StringPiece substr (size_type pos, size_type n = StringPiece::npos)
     {
-        assert (n >= 0 && n <= size ());
+        assert (pos >= 0 && pos <= size ());
         return stringpiecedetail::SubStr (*this, pos, n);
     }
 
@@ -301,6 +302,17 @@ public:
     void AppendToString (std::string* target) const
     {
         stringpiecedetail::AppendToString (*this, target);
+    }
+
+    //
+    // Split a StringPiece using a character(s) delimiter. Append the components to
+    // 'result'. If there are consecutive delimiters, this function skips over all of them.
+    //
+    void Split (std::vector<std::string>* result, const char* delimiter);
+
+    inline void Split (std::vector<std::string>* result, const char delimiter)
+    {
+        Split (result, &delimiter);
     }
 
     uint32_t Hash () const {
@@ -335,23 +347,23 @@ inline bool operator!= (const StringPiece& lhs, const StringPiece& rhs)
 
 inline bool operator< (const StringPiece& lhs, const StringPiece& rhs)
 {
-    const int r = StringPiece::WordMemcmp (lhs.data (), 
-                                           rhs.data (), 
+    const int r = StringPiece::WordMemcmp (lhs.data (),
+                                           rhs.data (),
                                            (lhs.size () < rhs.size () ? lhs.size () : rhs.size ()));
     return ((r < 0) || ((r == 0) && (lhs.size () < rhs.size ())));
 }
 
-inline bool operator> (const StringPiece& lhs, const StringPiece& rhs) 
+inline bool operator> (const StringPiece& lhs, const StringPiece& rhs)
 {
     return rhs < lhs;
 }
 
-inline bool operator<= (const StringPiece& lhs, const StringPiece& rhs) 
+inline bool operator<= (const StringPiece& lhs, const StringPiece& rhs)
 {
     return !(lhs > rhs);
 }
 
-inline bool operator>= (const StringPiece& lhs, const StringPiece& rhs) 
+inline bool operator>= (const StringPiece& lhs, const StringPiece& rhs)
 {
     return !(lhs < rhs);
 }

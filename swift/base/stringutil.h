@@ -223,15 +223,15 @@ public:
         Split(str, &delimiter, result);
     }
 
-    void SplitToSet(const std::string* str,
-                    const char* delimiter,
-                    std::set<std::string>* result);
-    void SplitToHashSet(const std::string* str,
-                        const char* delimiter,
-                        std::unordered_set<std::string>* result);
-    void SplitToHashMap(const std::string* str,
-                        const char* delimiter,
-                        std::unordered_map<std::string, std::string>* result);
+    static void SplitToSet(const std::string* str,
+                           const char* delimiter,
+                           std::set<std::string>* result);
+    static void SplitToHashSet(const std::string* str,
+                               const char* delimiter,
+                               std::unordered_set<std::string>* result);
+    static void SplitToHashMap(const std::string* str,
+                               const char* delimiter,
+                               std::unordered_map<std::string, std::string>* result);
 
 
     //

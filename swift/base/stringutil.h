@@ -20,6 +20,9 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
+#include <set>
+#include <unordered_set>
+#include <unordered_map>
 
 namespace swift {
 class StringUtil
@@ -30,6 +33,22 @@ public:
         // Do not use const_cast<char*>(str->data())
         assert(nullptr != str);
         return str->empty() ? nullptr : &*(str->begin());
+    }
+
+    static inline bool StartWithPrefix(const char* str,
+                                       const char* prefix)
+    {
+        const char* s = str;
+        const char* p = prefix;
+        while (*p) {
+            if (*p != *s) {
+                return false;
+            }
+            ++p;
+            ++s;
+        }
+
+        return true;
     }
 
     static inline bool StartWithPrefix(const std::string& str,
@@ -60,6 +79,20 @@ public:
         return EndWithSuffix(str, suffix) ?
                std::move(str.substr(0, str.size() - suffix.size())) :
                str;
+    }
+
+    static inline uint32_t Count(const std::string* str, char ch)
+    {
+        assert(nullptr != str);
+        uint32_t count = 0;
+        std::string::const_iterator end = str->end();
+        for (std::string::const_iterator it = str->begin(); it != end; ++it) {
+            if (ch == *it) {
+                ++count;
+            }
+        }
+
+        return count;
     }
 
     static inline void ToLower(std::string* str)
@@ -172,8 +205,12 @@ public:
     }
 
     //
-    // Split a string using a character delimiter. Append the components to
-    // 'result'. If there are consecutive delimiters, this function skips over all of them.
+    // Split a string using one or more character delimiters, presented
+    // as a nul-terminated c string. Append the components to 'result'.
+    // If there are consecutive delimiters, this function will return
+    // corresponding empty strings.
+    //
+    // If 'str' is the empty string, yields an empty string as the only value.
     //
     static void Split(const std::string* str,
                       const char* delimiter,
@@ -186,6 +223,17 @@ public:
         Split(str, &delimiter, result);
     }
 
+    void SplitToSet(const std::string* str,
+                    const char* delimiter,
+                    std::set<std::string>* result);
+    void SplitToHashSet(const std::string* str,
+                        const char* delimiter,
+                        std::unordered_set<std::string>* result);
+    void SplitToHashMap(const std::string* str,
+                        const char* delimiter,
+                        std::unordered_map<std::string, std::string>* result);
+
+
     //
     // Split a string using one or more byte delimiters, presented
     // as a nul-terminated c string. Append the components to 'result'.
@@ -197,11 +245,28 @@ public:
     static void SplitAllowEmpty(const std::string* str,
                                 const char* delimiter,
                                 std::vector<std::string>* result);
+    static void SplitToSetAllowEmpty(const std::string* str,
+                                     const char* delimiter,
+                                     std::set<std::string>* result);
+    static void SplitToHashSetAllowEmpty(const std::string* str,
+                                         const char* delimiter,
+                                         std::unordered_set<std::string>* result);
+    //
+    // The even-positioned (0-based) components become the keys for the
+    // odd-positioned components that follow them. When there is an odd
+    // number of components, the value for the last key will be unchanged
+    // if the key was already present in the hash table, or will be the
+    // empty string if the key is a newly inserted key.
+    //
+    static void SplitToHashMapAllowEmpty(const std::string* str,
+                                         const char* delimiter,
+                                         std::unordered_map<std::string, std::string>* result);
 
     //
     // Concatenate a vector of strings into a C++ string, using the C-string
     // 'delimiter' as s separator bwtween components. if 'delimiter' is NULL,
     // concatenate the vector of strings into a string directly.
+    // If string is empty in vector, skip it and no append 'delimiter'.
     // Note. 'result' will be clear at first
     //
     static void Join(const std::vector<std::string>* components,

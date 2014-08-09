@@ -18,6 +18,93 @@
 
 namespace swift {
 
+namespace {
+// NOTE(user): we have to implement our own interator because
+// insert_iterator<set<string> > does not instantiate without
+// errors, perhaps since string != std::string.
+// This is not a fully functional iterator, but is
+// sufficient for SplitToIterator().
+template<typename T>
+struct simple_insert_iterator
+{
+    simple_insert_iterator(T* t_init) : t(t_init) {}
+    simple_insert_iterator<T>& operator=(const typename T::value_type& value)
+    {
+        t->insert(value);
+        return *this;
+    }
+
+    simple_insert_iterator<T>& operator*()     { return *this; }
+    simple_insert_iterator<T>& operator++()    { return *this; }
+    simple_insert_iterator<T>& operator++(int) { return *this; }
+
+    T* t;
+};
+
+// Used to populate a hash_map out of pairs of consecutive strings in
+// SplitToIterator{Using|AllowEmpty}().
+template<typename T>
+struct simple_hash_map_iterator
+{
+    typename std::unordered_map<T, T>::iterator curr;
+
+    simple_hash_map_iterator(std::unordered_map<T, T>* t_init) : even(true), t(t_init)
+    {
+        curr = t->begin();
+    }
+
+    simple_hash_map_iterator<T>& operator=(const T& value)
+    {
+        if (even) {
+            curr = t->insert(std::make_pair(value, T())).first;
+        } else {
+            curr->second = value;
+        }
+        even = !even;
+        return *this;
+    }
+
+    simple_hash_map_iterator<T>& operator*()       { return *this; }
+    simple_hash_map_iterator<T>& operator++()      { return *this; }
+    simple_hash_map_iterator<T>& operator++(int i) { return *this; }
+
+    bool even;
+    std::unordered_map<T, T>* t;
+};
+} // anonymous namespace
+
+//
+// If we know how much to allocate for a vector of strings, we can
+// allocate the vector<string> only once and directly to the right size.
+// This saves in between 33-66 % of memory space needed for the result,
+// and runs faster in the microbenchmarks.
+//
+// The reserve is only implemented for the single character delim.
+//
+// The implementation for counting is cut-and-pasted from
+// SplitStringToIteratorUsing. I could have written my own counting iterator,
+// and use the existing template function, but probably this is more clear
+// and more sure to get optimized to reasonable code.
+//
+static int CalculateReserveForVector(const std::string* str, const char* delimiter)
+{
+    int count = 0;
+    if ('\0' != delimiter[0] && '\0' == delimiter[1]) {
+        char ch = delimiter[0];
+        const char* p = str->data();
+        const char* end = p + str->size();
+        while (p != end) {
+            if (*p == ch) {
+                ++p;
+            } else {
+                while (++p != end && *p != ch);
+                ++count;
+            }
+        }
+    }
+
+    return count;
+}
 //
 // Split a string using a character delimiter. Append the components to 'result'.
 //
@@ -79,7 +166,7 @@ static inline void SplitStringToIteratorAllowEmpty(const STRING_TYPE* str,
 {
     std::string::size_type begin = 0;
     std::string::size_type end = 0;
-    for (int i = 0; (i < pieces) || (0 == pieces); ++i) {
+    for (int i = 0; (i < pieces - 1) || (0 == pieces); ++i) {
         end = str->find_first_of(delimiter, begin);
         if (std::string::npos == end) {
             *result++ = std::move(str->substr(begin));
@@ -90,6 +177,140 @@ static inline void SplitStringToIteratorAllowEmpty(const STRING_TYPE* str,
         begin = end + 1;
     }
     *result++ = std::move(str->substr(begin));
+}
+
+// static public
+void StringUtil::Split(const std::string* str,
+                       const char* delimiter,
+                       std::vector<std::string>* result)
+{
+    if (str && delimiter && result) {
+        result->reserve(result->size() + CalculateReserveForVector(str, delimiter));
+        std::back_insert_iterator<std::vector<std::string>> it(*result);
+        SplitStringToIterator(str, delimiter, it);
+    }
+}
+
+// static public
+void StringUtil::SplitToSet(const std::string* str,
+                            const char* delimiter,
+                            std::set<std::string>* result)
+{
+    if (str && delimiter && result) {
+        simple_insert_iterator<std::set<std::string>> it(result);
+        SplitStringToIterator(str, delimiter, it);
+    }
+}
+
+// static public
+void StringUtil::SplitToHashSet(const std::string* str,
+                                const char* delimiter,
+                                std::unordered_set<std::string>* result)
+{
+    if (str && delimiter && result) {
+        simple_insert_iterator<std::unordered_set<std::string>> it(result);
+        SplitStringToIterator(str, delimiter, it);
+    }
+}
+
+// static public
+void StringUtil::SplitToHashMap(const std::string* str,
+                                const char* delimiter,
+                                std::unordered_map<std::string, std::string>* result)
+{
+    if (str && delimiter && result) {
+        simple_hash_map_iterator<std::string> it(result);
+        SplitStringToIterator(str, delimiter, it);
+    }
+}
+
+// static public
+void StringUtil::SplitAllowEmpty(const std::string* str,
+                                 const char* delimiter,
+                                 std::vector<std::string>* result)
+{
+    if (str && delimiter && result) {
+        std::back_insert_iterator<std::vector<std::string>> it(*result);
+        SplitStringToIteratorAllowEmpty(str, delimiter, 0, it);
+    }
+}
+
+// static public
+void StringUtil::SplitToSetAllowEmpty(const std::string* str,
+                                      const char* delimiter,
+                                      std::set<std::string>* result)
+{
+    if (str && delimiter && result) {
+        simple_insert_iterator<std::set<std::string>> it(result);
+        SplitStringToIteratorAllowEmpty(str, delimiter, 0, it);
+    }
+}
+
+// static public
+void StringUtil::SplitToHashSetAllowEmpty(const std::string* str,
+                                          const char* delimiter,
+                                          std::unordered_set<std::string>* result)
+{
+    if (str && delimiter && result) {
+        simple_insert_iterator<std::unordered_set<std::string>> it(result);
+        SplitStringToIteratorAllowEmpty(str, delimiter, 0, it);
+    }
+}
+
+// static public
+void StringUtil::SplitToHashMapAllowEmpty(const std::string* str,
+                                          const char* delimiter,
+                                          std::unordered_map<std::string, std::string>* result)
+{
+    if (str && delimiter && result) {
+        simple_hash_map_iterator<std::string> it(result);
+        SplitStringToIteratorAllowEmpty(str, delimiter, 0, it);
+    }
+}
+
+// static public
+void StringUtil::Join(const std::vector<std::string>* components,
+                      const char* delimiter,
+                      std::string* result)
+{
+    if (nullptr == result ||
+        nullptr == components ||
+        components->empty()) {
+        return;
+    }
+
+    result->clear();
+    size_t total_length = 0;
+    size_t delimiter_length = (nullptr == delimiter) ? 0 : strlen(delimiter);
+    for (auto const& it : *components) {
+        if (!it.empty()) {
+            total_length += it.size();
+            total_length += delimiter_length;
+        }
+    }
+
+    total_length -= delimiter_length;
+    if (total_length <= 0) {
+        return;
+    }
+
+    result->reserve(total_length);
+
+    // combine erverything
+    std::vector<std::string>::const_iterator it = components->begin();
+    if (!(*it).empty()) {
+        result->append((*it).data(), (*it).size());
+    }
+
+    std::vector<std::string>::const_iterator end = components->end();
+    while (++it != end) {
+        if (!(*it).empty()) {
+            if (delimiter_length) {
+                result->append(delimiter, delimiter_length);
+            }
+            result->append((*it).data(), (*it).size());
+        }
+    }
 }
 
 // static public
@@ -165,73 +386,6 @@ void StringUtil::Replace(const std::string& str,
 }
 
 // static public
-void StringUtil::Split(const std::string* str,
-                       const char* delimiter,
-                       std::vector<std::string>* result)
-{
-    if (str && delimiter && result) {
-        std::back_insert_iterator<std::vector<std::string>> it(*result);
-        SplitStringToIterator(str, delimiter, it);
-    }
-}
-
-// static public
-void StringUtil::SplitAllowEmpty(const std::string* str,
-                                 const char* delimiter,
-                                 std::vector<std::string>* result)
-{
-    if (str && delimiter && result) {
-        std::back_insert_iterator<std::vector<std::string>> it(*result);
-        SplitStringToIteratorAllowEmpty(str, delimiter, 0, it);
-    }
-}
-
-// static public
-void StringUtil::Join(const std::vector<std::string>* components,
-                      const char* delimiter,
-                      std::string* result)
-{
-    if (nullptr == result ||
-        nullptr == components ||
-        components->empty()) {
-        return;
-    }
-
-    result->clear();
-    size_t total_length = 0;
-    size_t delimiter_length = (nullptr == delimiter) ? 0 : strlen(delimiter);
-    for (auto const& it : *components) {
-        if (!it.empty()) {
-            total_length += it.size();
-            total_length += delimiter_length;
-        }
-    }
-
-    total_length -= delimiter_length;
-    if (total_length <= 0) {
-        return;
-    }
-
-    result->reserve(total_length);
-
-    // combine erverything
-    std::vector<std::string>::const_iterator it = components->begin();
-    if (!(*it).empty()) {
-        result->append((*it).data(), (*it).size());
-    }
-
-    std::vector<std::string>::const_iterator end = components->end();
-    while (++it != end) {
-        if (!(*it).empty()) {
-            if (delimiter_length) {
-                result->append(delimiter, delimiter_length);
-            }
-            result->append((*it).data(), (*it).size());
-        }
-    }
-}
-
-// static public
 size_t StringUtil::FastIntegerToHex(char buf[], uintptr_t value)
 {
     static const char digits_hex[] = "0123456789abcdef";
@@ -240,9 +394,8 @@ size_t StringUtil::FastIntegerToHex(char buf[], uintptr_t value)
     uintptr_t i = value;
     char* p = buf;
     do {
-        int lsd = i % 16;
-        i /= 16;
-        *p++ = digits_hex[lsd];
+        *p++ = digits_hex[i & 15];  // mod by 16
+        i >>= 4;                    // divide by 16
     } while (i != 0);
 
     *p = '\0';

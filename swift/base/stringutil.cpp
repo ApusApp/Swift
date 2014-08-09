@@ -64,6 +64,17 @@ struct simple_hash_map_iterator
         return *this;
     }
 
+    simple_hash_map_iterator<T>& operator=(T&& value)
+    {
+        if (even) {
+            curr = t->insert(std::make_pair(std::move(value), std::move(T()))).first;
+        } else {
+            curr->second = std::move(value);
+        }
+        even = !even;
+        return *this;
+    }
+
     simple_hash_map_iterator<T>& operator*()       { return *this; }
     simple_hash_map_iterator<T>& operator++()      { return *this; }
     simple_hash_map_iterator<T>& operator++(int i) { return *this; }

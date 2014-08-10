@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-#include "stringutil.h"
+#include "swift/base/stringutil.h"
 
 #include <string.h>
 

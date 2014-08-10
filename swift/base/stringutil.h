@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <sstream>
 #include <set>
+#include <limits>
 #include <unordered_set>
 #include <unordered_map>
 
@@ -38,9 +39,11 @@ public:
     static inline bool StartWithPrefix(const char* str,
                                        const char* prefix)
     {
+        assert(nullptr != str || nullptr != prefix);
         const char* s = str;
         const char* p = prefix;
-        while (*p) {
+        if ('\0' == *p) return false;
+        while (*p && *s) {
             if (*p != *s) {
                 return false;
             }
@@ -48,22 +51,69 @@ public:
             ++s;
         }
 
-        return true;
+        return ('\0' == *p) ? true : false;
     }
 
     static inline bool StartWithPrefix(const std::string& str,
                                        const std::string& prefix)
     {
-        return (str.size() >= prefix.size()) &&
+        return !prefix.empty() &&
+               (str.size() >= prefix.size()) &&
                (0 == str.compare(0, prefix.size(), prefix));
     }
 
     static inline bool EndWithSuffix(const std::string& str,
                                      const std::string& suffix)
     {
-        return (str.size() >= suffix.size()) &&
+        return !suffix.empty() &&
+               (str.size() >= suffix.size()) &&
                (0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix));
     }
+
+    static inline size_t Count(const char* str,
+                               char ch,
+                               size_t length = std::numeric_limits<size_t>::max())
+    {
+        assert(nullptr != str);
+        size_t count = 0;
+        for (const char* p = str; ('\0' != *p) && (length > 0); --length) {
+            if (*p++ == ch) ++count;
+        }
+
+        return count;
+    }
+
+    static inline std::string& ToLower(std::string& str)
+    {
+        std::string::iterator end = str.end();
+        for (std::string::iterator it = str.begin(); it != end; ++it) {
+            if (('A' <= *it) && (*it <= 'Z')) {
+                *it += ('a' - 'A');
+            }
+        }
+
+        return str;
+    }
+
+    static inline std::string& ToUpper(std::string& str)
+    {
+        std::string::iterator end = str.end();
+        for (std::string::iterator it = str.begin(); it != end; ++it) {
+            if (('a' <= *it) && (*it <= 'z')) {
+                *it += ('A' - 'a');
+            }
+        }
+
+        return str;
+    }
+
+    //
+    // Replaces any occurrence of the character 'remove' with the character 'replace_with'
+    // returns reference of the 'str'
+    //
+    static std::string& Strip(std::string& str,
+                              const char* remove,
+                              char replace_with);
 
     static inline std::string StripPrefix(const std::string& str,
                                           const std::string& prefix)
@@ -80,50 +130,6 @@ public:
                std::move(str.substr(0, str.size() - suffix.size())) :
                str;
     }
-
-    static inline uint32_t Count(const std::string* str, char ch)
-    {
-        assert(nullptr != str);
-        uint32_t count = 0;
-        std::string::const_iterator end = str->end();
-        for (std::string::const_iterator it = str->begin(); it != end; ++it) {
-            if (ch == *it) {
-                ++count;
-            }
-        }
-
-        return count;
-    }
-
-    static inline void ToLower(std::string* str)
-    {
-        assert(nullptr != str);
-        std::string::iterator end = str->end();
-        for (std::string::iterator it = str->begin(); it != end; ++it) {
-            if (('A' <= *it) && (*it <= 'Z')) {
-                *it += ('a' - 'A');
-            }
-        }
-    }
-
-    static inline void ToUpper(std::string* str)
-    {
-        assert(nullptr != str);
-        std::string::iterator end = str->end();
-        for (std::string::iterator it = str->begin(); it != end; ++it) {
-            if (('a' <= *it) && (*it <= 'z')) {
-                *it += ('A' - 'a');
-            }
-        }
-    }
-
-    //
-    // Replaces any occurrence of the character 'remove' with the character 'replace_with'
-    // returns reference of the 'str'
-    //
-    static std::string& Strip(std::string& str,
-                              const char* remove,
-                              char replace_with);
 
     //
     // Removes characters in " \t\r\n" from head or tail of the 'str'
@@ -183,6 +189,7 @@ public:
     // Replace the 'old_str' pattern with the 'new_str' pattern in a string,
     // and append the result to 'out_str'.  If replace_all is false,
     // it only replaces the first instance of 'old_str'.
+    //
     static void Replace(const std::string& str,
                         const std::string& old_str,
                         const std::string& new_str,

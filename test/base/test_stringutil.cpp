@@ -143,4 +143,60 @@ TEST(test_StringUtil, Trims)
 
     //TrimSpaces
     EXPECT_EQ("abc", swift::StringUtil::TrimSpaces(str_1));
+    EXPECT_EQ("abc", swift::StringUtil::TrimSpaces(str_1));
+    str_1.clear();
+    EXPECT_EQ(std::string(), swift::StringUtil::TrimSpaces(str_1));
+
+    //TrimAll
+    str_1 = " a b c d \t \t";
+    EXPECT_EQ("abcd\t\t", swift::StringUtil::TrimAll(str_1, ' '));
+    EXPECT_EQ("abcd", swift::StringUtil::TrimAll(str_1, '\t'));
+    EXPECT_EQ("abd", swift::StringUtil::TrimAll(str_1, 'c'));
+    EXPECT_EQ("ab", swift::StringUtil::TrimAll(str_1, 'd'));
+    EXPECT_EQ("ab", swift::StringUtil::TrimAll(str_1, 'd'));
+    EXPECT_EQ("b", swift::StringUtil::TrimAll(str_1, 'a'));
+    EXPECT_EQ(std::string(), swift::StringUtil::TrimAll(str_1, 'b'));
+    EXPECT_EQ(std::string(), swift::StringUtil::TrimAll(str_1, 'x'));
+
+    str_1 = " a b c d \t \t";
+    EXPECT_EQ("abcd\t\t", swift::StringUtil::TrimAll(str_1, " "));
+    EXPECT_EQ("abc", swift::StringUtil::TrimAll(str_1, "d\t"));
+    EXPECT_EQ("a", swift::StringUtil::TrimAll(str_1, "bc\t"));
+    EXPECT_EQ(std::string(), swift::StringUtil::TrimAll(str_1, "ab"));
+}
+
+TEST(test_StringUtil, Replace)
+{
+    std::string str("ababaabcdefghjiklmnopq");
+    std::string old_str("ab");
+    std::string new_str("xxx");
+    std::string out_str;
+    swift::StringUtil::Replace(str, old_str, new_str, false, out_str);
+    EXPECT_EQ(out_str, "xxxabaabcdefghjiklmnopq");
+    out_str.clear();
+    swift::StringUtil::Replace(str, old_str, new_str, true, out_str);
+    EXPECT_EQ(out_str, "xxxxxxaxxxcdefghjiklmnopq");
+    out_str.clear();
+
+    old_str = "a";
+    swift::StringUtil::Replace(str, old_str, std::string(), true, out_str);
+    EXPECT_EQ(out_str, "bbbcdefghjiklmnopq");
+
+    old_str = "";
+    new_str = "a";
+    out_str.clear();
+    swift::StringUtil::Replace(str, old_str, std::string(), true, out_str);
+    EXPECT_EQ(out_str, str);
+
+    old_str = "bcdefghjiklmnopq";
+    out_str.clear();
+    swift::StringUtil::Replace(str, old_str, std::string(), true, out_str);
+    EXPECT_EQ(out_str, "ababaa");
+
+    str.clear();
+    swift::StringUtil::Replace(str, old_str, std::string(), true, out_str);
+    EXPECT_EQ(out_str, "ababaa");
+
+    out_str = swift::StringUtil::Replace(str, old_str, std::string(), true);
+    EXPECT_EQ(out_str.empty(), true);
 }

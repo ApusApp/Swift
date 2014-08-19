@@ -188,7 +188,8 @@ public:
     //
     // Replace the 'old_str' pattern with the 'new_str' pattern in a string,
     // and append the result to 'out_str'.  If replace_all is false,
-    // it only replaces the first instance of 'old_str'.
+    // it only replaces the first instance of 'old_str'. If 'old_str' is empty,
+    // 'str' will be append to 'out_str'
     //
     static void Replace(const std::string& str,
                         const std::string& old_str,

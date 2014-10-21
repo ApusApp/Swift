@@ -11,19 +11,19 @@ public:
   ~test_LruCache() {}
 };
 
-TEST_F (test_Crc32, All)
+TEST_F(test_LruCache, All)
 {
     //
     // base case:
     //
-    LruCache<int, int> lru_cache(3);
+    swift::LruCache<size_t, size_t> lru_cache(3);
     lru_cache.Set(1, 1);
     lru_cache.Set(2, 2);
     lru_cache.Set(3, 3);
 
     // order: 3, 2, 1
 
-    int value = 0;
+    size_t value = 0;
     lru_cache.Get(1, value);
     EXPECT_EQ(value, 1);
 
@@ -32,29 +32,26 @@ TEST_F (test_Crc32, All)
     ASSERT_FALSE(lru_cache.Get(2, value));
 
     // benchmark
-    LruCache<int, int> lru_cache_bench(2000);
+    swift::LruCache<size_t, size_t> lru_cache_bench(2000);
 
     size_t thread_num = 4;
     size_t run_times = 1000;
-
-    auto run_func = [&](LruCache& lru_cache, size_t run_times) {
-      int value;
-      for (size_t i = 0; i < run_times; ++i) {
-        if (i % 2 == 0) {
-          lru_cache.Set(i, i);
-        } else {
-          lru_cache.Get(i - 1, value);
-        }
-      }
-    };
-
 
     timeval t1, t2;
     gettimeofday(&t1, NULL);
 
     std::vector<std::thread> thread_pool;
     for (size_t i = 0; i < thread_num; ++i) {
-      thread_pool.push_back(std::thread(run_func, lru_cache_bench, run_times));
+      thread_pool.push_back(std::thread([&]() {
+        size_t value;
+        for (size_t i = 0; i < run_times; ++i) {
+          if (i % 2 == 0) {
+            lru_cache_bench.Set(i, i);
+          } else {
+            lru_cache_bench.Get(i - 1, value);
+          }
+        }
+      }));
     }
 
     for (auto& t : thread_pool) {

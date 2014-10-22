@@ -24,11 +24,11 @@ public:
     }
 };
 
-struct tm GetTime (int year, 
-                   int month, 
+struct tm GetTime (int year,
+                   int month,
                    int day,
-                   int hour, 
-                   int minute, 
+                   int hour,
+                   int minute,
                    int secondes)
 {
     struct tm gmt;
@@ -51,11 +51,11 @@ struct tm GetTime (const char* str)
     return gmt;
 }
 
-time_t GetGmt (int year, 
-               int month, 
-               int day, 
-               int hour, 
-               int minu, 
+time_t GetGmt (int year,
+               int month,
+               int day,
+               int hour,
+               int minu,
                int sec)
 {
     struct tm gmt = GetTime (year, month, day, hour, minu, sec);

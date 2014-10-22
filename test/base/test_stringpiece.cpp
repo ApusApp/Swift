@@ -123,7 +123,7 @@ TEST_F (test_StringPiece, All)
                 ASSERT_EQ (*spit, *sit);
             }
         }
-        
+
         {
             swift::StringPiece::const_reverse_iterator spit = sp.rbegin ();
             std::string::const_reverse_iterator sit = str.rbegin ();
@@ -138,7 +138,7 @@ TEST_F (test_StringPiece, All)
         ASSERT_EQ (sp.find ('a', sp.size () + 10), swift::StringPiece::npos);
         ASSERT_EQ (sp.find (swift::StringPiece ("xx")), swift::StringPiece::npos);
         ASSERT_EQ (sp.find (swift::StringPiece ("def")), str.find ("def"));
-        
+
         ASSERT_EQ (sp.rfind ('c'), sp.find ('c'));
         ASSERT_EQ (sp.rfind (swift::StringPiece ("def")), str.find ("def"));
     }
@@ -190,5 +190,5 @@ TEST_F (test_StringPiece, All)
         EXPECT_EQ (it->second, 1);
         EXPECT_EQ (it->first, s);
     }
-    
+
 }

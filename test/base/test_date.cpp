@@ -57,7 +57,6 @@ TEST_F (test_Date, All)
     ASSERT_TRUE (ymd_tmp.year == ymd.year);
     ASSERT_TRUE (ymd_tmp.month != ymd.month);
     ASSERT_TRUE (ymd_tmp.day != ymd.day);
-    
 
     swift::Date dtt (date.GetJulianDayNumber ());
     ASSERT_TRUE (dtt == date);

@@ -74,7 +74,7 @@ TEST_F (test_ThreadPool, All)
     {
         func = std::move ([]() { TestAdd (100, 100); });
     }
-    
+
     auto func_1 = std::move (func);
     pool.Schedule (func_1);
     ASSERT_TRUE (func == nullptr);

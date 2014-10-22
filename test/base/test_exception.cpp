@@ -64,7 +64,7 @@ TEST_F (test_Exception, All)
         ASSERT_TRUE (true == e.Messge ().empty ());
         ASSERT_TRUE (false == std::string (e.GetStackTrace ()).empty ());
     }
-    
+
     {
         swift::Exception ex ("abc");
         ASSERT_TRUE ("abc" == std::string (ex.what ()));
@@ -78,7 +78,7 @@ TEST_F (test_Exception, All)
         swift::Exception ex (msg);
         ASSERT_TRUE (msg == std::string (ex.what ()));
     }
-    
+
     TestFunc (5);
 }
 

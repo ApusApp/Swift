@@ -163,7 +163,7 @@ TEST_F (test_FileUtil, Read)
 {
     for (auto& p : readers_) {
         std::string out (in_.size (), '\0');
-        EXPECT_EQ (p.first, 
+        EXPECT_EQ (p.first,
             swift::detail::WrapFileOpFuncT (p.second, 0, &out[0], out.size ()));
         if (-1 != static_cast<int>(p.first)) {
             EXPECT_EQ (in_.substr (0, p.first), out.substr (0, p.first));
@@ -171,11 +171,11 @@ TEST_F (test_FileUtil, Read)
     }
 }
 
-TEST_F (test_FileUtil, PRead) 
+TEST_F (test_FileUtil, PRead)
 {
     for (auto& p : readers_) {
         std::string out (in_.size (), '\0');
-        EXPECT_EQ (p.first, 
+        EXPECT_EQ (p.first,
             swift::detail::WrapFileOpFuncT (p.second, 0, &out[0], out.size (), off_t (42)));
         if (static_cast<int>(p.first) != -1) {
             EXPECT_EQ (in_.substr (0, p.first), out.substr (0, p.first));

@@ -19,7 +19,7 @@ public:
     }
 };
 
-TEST_F (test_ByteBuffer, BufferLength) 
+TEST_F (test_ByteBuffer, BufferLength)
 {
     swift::ByteBuffer buffer;
     size_t size = 0;
@@ -49,7 +49,7 @@ TEST_F (test_ByteBuffer, BufferLength)
     EXPECT_EQ (size, buffer.Length ());
 }
 
-TEST_F (test_ByteBuffer, GetSetReadPosition) 
+TEST_F (test_ByteBuffer, GetSetReadPosition)
 {
     swift::ByteBuffer buffer ("ABCDEF", 6);
     EXPECT_EQ (6U, buffer.Length ());
@@ -76,9 +76,9 @@ TEST_F (test_ByteBuffer, GetSetReadPosition)
     EXPECT_EQ ("DEF", read);
 }
 
-TEST_F (test_ByteBuffer, ReadWriteBuffer) 
+TEST_F (test_ByteBuffer, ReadWriteBuffer)
 {
-    swift::ByteOrderHelper::ByteOrder orders[2] = { 
+    swift::ByteOrderHelper::ByteOrder orders[2] = {
         swift::ByteOrderHelper::ByteOrder::BYTE_ORDER_HOST,
         swift::ByteOrderHelper::ByteOrder::BYTE_ORDER_NETWORKER
     };
@@ -166,7 +166,7 @@ TEST_F (test_ByteBuffer, ReadWriteBuffer)
     }
 }
 
-TEST_F (test_ByteBuffer, Others) 
+TEST_F (test_ByteBuffer, Others)
 {
     std::string str ("abcdefgh");
     swift::ByteBuffer buffer (str.c_str (), str.size (), swift::ByteOrderHelper::ByteOrder::BYTE_ORDER_NETWORKER);

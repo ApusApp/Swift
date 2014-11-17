@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <openssl/sha.h>
 #include <swift/base/stringpiece.h>
+#include <swift/base/file.h>
 
 class test_Sha1 : public testing::Test
 {
@@ -87,4 +88,46 @@ TEST(test_Sha1, All)
     std::string s;
     swift::Sha1::Sha1Sum(str, &s);
     EXPECT_EQ(s, sha1);
+}
+
+TEST(test_Sha1, FileCopy)
+{
+    swift::File src_file;
+    src_file.Open("/etc/fstab", O_RDONLY);
+    swift::File dest_file;
+    dest_file.Open("fstab");
+
+    swift::Sha1 sha1;
+    char buf[4096] = {'\0'};
+    size_t offset = 0;
+    size_t length = 0;
+    SHA_CTX s;
+    unsigned char hash[20];
+    SHA1_Init(&s);
+
+    while ((length = src_file.PRead(buf, sizeof(buf), offset)) > 0) {
+        sha1.Update(reinterpret_cast<const void*>(buf), length);
+        SHA1_Update(&s, buf, length);
+        if (dest_file.PWrite(buf, length, offset) != length) {
+            printf("write dest file %s error\n", argv[2]);
+            return -1;
+        }
+        offset += length;
+        length = -1;
+    }
+
+    sha1.Final();
+    SHA1_Final(hash, &s);
+    printf("sha1: %s\n", sha1.ToString().c_str());
+
+    char b[3];
+    std::string str;
+    for (int i=0; i < 20; i++) {
+        snprintf (b, sizeof(b), "%.2x", (int)hash[i]);
+        str.append(b);
+    }
+
+    printf("system sha1: %s\n", str.c_str());
+    EXPECT_EQ(str, sha1.ToString());
+
 }

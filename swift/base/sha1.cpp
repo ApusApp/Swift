@@ -130,25 +130,26 @@ void Sha1Init(Sha1Context* context)
 void Sha1Update(Sha1Context* context, const unsigned char* data, uint32_t length)
 {
     uint32_t i = 0;
-    uint32_t index = (context->count[0] >> 3) & 63;
+    uint32_t j = context->count[0];
     context->count[0] += (length << 3);
-    if (context->count[0] < (length << 3)) {
+    if (context->count[0] < j) {
         ++context->count[1];
     }
-
     context->count[1] += (length >> 29);
-    if ((index + length) > 63) {
-        i = 64 - index;
-        memcpy(&context->buffer[index], data, i);
+    j = (j >> 3) & 63;
+    if ((j + length) > 63) {
+        memcpy(&context->buffer[j], data, (i = 64 - j));
         Sha1Transform(context->state, context->buffer);
-        for (; i < length; i += 64) {
+        for (; i + 63 < length; i += 64) {
             Sha1Transform(context->state, data + i);
         }
-
-        index = 0;
+        j = 0;
+    } else {
+        i = 0;
     }
 
-    memcpy(&context->buffer[index], &data[i], length - i);
+    assert(length >= i);
+    memcpy(&context->buffer[j], &data[i], length - i);
 }
 
 // static

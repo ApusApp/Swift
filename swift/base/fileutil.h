@@ -110,7 +110,7 @@ ssize_t WrapFileOpVFuncT (Func f,
         total_bytes += ret;
         Increase (ret, offset...);
         while (0 != ret && 0 != size) {
-            if (ret >= iov->iov_len) {
+            if (ret >= static_cast<ssize_t>(iov->iov_len)) {
                 ret -= iov->iov_len;
                 ++iov;
                 --size;
@@ -237,8 +237,8 @@ bool ReadFile (const char *file_name,
     out.resize (std::min (buf.st_size > 0 ? static_cast<size_t>(buf.st_size + 1) : initial_alloc,
                           num_bytes));
     while (size < out.size ()) {
-        size_t n = ReadFull (fd, &out[size], out.size () - size);
-        if (-1 == n) {
+        ssize_t n = ReadFull (fd, &out[size], out.size () - size);
+        if (n < 0) {
             return false;
         }
         size += n;

@@ -480,7 +480,7 @@ bool ProcessInformation::BlockInMemory (const void* start)
         return 1;
     }
 
-    return x & 0x1;
+    return (bool)(x & 0x1);
 }
 
 // static private

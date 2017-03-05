@@ -54,7 +54,7 @@ bool File::Open (const char *file_name,
 
     fd_ = fileutil::Open (file_name, flags, mode);
     is_owns_ = true;
-    return (fd_ > 0) ? true : false;
+    return fd_ > 0;
 }
 
 // public

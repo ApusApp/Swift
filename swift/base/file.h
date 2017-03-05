@@ -92,7 +92,7 @@ public:
         return 0 == fileutil::Ftrucate (fd_, static_cast<off_t>(size));
     }
 
-    size_t Read (char* buf, size_t size)
+    size_t Read (char* buf, size_t size) const
     {
         if (fd_ < 0) {
             return 0;
@@ -101,7 +101,7 @@ public:
         return static_cast<size_t>(fileutil::ReadFull (fd_, buf, size));
     }
 
-    size_t PRead (char* buf, size_t nbytes, size_t offset)
+    size_t PRead (char* buf, size_t nbytes, size_t offset) const
     {
         if (fd_ < 0) {
             return 0;
@@ -113,7 +113,7 @@ public:
                                                         static_cast<off_t>(offset)));
     }
 
-    size_t Write (const char* buf, size_t size)
+    size_t Write (const char* buf, size_t size) const
     {
         if (fd_ < 0) {
             return 0;
@@ -122,7 +122,7 @@ public:
         return static_cast<size_t>(fileutil::WriteFull (fd_, buf, size));
     }
 
-    size_t PWrite (const char* buf, size_t nbytes, size_t offset)
+    size_t PWrite (const char* buf, size_t nbytes, size_t offset) const
     {
         if (fd_ < 0) {
             return 0;
@@ -134,7 +134,7 @@ public:
                                                           static_cast<off_t>(offset)));
     }
 
-    size_t Append (const char* buf, const size_t size)
+    size_t Append (const char* buf, const size_t size) const
     {
         if (fd_ < 0) {
             return 0;
@@ -145,13 +145,18 @@ public:
             return 0;
         }
 
-        return (size == PWrite (buf, size, offset)) ? size : 0;
+        return (size == PWrite (buf, size, static_cast<size_t>(offset))) ? size : 0;
     }
 
 
     explicit operator bool () const
     {
         return (-1 != fd_);
+    }
+
+    inline void NoCloseAtExist()
+    {
+        is_owns_ = false;
     }
 
     int GetFd () const
@@ -218,7 +223,7 @@ private:
         fileutil::Flock (fd_, op);
     }
 
-    bool DoTryLock (int op)
+    inline bool DoTryLock (int op)
     {
         int ret = fileutil::Flock (fd_, op | LOCK_NB);
         // flock returns EWOULDBLOCK if already locked

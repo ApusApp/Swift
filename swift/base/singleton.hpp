@@ -27,11 +27,18 @@ template <typename T>
 class Singleton : swift::noncopyable
 {
 public:
-    static T& Instance ()
+    inline static T& Instance ()
+    {
+        T* instance = GetInstance();
+
+        return *instance;
+    }
+
+    inline static T* GetInstance()
     {
         std::call_once (ponce_, &Singleton::Init);
 
-        return *value_;
+        return value_;
     }
 
 protected:
@@ -39,7 +46,7 @@ protected:
     ~Singleton () {};
 
 private:
-    static void Init ()
+    inline static void Init ()
     {
         if (0 == value_) {
             value_ = new T ();
@@ -47,7 +54,7 @@ private:
         }
     }
 
-    static void Destroy ()
+    inline static void Destroy ()
     {
         // this typedef is to avoid T is not a complete type
         typedef char T_must_be_complete_type[sizeof (T) == 0 ? -1 : 1];

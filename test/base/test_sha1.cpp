@@ -109,11 +109,10 @@ TEST(test_Sha1, FileCopy)
         sha1.Update(reinterpret_cast<const void*>(buf), length);
         SHA1_Update(&s, buf, length);
         if (dest_file.PWrite(buf, length, offset) != length) {
-            printf("write dest file %s error\n", argv[2]);
-            return -1;
+            break;
         }
         offset += length;
-        length = -1;
+        length = 0;
     }
 
     sha1.Final();

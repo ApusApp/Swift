@@ -19,6 +19,11 @@ string (TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
 include_directories (.)
 
 add_subdirectory (swift/base)
+add_subdirectory (swift/net)
 
 add_subdirectory (test/base)
+add_subdirectory (test/net)
 add_subdirectory (test/disruptor)
+
+add_subdirectory (apps/swiftclient/bin)
+add_subdirectory (apps/test/swiftclient)

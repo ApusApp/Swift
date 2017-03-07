@@ -148,20 +148,21 @@ public:
     inline void Reset();
     inline void SetUrl(const char* url);
     inline void SetPort(const long port);
-    inline void SetHeader(const Request* req);
     inline void SetReadTimeout(size_t timeout);
     inline void SetConnectTimeout(size_t timeout);
-    inline void SetMethod(const HttpMethod& method);
-    inline void SetReceiveHandler(const ReceiveHandler* handler, Response* resp, DownloadBuffer* buf);
-    inline void SetUploadBuf(UploadBuffer* buf, const HttpMethod& method);
-    inline int SendRequest(const Request* req, const HttpMethod& method);
+
+    void SetHeader(const Request* req);
+    void SetMethod(const HttpMethod& method);
+    int SendRequest(const Request* req, const HttpMethod& method);
+    void SetUploadBuf(UploadBuffer* buf, const HttpMethod& method);
+    void SetReceiveHandler(const ReceiveHandler* handler, Response* resp, DownloadBuffer* buf=nullptr);
 
     inline static void GlobalInit();
     inline static void GlobalCleanUp();
 
 private:
-    inline void Init();
-    inline void Destroy();
+    void Init();
+    void Destroy();
     inline static size_t BodyHandler(void *data, size_t size, size_t nmemb, void *user_data);
     inline static size_t HeaderHandler(void *data, size_t size, size_t nmemb, void *user_data);
     inline static size_t EmptyHandler(void *data, size_t size, size_t nmemb, void *user_data);

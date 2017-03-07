@@ -154,11 +154,6 @@ public:
         return (-1 != fd_);
     }
 
-    inline void NoCloseAtExist()
-    {
-        is_owns_ = false;
-    }
-
     int GetFd () const
     {
         return fd_;

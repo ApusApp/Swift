@@ -25,5 +25,4 @@ add_subdirectory (test/base)
 add_subdirectory (test/net)
 add_subdirectory (test/disruptor)
 
-add_subdirectory (apps/swiftclient/bin)
 add_subdirectory (apps/test/swiftclient)

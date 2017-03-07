@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <cassert>
+#include <string.h>
 
 #include "swift/base/file.h"
 #include "swift/net/httpclient/easycurl.h"
@@ -159,4 +160,172 @@ namespace swift {
 
         return 0;
     }
+
+    // public
+    void EasyCurl::SetUploadBuf(UploadBuffer* buffer, const HttpMethod& method)
+    {
+        assert (0 != curl_);
+        switch (method) {
+            case HTTP_METHOD_PUT:
+                curl_easy_setopt(curl_, CURLOPT_UPLOAD, 1L);
+                if (buffer) {
+                    // set read callback function
+                    if (buffer->buf_) {
+                        curl_easy_setopt(curl_, CURLOPT_READFUNCTION, EasyCurl::UploadHandler);
+                        curl_easy_setopt(curl_, CURLOPT_INFILESIZE, static_cast<curl_off_t>(buffer->size_));
+                    } else if (buffer->file_) {
+                        curl_easy_setopt(curl_, CURLOPT_READFUNCTION, EasyCurl::UploadFileHandler);
+                        // Content-Length
+                        curl_easy_setopt(curl_, CURLOPT_INFILESIZE_LARGE, static_cast<curl_off_t>(buffer->size_));
+                    } else {
+                        // TO DO
+                        // throw exception ??
+                        (void)buffer;
+                    }
+                    // set data object to pass to callback function
+                    curl_easy_setopt(curl_, CURLOPT_READDATA, buffer);
+
+                }
+                else {
+                    curl_easy_setopt(curl_, CURLOPT_INFILESIZE, 0L);
+                }
+                break;
+            case HTTP_METHOD_POST:
+                if (buffer && buffer->buf_ && buffer->size_ > 0) {
+                    assert(0 != buffer->size_);
+                    curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, buffer->buf_);
+                    curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, static_cast<curl_off_t>(buffer->size_));
+                }
+                else {
+                    curl_easy_setopt(curl_, CURLOPT_POSTFIELDSIZE, 0L);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    // public
+    int EasyCurl::SendRequest(const Request* req, const HttpMethod& method)
+    {
+        assert(0 != req);
+        SetMethod(method);
+        SetUrl(req->GetUrl());
+        SetHeader(req);
+        SetConnectTimeout(static_cast<size_t>(req->GetConnectTimeout()));
+        SetReadTimeout(static_cast<size_t>(req->GetReadTimeout()));
+        CURLcode ret = curl_easy_perform(curl_);
+        int code = static_cast<int>(ret);
+        if (CURLE_OK == ret) {
+            curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &code);
+            if (middleware_) {
+                middleware_->SetResponseStatusCode(code);
+            }
+        }
+
+        return code;
+    }
+
+    // public
+    void EasyCurl::SetReceiveHandler(const ReceiveHandler* handler, Response* resp, DownloadBuffer* buf /*=nullptr*/)
+    {
+        assert(0 != curl_);
+        if (handler && resp) {
+            middleware_ = new Middleware(resp, handler, buf);
+            if (handler->body_handler_ && handler->header_handler_) {
+                curl_easy_setopt(curl_, CURLOPT_WRITEDATA, middleware_);
+                curl_easy_setopt(curl_, CURLOPT_HEADERDATA, middleware_);
+                curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, EasyCurl::BodyHandler);
+                curl_easy_setopt(curl_, CURLOPT_HEADERFUNCTION, EasyCurl::HeaderHandler);
+            }
+            else if (handler->body_handler_ && !handler->header_handler_) {
+                curl_easy_setopt(curl_, CURLOPT_WRITEDATA, middleware_);
+                curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, EasyCurl::BodyHandler);
+            }
+            else if (!handler->body_handler_ && handler->header_handler_) {
+                curl_easy_setopt(curl_, CURLOPT_HEADERDATA, middleware_);
+                curl_easy_setopt(curl_, CURLOPT_HEADERFUNCTION, EasyCurl::HeaderHandler);
+            }
+        }
+    }
+
+    // public
+    void EasyCurl::SetHeader(const Request *req)
+    {
+        assert(0 != curl_);
+        if (nullptr != req) {
+            for (auto &it : req->GetHeaders()) {
+                std::string str = std::move(std::string(it.first + ":" + it.second));
+                header_ = curl_slist_append(header_, str.c_str());
+            }
+
+            if (header_) {
+                curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, header_);
+            }
+        }
+    }
+
+    // public
+    void EasyCurl::SetMethod(const HttpMethod& method)
+    {
+        assert(0 != curl_);
+        switch(method) {
+            case HTTP_METHOD_GET:
+                curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
+                break;
+            case HTTP_METHOD_HEAD:
+                curl_easy_setopt(curl_, CURLOPT_NOBODY, 1L);
+                break;
+            case HTTP_METHOD_PUT:
+                curl_easy_setopt(curl_, CURLOPT_PUT, 1L);
+                header_ = curl_slist_append(header_, "Expect: ");
+                break;
+            case HTTP_METHOD_DELETE:
+                curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, "DELETE");
+                break;
+            case HTTP_METHOD_POST:
+                curl_easy_setopt(curl_, CURLOPT_POST, 1L);
+                header_ = curl_slist_append(header_, "Expect: ");
+                break;
+            case HTTP_METHOD_COPY:
+                curl_easy_setopt(curl_, CURLOPT_CUSTOMREQUEST, "COPY");
+                break;
+            default:
+                break;
+        }
+    }
+
+    // private
+    void EasyCurl::Init()
+    {
+        assert(0 != curl_);
+        curl_easy_setopt(curl_, CURLOPT_NOSIGNAL, 1L);
+        // set dns cache never time out
+        curl_easy_setopt(curl_, CURLOPT_DNS_CACHE_TIMEOUT, 5L);
+        // set tcp no delay
+        curl_easy_setopt(curl_, CURLOPT_TCP_NODELAY, 0);
+        // set receive time out
+        curl_easy_setopt(curl_, CURLOPT_TIMEOUT, 30L);
+        // set connect time out
+        curl_easy_setopt(curl_, CURLOPT_CONNECTTIMEOUT, 1L);
+        // set http version HTTP/1.1
+        curl_easy_setopt(curl_, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, EasyCurl::EmptyHandler);
+        curl_easy_setopt(curl_, CURLOPT_HEADERFUNCTION, EasyCurl::EmptyHandler);
+    }
+
+    // private
+    void EasyCurl::Destroy()
+    {
+        if (header_) {
+            curl_slist_free_all(header_);
+            header_ = 0;
+        }
+
+        if (middleware_) {
+            delete middleware_;
+            middleware_ = 0;
+        }
+    }
+
 } // namespace swift
